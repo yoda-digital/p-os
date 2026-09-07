@@ -1,4 +1,10 @@
-// Context Orchestrator — manages session context health and generates Context Capsules
+// Context Orchestrator — manages session context health and generates Context Capsules.
+//
+// The generation/assessment logic lives in capsule-generator.ts (11-section Context Capsule,
+// built from canonical DB state) and health.ts (DB-derived Context Health + recommended
+// action). This file holds the shared types plus a thin class wrapper that binds a `Sql`
+// connection to those functions, for callers that prefer an instance API
+// (e.g. apps/api/src/routes/edge.ts).
 
 export interface ContextCapsule {
   capsuleId: string;
@@ -26,14 +32,18 @@ export interface ContextCapsule {
   tokenEstimate: number;
 }
 
+// The nine Context Health dimensions from docs/specs_design.md §110 — no single dimension
+// (e.g. raw token percentage) is a sufficient signal on its own.
 export interface ContextHealth {
   tokenPressure: number;
   relevanceDensity: number;
   staleAssumptionDensity: number;
+  contradictionDensity: number;
   toolOutputBloat: number;
   phaseShift: boolean;
   pivotCount: number;
   remainingExpectedWork: number;
+  resumeCacheCost: number;
 }
 
 export type ContextAction =
@@ -48,129 +58,18 @@ export type ContextAction =
 import type postgres from 'postgres';
 type Sql = ReturnType<typeof postgres>;
 
+import { generateCapsule } from './capsule-generator.js';
+import { assessHealth, recommendContextAction } from './health.js';
+
+export { generateCapsule } from './capsule-generator.js';
+export { assessHealth, recommendContextAction } from './health.js';
+
 export class ContextOrchestrator {
   constructor(private sql: Sql) {}
 
-  async generateCapsule(
-    caseId: string,
-    moveId?: string,
-    attemptId?: string,
-  ): Promise<ContextCapsule> {
-    const [caseData] = await this.sql`SELECT * FROM cases WHERE id = ${caseId}`;
-    if (!caseData) throw new Error(`Case ${caseId} not found`);
-
-    const intents =
-      await this.sql`SELECT * FROM intents WHERE case_id = ${caseId} AND status = 'active'`;
-
-    const move = moveId
-      ? (await this.sql`SELECT * FROM moves WHERE id = ${moveId}`)[0]
-      : null;
-
-    const decisions =
-      await this.sql`SELECT * FROM decisions WHERE case_id = ${caseId} AND state IN ('requested', 'in_review')`;
-
-    const rules =
-      await this.sql`SELECT * FROM rules WHERE case_id = ${caseId} AND evaluation_status NOT IN ('satisfied', 'not_applicable')`;
-
-    const recentEvents = await this.sql`
-      SELECT type, occurred_at, data FROM events
-      WHERE case_id = ${caseId}
-      ORDER BY case_sequence DESC LIMIT 10
-    `;
-
-    const evidence =
-      await this.sql`SELECT * FROM evidence WHERE case_id = ${caseId} AND validity = 'valid'`;
-
-    const dependencies = moveId
-      ? await this.sql`
-      SELECT m.title, m.outcome FROM moves m
-      WHERE m.id = ANY(SELECT unnest(dependencies) FROM moves WHERE id = ${moveId})
-    `
-      : [];
-
-    const completedMoves = await this.sql`
-      SELECT title, outcome FROM moves WHERE case_id = ${caseId} AND outcome = 'satisfied' LIMIT 20
-    `;
-
-    const failedAttempts = await this.sql`
-      SELECT a.failure_reason, m.title FROM attempts a JOIN moves m ON m.id = a.move_id
-      WHERE a.case_id = ${caseId} AND a.state = 'failed' LIMIT 10
-    `;
-
-    const capsule: ContextCapsule = {
-      capsuleId: crypto.randomUUID(),
-      caseId,
-      caseRevision: Number(caseData.revision),
-      moveId: moveId ?? undefined,
-      moveRevision: move ? Number(move.revision) : undefined,
-      attemptId,
-      generatedAt: new Date().toISOString(),
-      generatorVersion: '0.1.0',
-      sections: {
-        identity: `Case: "${caseData.title}" (${caseData.lifecycle}). Type: ${caseData.type}. Organization: ${caseData.organization_id}.`,
-        intent:
-          intents
-            .map(
-              (i: Record<string, unknown>) =>
-                `[${i.class}] ${i.statement} (${i.priority}, ${i.status})`,
-            )
-            .join('\n') || 'No active intents.',
-        reality: move
-          ? `Current Move: "${move.title}" (${move.class}). Execution: ${move.execution}. Outcome: ${move.outcome}. Readiness: ${move.readiness}.`
-          : 'No active move.',
-        decisions:
-          decisions
-            .map(
-              (d: Record<string, unknown>) =>
-                `PENDING: ${d.question} (${d.state})`,
-            )
-            .join('\n') || 'No pending decisions.',
-        constraints:
-          rules
-            .map(
-              (r: Record<string, unknown>) =>
-                `[${r.type}] ${r.statement} — ${r.evaluation_status}`,
-            )
-            .join('\n') || 'No active constraints.',
-        progress: `${completedMoves.length} moves completed. ${completedMoves.map((m: Record<string, unknown>) => m.title).join(', ') || 'None yet.'}`,
-        dependencies:
-          dependencies
-            .map(
-              (d: Record<string, unknown>) => `"${d.title}": ${d.outcome}`,
-            )
-            .join('\n') || 'No dependencies.',
-        evidence: `${evidence.length} valid evidence items.`,
-        delta:
-          recentEvents
-            .map(
-              (e: Record<string, unknown>) =>
-                `${e.type} at ${e.occurred_at}`,
-            )
-            .join('\n') || 'No recent events.',
-        next: move
-          ? `Continue work on "${move.title}": ${move.objective || move.title}`
-          : 'No current assignment.',
-        doNotRepeat:
-          failedAttempts
-            .map(
-              (a: Record<string, unknown>) =>
-                `Failed: "${a.title}" — ${a.failure_reason || 'unknown reason'}`,
-            )
-            .join('\n') || 'No failed approaches.',
-      },
-      includedObjectRefs: [caseId, ...(moveId ? [moveId] : [])],
-      tokenEstimate: 0,
-    };
-
-    const fullText = Object.values(capsule.sections).join('\n');
-    capsule.tokenEstimate = Math.ceil(fullText.length / 4);
-
-    await this.sql`
-      INSERT INTO context_capsules (id, case_id, case_revision, move_id, move_revision, attempt_id, generated_at, generator_version, sections, included_object_refs, token_estimate)
-      VALUES (${capsule.capsuleId}, ${caseId}, ${capsule.caseRevision}, ${capsule.moveId ?? null}, ${capsule.moveRevision ?? null}, ${capsule.attemptId ?? null}, ${capsule.generatedAt}, ${capsule.generatorVersion}, ${JSON.stringify(capsule.sections)}, ${JSON.stringify(capsule.includedObjectRefs)}, ${capsule.tokenEstimate})
-    `;
-
-    return capsule;
+  /** Builds the 11-section Context Capsule for a case (optionally scoped to a bound move). */
+  async generateCapsule(caseId: string, moveId?: string, lastEventAck?: number): Promise<ContextCapsule> {
+    return generateCapsule(this.sql, caseId, moveId, lastEventAck);
   }
 
   async getLatestCapsule(caseId: string): Promise<ContextCapsule | null> {
@@ -193,44 +92,13 @@ export class ContextOrchestrator {
     };
   }
 
-  assessHealth(metrics: {
-    contextTokens?: number;
-    pivotCount?: number;
-    remainingWork?: number;
-    secondsSinceLastResponse?: number;
-    promptCacheLikelyExpired?: boolean;
-  }): { health: ContextHealth; recommendedAction: ContextAction } {
-    const health: ContextHealth = {
-      tokenPressure: metrics.contextTokens ? metrics.contextTokens / 200_000 : 0,
-      relevanceDensity: 0.7,
-      staleAssumptionDensity: metrics.pivotCount
-        ? Math.min(metrics.pivotCount * 0.1, 1)
-        : 0,
-      toolOutputBloat: 0.3,
-      phaseShift: false,
-      pivotCount: metrics.pivotCount ?? 0,
-      remainingExpectedWork: metrics.remainingWork ?? 5,
-    };
-
-    let action: ContextAction = 'CONTINUE';
-
-    if (health.tokenPressure > 0.85) {
-      action = 'ROTATE_FRESH';
-    } else if (health.tokenPressure > 0.7) {
-      action = 'COMPACT_RECOMMENDED';
-    } else if (health.staleAssumptionDensity > 0.5) {
-      action = 'ROTATE_FRESH';
-    } else if (health.pivotCount > 3) {
-      action = 'FORK';
-    } else if (
-      metrics.secondsSinceLastResponse &&
-      metrics.secondsSinceLastResponse > 3600 &&
-      metrics.promptCacheLikelyExpired
-    ) {
-      action = 'ROTATE_FRESH';
-    }
-
-    return { health, recommendedAction: action };
+  /** Assesses Context Health for a session (identified by its driving Attempt id) from canonical DB state. */
+  async assessHealth(
+    sessionId: string,
+    caseId: string,
+  ): Promise<{ health: ContextHealth; recommendedAction: ContextAction }> {
+    const health = await assessHealth(this.sql, sessionId, caseId);
+    return { health, recommendedAction: recommendContextAction(health) };
   }
 
   decideSessionStrategy(metrics: {
