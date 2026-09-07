@@ -10,11 +10,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@pos/context": "workspace:*",
     "@pos/contracts": "workspace:*",
     "@pos/edge-core": "workspace:*",
     "@pos/execution": "workspace:*",
-    "better-sqlite3": "^13.0.3"
+    "better-sqlite3": "^13.0.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
