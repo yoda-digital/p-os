@@ -38,6 +38,30 @@ export class ApiError extends Error {
   }
 }
 
+// Process Edge routes (device pairing, event ingestion, ...) live outside
+// /api/v1 on the API server (spec section 10.1) — a separate base path,
+// proxied by vite under /edge in dev (see vite.config.ts).
+const EDGE_BASE = '/edge/v1';
+
+async function edgeRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${EDGE_BASE}${path}`, { ...options, headers });
+
+  if (!res.ok) {
+    const body: any = await res.json().catch(() => ({ error: res.statusText }));
+    throw new ApiError(res.status, body.error || body.message || res.statusText, body);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
 // ===== AUTH =====
 export interface AuthResponse { token: string; user: User; }
 export interface Membership { organization_id: string; role: string; organization_name: string; }
@@ -48,6 +72,7 @@ export interface User {
 }
 export interface UpdateProfileInput { preferred_language?: string; timezone?: string; display_name?: string; avatar_url?: string; }
 export interface SwitchOrgResponse { token: string; organization: { id: string; name: string; role: string }; }
+export interface PairConfirmResponse { device_id: string; auth_token: string; user_id: string; organization_id: string; }
 
 export const api = {
   // Auth
@@ -60,6 +85,13 @@ export const api = {
     request<User>('/v1/auth/profile', { method: 'PATCH', body: JSON.stringify(data) }),
   switchOrg: (organizationId: string) =>
     request<SwitchOrgResponse>('/v1/auth/switch-org', { method: 'POST', body: JSON.stringify({ organization_id: organizationId }) }),
+
+  // Device pairing (spec section 8) — the authenticated web-side half of the
+  // pairing flow: the plugin registers the code (POST /edge/v1/pair) and
+  // polls for confirmation; this call is what a signed-in user makes from
+  // the /pair page to confirm it.
+  confirmPairing: (code: string) =>
+    edgeRequest<PairConfirmResponse>('/pair/confirm', { method: 'POST', body: JSON.stringify({ code }) }),
 
   // Cases
   listCases: () => request<Case[]>('/v1/cases'),

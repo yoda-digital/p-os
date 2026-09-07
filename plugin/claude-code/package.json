@@ -4,12 +4,23 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "scripts": { "build": "tsc", "dev": "tsc --watch", "test": "vitest run" },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@pos/context": "workspace:*",
     "@pos/contracts": "workspace:*",
     "@pos/edge-core": "workspace:*",
     "@pos/execution": "workspace:*",
-    "@pos/context": "workspace:*"
+    "better-sqlite3": "^13.0.3",
+    "zod": "^3.25.76"
   },
-  "devDependencies": { "typescript": "^5.8.0", "vitest": "^3.0.0" }
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
 }

@@ -1,47 +1,29 @@
 {
   "name": "universal-process-os",
   "version": "0.1.0",
+  "displayName": "Universal Process OS",
   "description": "Universal Process OS — semantic control plane for evolving processes with AI-native execution",
   "author": "Universal Process OS",
   "homepage": "https://ai-kanban.yoda.digital",
-  "skills": [],
-  "agents": [],
-  "hooks": {
-    "SessionStart": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/session-start.js"
-      }
-    ],
-    "PreToolUse": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/pre-tool-use.js"
-      }
-    ],
-    "PostToolUse": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/post-tool-use.js"
-      }
-    ],
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/stop.js"
-      }
-    ],
-    "TaskCreated": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/task-created.js"
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/task-completed.js"
-      }
-    ]
+  "skills": ["skills/*.md"],
+  "agents": ["agents/*.md"],
+  "hooks": "hooks/hooks.json",
+  "mcpServers": ".mcp.json",
+  "userConfig": {
+    "control_plane_url": {
+      "type": "string",
+      "description": "Process OS control plane URL",
+      "default": "http://localhost:4000"
+    },
+    "organization_hint": {
+      "type": "string",
+      "description": "Organization slug for auto-discovery"
+    },
+    "deployment_mode": {
+      "type": "string",
+      "enum": ["cloud", "self-hosted", "local"],
+      "default": "local",
+      "description": "Deployment mode"
+    }
   }
 }

@@ -2,6 +2,12 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'node:http';
 import { getDb } from '@pos/db';
 import { verifyToken, type TokenPayload } from './auth.js';
+import {
+  createEdgeWebSocketServer,
+  dispatchPendingSteering,
+  edgeHeartbeatSweep,
+  getEdgeClientCount,
+} from './edge.js';
 
 // ── Client tracking ──────────────────────────────────────────────
 
@@ -18,10 +24,28 @@ const clients = new Map<WebSocket, Client>();
 
 const server = createServer((_req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ status: 'ok', clients: clients.size }));
+  res.end(JSON.stringify({ status: 'ok', clients: clients.size, edgeClients: getEdgeClientCount() }));
 });
 
-const wss = new WebSocketServer({ server });
+// Browser/UI clients (subscribe to case events) and Process Edge (device/plugin)
+// clients are two separate WebSocket servers sharing one HTTP server. Both run in
+// `noServer` mode; the `upgrade` handler below routes by path.
+const wss = new WebSocketServer({ noServer: true });
+const edgeWss = createEdgeWebSocketServer();
+
+server.on('upgrade', (req, socket, head) => {
+  const { pathname } = new URL(req.url ?? '/', `http://${req.headers.host}`);
+
+  if (pathname === '/edge' || pathname.startsWith('/edge/')) {
+    edgeWss.handleUpgrade(req, socket, head, (ws) => {
+      edgeWss.emit('connection', ws, req);
+    });
+  } else {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+  }
+});
 
 wss.on('connection', async (ws, req) => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
@@ -202,15 +226,22 @@ async function main(): Promise<void> {
 
   const pollTimer = setInterval(pollAndBroadcast, 500);
   const heartbeatTimer = setInterval(heartbeat, 30_000);
+  const edgeHeartbeatTimer = setInterval(edgeHeartbeatSweep, 30_000);
+  const steeringTimer = setInterval(() => {
+    void dispatchPendingSteering();
+  }, 1000);
 
   server.listen(PORT, () => {
-    console.log(`[Realtime] WebSocket server on ws://localhost:${PORT}`);
+    console.log(`[Realtime] WebSocket server on ws://localhost:${PORT} (browser: /, edge: /edge)`);
   });
 
   const shutdown = () => {
     clearInterval(pollTimer);
     clearInterval(heartbeatTimer);
+    clearInterval(edgeHeartbeatTimer);
+    clearInterval(steeringTimer);
     wss.close();
+    edgeWss.close();
     server.close();
     process.exit(0);
   };

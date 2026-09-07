@@ -1,0 +1,40 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "node plugin/claude-code/hooks/session-start.js",
+      "timeout": 5000
+    },
+    {
+      "event": "PreToolUse",
+      "command": "node plugin/claude-code/hooks/pre-tool-use.js",
+      "timeout": 1000,
+      "matcher": { "tool_name": "*" }
+    },
+    {
+      "event": "PostToolUse",
+      "command": "node plugin/claude-code/hooks/post-tool-use.js",
+      "timeout": 1000
+    },
+    {
+      "event": "Stop",
+      "command": "node plugin/claude-code/hooks/stop.js",
+      "timeout": 2000
+    },
+    {
+      "event": "TaskCreated",
+      "command": "node plugin/claude-code/hooks/task-created.js",
+      "timeout": 2000
+    },
+    {
+      "event": "TaskCompleted",
+      "command": "node plugin/claude-code/hooks/task-completed.js",
+      "timeout": 3000
+    },
+    {
+      "event": "SessionEnd",
+      "command": "node plugin/claude-code/hooks/session-end.js",
+      "timeout": 2000
+    }
+  ]
+}

@@ -44,7 +44,12 @@ CREATE TABLE IF NOT EXISTS teams (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS devices (
+-- Trusted-device registry for session/auth device fingerprinting. Named distinctly from
+-- the `devices` table introduced in 003_edge_devices.sql (Claude Code plugin pairing) —
+-- the two are unrelated concepts that originally collided on the same table name, which
+-- silently no-op'd the 003 CREATE TABLE (IF NOT EXISTS) and left the plugin-pairing schema
+-- missing in any database where this migration had already run.
+CREATE TABLE IF NOT EXISTS trusted_devices (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES users(id),
   organization_id UUID NOT NULL REFERENCES organizations(id),
@@ -57,7 +62,7 @@ CREATE TABLE IF NOT EXISTS devices (
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES users(id),
-  device_id UUID REFERENCES devices(id),
+  device_id UUID REFERENCES trusted_devices(id),
   token_hash TEXT NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
