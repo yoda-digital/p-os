@@ -8,4 +8,5 @@ packages:
 
 onlyBuiltDependencies:
   - "@embedded-postgres/linux-x64"
+  - "better-sqlite3"
   - "esbuild"
