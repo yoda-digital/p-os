@@ -32,6 +32,7 @@ import { memberRoutes } from './routes/members.js';
 import { caseAccessRoutes } from './routes/case-access.js';
 import { auditRoutes } from './routes/audit.js';
 import { adminRoutes } from './routes/admin.js';
+import { edgeRoutes } from './routes/edge.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -113,6 +114,12 @@ async function main() {
 
   // Admin routes (system org only)
   app.route('/api/v1/admin', adminRoutes(sql));
+
+  // Process Edge routes — device pairing, event ingestion, context capsule, policy mirror.
+  // Lives outside /api/v1 per the control-plane extension spec (§10.1); auth is mixed
+  // per-route inside edgeRoutes (some endpoints are unauthenticated pairing steps,
+  // others require a device auth token rather than a user JWT).
+  app.route('/edge/v1', edgeRoutes(sql));
 
   // Seed default process packs
   await seedProcessPacks(sql);
