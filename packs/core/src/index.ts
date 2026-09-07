@@ -1,0 +1,20 @@
+export const corePack = {
+  id: 'core',
+  name: 'Core Process Pack',
+  version: '0.1.0',
+  domain: 'core',
+  type_schemas: {
+    'core.case': { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' } } },
+    'core.move': { type: 'object', properties: { title: { type: 'string' }, objective: { type: 'string' } } },
+    'core.document': { type: 'object', properties: { title: { type: 'string' }, url: { type: 'string' }, format: { type: 'string' } } },
+    'core.person': { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, role: { type: 'string' } } },
+    'core.milestone': { type: 'object', properties: { name: { type: 'string' }, target_date: { type: 'string' } } },
+    'core.comment': { type: 'object', properties: { text: { type: 'string' }, author: { type: 'string' } } },
+  },
+  relation_types: ['DEPENDS_ON', 'BLOCKS', 'REQUIRES', 'PRODUCES', 'SUPPORTS', 'CONTRADICTS', 'SUPERSEDES', 'CONTAINS'],
+  views: ['kanban', 'timeline', 'attention', 'dependencies', 'evidence', 'decisions'],
+  controllers: ['dependency', 'completion', 'attention', 'deadline'],
+  default_rules: [],
+  execution_hints: {},
+  extractors: [],
+} as const;

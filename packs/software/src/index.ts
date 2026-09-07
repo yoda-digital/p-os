@@ -1,0 +1,26 @@
+export const softwarePack = {
+  id: 'software',
+  name: 'Software Delivery',
+  version: '0.1.0',
+  domain: 'software',
+  type_schemas: {
+    'software.repository': { type: 'object', properties: { url: { type: 'string' }, branch: { type: 'string' }, remote: { type: 'string' } } },
+    'software.commit': { type: 'object', properties: { sha: { type: 'string' }, message: { type: 'string' }, author: { type: 'string' }, date: { type: 'string' } } },
+    'software.branch': { type: 'object', properties: { name: { type: 'string' }, base: { type: 'string' } } },
+    'software.test_suite': { type: 'object', properties: { name: { type: 'string' }, framework: { type: 'string' }, pass_count: { type: 'number' }, fail_count: { type: 'number' } } },
+    'software.pull_request': { type: 'object', properties: { number: { type: 'number' }, title: { type: 'string' }, state: { type: 'string' }, url: { type: 'string' } } },
+    'software.deployment': { type: 'object', properties: { environment: { type: 'string' }, version: { type: 'string' }, status: { type: 'string' }, url: { type: 'string' } } },
+    'software.worktree': { type: 'object', properties: { path: { type: 'string' }, branch: { type: 'string' } } },
+    'software.review': { type: 'object', properties: { reviewer: { type: 'string' }, status: { type: 'string' }, comments: { type: 'number' } } },
+    'software.ci_pipeline': { type: 'object', properties: { name: { type: 'string' }, status: { type: 'string' }, duration: { type: 'number' } } },
+  },
+  relation_types: ['TESTS', 'DEPLOYS', 'REVIEWS', 'IMPLEMENTS', 'FIXES', 'BREAKS'],
+  views: ['kanban', 'timeline', 'dependencies', 'evidence', 'agents', 'compliance'],
+  controllers: ['dependency', 'completion', 'attention', 'deadline', 'evidence'],
+  default_rules: [
+    { type: 'Requirement', statement: 'All tests must pass before merge', authority_ref: { type: 'system' } },
+    { type: 'Requirement', statement: 'Code review required before merge', authority_ref: { type: 'system' } },
+  ],
+  execution_hints: { prefer_worktree_isolation: true, default_strategy: 'background_session' },
+  extractors: ['git_commit', 'test_result', 'pr_status'],
+} as const;

@@ -1,0 +1,275 @@
+const BASE = '/api';
+
+function getToken(): string | null {
+  try {
+    return localStorage.getItem('pos_token');
+  } catch {
+    return null;
+  }
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+
+  if (!res.ok) {
+    const body: any = await res.json().catch(() => ({ error: res.statusText }));
+    throw new ApiError(res.status, body.error || body.message || res.statusText, body);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+    public body?: unknown,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// ===== AUTH =====
+export interface AuthResponse { token: string; user: User; }
+export interface User { id: string; email: string; display_name: string; organization_id?: string; }
+
+export const api = {
+  // Auth
+  login: (email: string, password: string) =>
+    request<AuthResponse>('/v1/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register: (email: string, password: string, display_name: string) =>
+    request<AuthResponse>('/v1/auth/register', { method: 'POST', body: JSON.stringify({ email, password, display_name }) }),
+  getProfile: () => request<User>('/v1/auth/profile'),
+
+  // Cases
+  listCases: () => request<Case[]>('/v1/cases'),
+  getCase: (id: string) => request<Case>(`/v1/cases/${id}`),
+  createCase: (data: CreateCaseInput) =>
+    request<Case>('/v1/cases', { method: 'POST', body: JSON.stringify(data) }),
+  updateCase: (id: string, data: Partial<CreateCaseInput>) =>
+    request<Case>(`/v1/cases/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  closeCase: (id: string) =>
+    request<void>(`/v1/cases/${id}/close`, { method: 'POST' }),
+
+  // Moves — API uses /v1/moves?caseId=xxx for list, /v1/moves/:id for single
+  listMoves: (caseId: string) => request<Move[]>(`/v1/moves?caseId=${caseId}`),
+  getMove: (id: string) => request<Move>(`/v1/moves/${id}`),
+  createMove: (caseId: string, data: CreateMoveInput) =>
+    request<Move>('/v1/moves', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  updateMove: (id: string, data: Partial<CreateMoveInput>) =>
+    request<Move>(`/v1/moves/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  activateMove: (id: string, caseId?: string) =>
+    request<Move>(`/v1/moves/${id}/activate`, { method: 'POST', body: JSON.stringify({ case_id: caseId }) }),
+  pauseMove: (id: string) =>
+    request<void>(`/v1/moves/${id}/pause`, { method: 'POST' }),
+  resumeMove: (id: string) =>
+    request<void>(`/v1/moves/${id}/resume`, { method: 'POST' }),
+  cancelMove: (id: string) =>
+    request<void>(`/v1/moves/${id}/cancel`, { method: 'POST' }),
+  satisfyMove: (id: string) =>
+    request<void>(`/v1/moves/${id}/satisfy`, { method: 'POST' }),
+
+  // Kanban — API uses /v1/kanban/:caseId
+  getKanban: (caseId: string) => request<KanbanProjection>(`/v1/kanban/${caseId}`),
+  moveCard: (moveId: string, fromColumn: string, toColumn: string, position: number) =>
+    request<void>('/v1/kanban/move-card', { method: 'POST', body: JSON.stringify({ move_id: moveId, from_column: fromColumn, to_column: toColumn, position }) }),
+
+  // Decisions — API uses /v1/decisions?caseId=xxx
+  listDecisions: (caseId: string) => request<Decision[]>(`/v1/decisions?caseId=${caseId}`),
+  createDecision: (caseId: string, data: CreateDecisionInput) =>
+    request<Decision>('/v1/decisions', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  resolveDecision: (id: string, selected_option: unknown, rationale: string) =>
+    request<void>(`/v1/decisions/${id}/resolve`, { method: 'POST', body: JSON.stringify({ selected_option, rationale }) }),
+
+  // Evidence — API uses /v1/evidence?caseId=xxx
+  listEvidence: (caseId: string) => request<Evidence[]>(`/v1/evidence?caseId=${caseId}`),
+  attachEvidence: (caseId: string, data: CreateEvidenceInput) =>
+    request<Evidence>('/v1/evidence', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+
+  // Intents — API uses /v1/intents?caseId=xxx
+  listIntents: (caseId: string) => request<Intent[]>(`/v1/intents?caseId=${caseId}`),
+  createIntent: (caseId: string, data: CreateIntentInput) =>
+    request<Intent>('/v1/intents', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+
+  // Entities — API uses /v1/entities?caseId=xxx
+  listEntities: (caseId: string) => request<Entity[]>(`/v1/entities?caseId=${caseId}`),
+  createEntity: (caseId: string, data: CreateEntityInput) =>
+    request<Entity>('/v1/entities', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+
+  // Relations — API uses /v1/relations?caseId=xxx
+  listRelations: (caseId: string) => request<Relation[]>(`/v1/relations?caseId=${caseId}`),
+  addRelation: (caseId: string, data: CreateRelationInput) =>
+    request<Relation>('/v1/relations', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+
+  // Rules — API uses /v1/rules?caseId=xxx
+  listRules: (caseId: string) => request<Rule[]>(`/v1/rules?caseId=${caseId}`),
+  createRule: (caseId: string, data: CreateRuleInput) =>
+    request<Rule>('/v1/rules', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+
+  // Actors
+  listActors: () => request<Actor[]>('/v1/actors'),
+
+  // Assertions — API uses query param pattern
+  listAssertions: (caseId: string) => request<Assertion[]>(`/v1/entities?caseId=${caseId}&type=assertion`),
+  createAssertion: (caseId: string, data: CreateAssertionInput) =>
+    request<Assertion>('/v1/commands', { method: 'POST', body: JSON.stringify({ type: 'Assertion.Create', payload: { ...data, case_id: caseId } }) }),
+
+  // Attention — API uses /v1/attention?caseId=xxx
+  getAttention: (caseId: string) => request<AttentionItem[]>(`/v1/attention?caseId=${caseId}`),
+
+  // Timeline — API uses /v1/timeline?caseId=xxx
+  getTimeline: (caseId: string) => request<TimelineEntry[]>(`/v1/timeline?caseId=${caseId}`),
+
+  // WHY — API uses POST /v1/why
+  explainWhy: (caseId: string, question: string, moveId?: string) =>
+    request<WhyExplanation>('/v1/why', { method: 'POST', body: JSON.stringify({ caseId, question, moveId }) }),
+
+  // Steering
+  sendSteering: (caseId: string, moveId: string, data: CreateSteeringInput) =>
+    request<void>('/v1/steering', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId, move_id: moveId }) }),
+
+  // Time Travel — API uses /v1/time-travel?caseId=xxx
+  getCaseAtEvent: (caseId: string, eventId: string) =>
+    request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&eventId=${eventId}`),
+  getCaseAtTime: (caseId: string, timestamp: string) =>
+    request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&timestamp=${timestamp}`),
+
+  // Simulation — API uses /v1/simulation?caseId=xxx
+  createSimulation: (caseId: string, data: CreateSimulationInput) =>
+    request<SimulationFork>('/v1/simulation', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  listSimulations: (caseId: string) => request<SimulationFork[]>(`/v1/simulation?caseId=${caseId}`),
+
+  // Process Intelligence — API uses /v1/intelligence?caseId=xxx
+  getMetrics: (caseId: string) => request<ProcessMetrics>(`/v1/intelligence/metrics?caseId=${caseId}`),
+  getDriftReport: (caseId: string) => request<DriftReport>(`/v1/intelligence/drift?caseId=${caseId}`),
+
+  // Process Packs
+  listPacks: () => request<ProcessPack[]>('/v1/packs'),
+
+  // Attempts
+  listAttempts: (moveId: string) => request<Attempt[]>(`/v1/moves/${moveId}/attempts`),
+
+  // Resources — API uses /v1/resources?caseId=xxx
+  listResources: (caseId: string) => request<Resource[]>(`/v1/resources?caseId=${caseId}`),
+};
+
+// ===== Types =====
+export interface Case {
+  id: string; organization_id: string; workspace_id?: string; type: string;
+  title: string; description?: string; lifecycle: string;
+  primary_intent_ids: string[]; owner_actor_ids: string[];
+  pack_refs: unknown[]; project_refs: unknown[]; metadata: Record<string, unknown>;
+  created_at: string; created_by?: string; revision: number;
+}
+export interface CreateCaseInput { title: string; description?: string; type?: string; workspace_id?: string; intent_statement?: string; }
+
+export interface Move {
+  id: string; case_id: string; class: string; title: string; objective?: string;
+  intent_refs: string[]; parent_move_id?: string;
+  preconditions: unknown[]; postconditions: unknown[]; completion_contract?: unknown;
+  required_capabilities: unknown[]; required_authority: unknown[];
+  constraints: unknown[]; dependencies: string[];
+  priority: string; risk: string; deadline?: string;
+  execution_policy?: unknown; assigned_actor_ids: string[];
+  readiness: string; execution: string; verification: string;
+  attention: string; risk_level: string; temporal: string; outcome: string;
+  created_at: string; created_by?: string; revision: number;
+}
+export interface CreateMoveInput {
+  title: string; class?: string; objective?: string; priority?: string;
+  risk?: string; deadline?: string; dependencies?: string[];
+  assigned_actor_ids?: string[]; constraints?: string[]; intent_refs?: string[];
+}
+
+export interface KanbanProjection {
+  columns: KanbanColumnData[];
+}
+export interface KanbanColumnData {
+  id: string;
+  label: string;
+  cards: KanbanCard[];
+}
+export interface KanbanCard {
+  move_id: string; title: string; class: string; executor?: string;
+  execution?: string; execution_state?: string; risk: string; deadline?: string;
+  verification: string; evidence_count?: number;
+  evidence_progress?: { done: number; total: number };
+  dependencies?: string[] | { blocked_by: number }; attention: string;
+  current_activity?: string; priority: string; position: number;
+  outcome?: string; assigned_actor_ids?: string[];
+  column_id?: string;
+}
+
+export interface Decision {
+  id: string; case_id: string; question: string; context?: string;
+  options: { id: string; label: string; description?: string; evidence_refs?: string[]; risks?: string[]; tradeoffs?: string[] }[];
+  evidence_refs: string[]; risk_refs: unknown[];
+  recommended_option?: unknown; recommendation_confidence?: number;
+  recommendation_rationale?: string; required_authority?: unknown;
+  state: string; selected_option?: unknown; rationale?: string;
+  decided_by?: string; decided_at?: string; blocking_move_ids: string[];
+  created_at: string; created_by?: string; revision: number;
+}
+export interface CreateDecisionInput { question: string; context?: string; options?: { label: string; description?: string }[]; blocking_move_ids?: string[]; }
+
+export interface Evidence {
+  id: string; case_id: string; subject_refs: { id: string; type: string }[];
+  relation: string; artifact_ref?: unknown; source_ref?: unknown;
+  scope?: unknown; provenance?: unknown; observed_at?: string;
+  fresh_until?: string; confidence: number;
+  validity: string; created_at: string; created_by?: string; revision: number;
+}
+export interface CreateEvidenceInput { subject_refs: { id: string; type: string }[]; relation: string; scope?: unknown; confidence?: number; }
+
+export interface Intent {
+  id: string; case_id: string; class: string; statement: string;
+  priority: string; owner_refs: unknown[]; success_contract?: unknown;
+  status: string; created_at: string; revision: number;
+}
+export interface CreateIntentInput { class: string; statement: string; priority?: string; }
+
+export interface Entity { id: string; case_id: string; type: string; title: string; description?: string; properties: Record<string, unknown>; created_at: string; revision: number; }
+export interface CreateEntityInput { type: string; title: string; description?: string; properties?: Record<string, unknown>; }
+
+export interface Relation { id: string; case_id: string; source_ref: { id: string; type: string }; target_ref: { id: string; type: string }; type: string; qualifier?: string; confidence: number; created_at: string; revision: number; }
+export interface CreateRelationInput { source_ref: { id: string; type: string }; target_ref: { id: string; type: string }; type: string; qualifier?: string; }
+
+export interface Rule { id: string; case_id: string; type: string; statement: string; authority_ref?: unknown; evaluation_status: string; created_at: string; revision: number; }
+export interface CreateRuleInput { type: string; statement: string; }
+
+export interface Assertion { id: string; case_id: string; subject_ref: unknown; predicate: string; value?: unknown; modality: string; confidence: number; status: string; created_at: string; revision: number; }
+export interface CreateAssertionInput { subject_ref: unknown; predicate: string; value?: unknown; modality?: string; confidence?: number; }
+
+export interface Actor { id: string; organization_id: string; class: string; display_name: string; roles: unknown[]; capabilities: unknown[]; created_at: string; revision: number; }
+
+export interface AttentionItem { id: string; case_id: string; move_id?: string; decision_id?: string; priority: string; reason: string; action_required?: string; actor_ids: string[]; deadline?: string; blocking_impact: number; resolved: boolean; created_at: string; }
+
+export interface TimelineEntry { event_id: string; case_id: string; occurred_at: string; type: string; actor_id?: string; summary: string; details: Record<string, unknown>; move_id?: string; attempt_id?: string; }
+
+export interface WhyExplanation { question: string; causal_chain: { id: string; type: string; description: string; timestamp: string; }[]; explanation: string; }
+
+export interface CaseSnapshot { case: Case; moves: Move[]; timestamp: string; event_id: string; }
+
+export interface SimulationFork { id: string; source_case_id: string; fork_event_id?: string; title: string; description?: string; hypothetical_changes: unknown[]; created_at: string; }
+export interface CreateSimulationInput { title: string; description?: string; hypothetical_changes: unknown[]; fork_event_id?: string; }
+
+export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; rework_count: number; failed_attempts: number; human_attention_time?: string; evidence_gaps: number; completion_reliability?: number; cost?: unknown; executor_performance: Record<string, unknown>; context_rotations: number; steering_frequency: number; }
+
+export interface DriftReport { expected_process: unknown; observed_process: unknown; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
+
+export interface ProcessPack { id: string; name: string; version: string; domain: string; created_at: string; }
+
+export interface Attempt { id: string; case_id: string; move_id: string; executor_id?: string; strategy: string; state: string; model?: string; effort?: string; started_at?: string; ended_at?: string; cost?: unknown; usage?: unknown; failure_reason?: string; steering_history: unknown[]; created_at: string; revision: number; }
+
+export interface Resource { id: string; case_id: string; type: string; name: string; capacity?: unknown; available?: unknown; reserved?: unknown; cost_per_unit?: unknown; consumable: boolean; created_at: string; revision: number; }
+
+export interface CreateSteeringInput { class: string; instruction: string; attempt_id?: string; }

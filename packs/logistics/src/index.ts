@@ -1,0 +1,25 @@
+export const logisticsPack = {
+  id: 'logistics',
+  name: 'Physical Logistics',
+  version: '0.1.0',
+  domain: 'logistics',
+  type_schemas: {
+    'logistics.asset': { type: 'object', properties: { name: { type: 'string' }, sku: { type: 'string' }, category: { type: 'string' }, serial: { type: 'string' } } },
+    'logistics.quantity': { type: 'object', properties: { amount: { type: 'number' }, unit: { type: 'string' } } },
+    'logistics.location': { type: 'object', properties: { name: { type: 'string' }, address: { type: 'string' }, coordinates: { type: 'object', properties: { lat: { type: 'number' }, lng: { type: 'number' } } }, type: { type: 'string' } } },
+    'logistics.custody': { type: 'object', properties: { holder: { type: 'string' }, received_at: { type: 'string' }, condition: { type: 'string' }, signed: { type: 'boolean' } } },
+    'logistics.shipment': { type: 'object', properties: { origin: { type: 'string' }, destination: { type: 'string' }, carrier: { type: 'string' }, tracking: { type: 'string' }, status: { type: 'string' } } },
+    'logistics.split': { type: 'object', properties: { original_asset: { type: 'string' }, resulting_assets: { type: 'array', items: { type: 'string' } }, reason: { type: 'string' } } },
+    'logistics.merge': { type: 'object', properties: { source_assets: { type: 'array', items: { type: 'string' } }, resulting_asset: { type: 'string' }, reason: { type: 'string' } } },
+    'logistics.capacity': { type: 'object', properties: { resource: { type: 'string' }, max_capacity: { type: 'number' }, current_usage: { type: 'number' }, unit: { type: 'string' } } },
+  },
+  relation_types: ['LOCATED_AT', 'CUSTODY_OF', 'SHIPPED_TO', 'SPLIT_FROM', 'MERGED_INTO', 'CONTAINS', 'CAPACITY_OF'],
+  views: ['kanban', 'timeline', 'resources', 'risk'],
+  controllers: ['resource', 'deadline', 'attention', 'risk'],
+  default_rules: [
+    { type: 'Requirement', statement: 'Custody transfer requires signed receipt', authority_ref: { type: 'system' } },
+    { type: 'Invariant', statement: 'Total quantity preserved across split/merge operations', authority_ref: { type: 'system' } },
+  ],
+  execution_hints: { track_physical_location: true },
+  extractors: ['shipment_status', 'custody_transfer'],
+} as const;

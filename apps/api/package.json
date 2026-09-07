@@ -1,0 +1,35 @@
+{
+  "name": "@pos/api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "db:migrate": "tsx src/migrate.ts"
+  },
+  "dependencies": {
+    "@pos/contracts": "workspace:*",
+    "@pos/kernel": "workspace:*",
+    "@pos/events": "workspace:*",
+    "@pos/commands": "workspace:*",
+    "@pos/projections": "workspace:*",
+    "@pos/controllers": "workspace:*",
+    "@pos/policy": "workspace:*",
+    "@pos/why": "workspace:*",
+    "@pos/execution": "workspace:*",
+    "@pos/context": "workspace:*",
+    "@pos/db": "workspace:*",
+    "@pos/schema-registry": "workspace:*",
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.7.0",
+    "jose": "^6.0.0",
+    "postgres": "^3.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.19.0",
+    "vitest": "^3.0.0"
+  }
+}

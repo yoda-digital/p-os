@@ -1,0 +1,23 @@
+{
+  "name": "@pos/worker",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pos/contracts": "workspace:*",
+    "@pos/events": "workspace:*",
+    "@pos/projections": "workspace:*",
+    "@pos/controllers": "workspace:*",
+    "@pos/db": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.19.0",
+    "vitest": "^3.0.0"
+  }
+}

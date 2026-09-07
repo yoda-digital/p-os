@@ -1,0 +1,25 @@
+export const procurementPack = {
+  id: 'procurement',
+  name: 'Procurement & Tender',
+  version: '0.1.0',
+  domain: 'procurement',
+  type_schemas: {
+    'procurement.requirement': { type: 'object', properties: { text: { type: 'string' }, category: { type: 'string' }, mandatory: { type: 'boolean' }, source_document: { type: 'string' } } },
+    'procurement.clarification': { type: 'object', properties: { question: { type: 'string' }, answer: { type: 'string' }, issued_at: { type: 'string' }, answered_at: { type: 'string' } } },
+    'procurement.document': { type: 'object', properties: { title: { type: 'string' }, type: { type: 'string' }, version: { type: 'string' }, url: { type: 'string' } } },
+    'procurement.compliance_item': { type: 'object', properties: { requirement_id: { type: 'string' }, status: { type: 'string' }, evidence_ids: { type: 'array', items: { type: 'string' } } } },
+    'procurement.eligibility': { type: 'object', properties: { criterion: { type: 'string' }, met: { type: 'boolean' }, proof: { type: 'string' } } },
+    'procurement.submission': { type: 'object', properties: { type: { type: 'string' }, deadline: { type: 'string' }, format: { type: 'string' }, submitted: { type: 'boolean' } } },
+    'procurement.evaluation_criterion': { type: 'object', properties: { name: { type: 'string' }, weight: { type: 'number' }, max_score: { type: 'number' } } },
+    'procurement.bid': { type: 'object', properties: { amount: { type: 'number' }, currency: { type: 'string' }, submitted_at: { type: 'string' } } },
+  },
+  relation_types: ['SATISFIES', 'CLARIFIES', 'MODIFIES', 'SUPERSEDES', 'INVALIDATES', 'REQUIRES_PROOF'],
+  views: ['compliance', 'kanban', 'timeline', 'evidence', 'decisions', 'deadlines'],
+  controllers: ['compliance', 'deadline', 'evidence', 'completion'],
+  default_rules: [
+    { type: 'Deadline', statement: 'Submission deadline must be met', authority_ref: { type: 'external' } },
+    { type: 'Requirement', statement: 'All mandatory requirements must have evidence', authority_ref: { type: 'system' } },
+  ],
+  execution_hints: { require_human_approval_for_submission: true },
+  extractors: ['requirement', 'clarification', 'compliance_status'],
+} as const;

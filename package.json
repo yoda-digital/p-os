@@ -1,0 +1,23 @@
+{
+  "name": "universal-process-os",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "db:migrate": "pnpm --filter @pos/api db:migrate",
+    "db:start": "pnpm --filter @pos/db start",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.0",
+    "tsx": "^4.23.13",
+    "turbo": "^2.10.12"
+  }
+}

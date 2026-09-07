@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "executors/*"
+  - "plugin/*"
+  - "edge/*"
+  - "packs/*"
+
+onlyBuiltDependencies:
+  - "@embedded-postgres/linux-x64"
+  - "esbuild"

@@ -1,0 +1,26 @@
+{
+  "name": "@pos/kernel",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pos/contracts": "workspace:*",
+    "@pos/events": "workspace:*",
+    "@pos/commands": "workspace:*",
+    "@pos/projections": "workspace:*",
+    "@pos/controllers": "workspace:*",
+    "@pos/policy": "workspace:*",
+    "@pos/why": "workspace:*",
+    "@pos/db": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}

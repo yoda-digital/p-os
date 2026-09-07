@@ -1,0 +1,14 @@
+{
+  "name": "@pos/dispatcher",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": { "build": "tsc", "dev": "tsc --watch", "test": "vitest run" },
+  "dependencies": {
+    "@pos/contracts": "workspace:*",
+    "@pos/edge-core": "workspace:*",
+    "@pos/execution": "workspace:*"
+  },
+  "devDependencies": { "typescript": "^5.8.0", "vitest": "^3.0.0" }
+}
