@@ -1,0 +1,75 @@
+{
+  "title": "Admin",
+  "nav": {
+    "organizations": "Organizations",
+    "users": "Users",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "settings": "System Settings",
+    "audit_log": "Audit Log"
+  },
+  "organizations": {
+    "title": "Organizations",
+    "new": "New Organization",
+    "name": "Name",
+    "members": "Members",
+    "created": "Created",
+    "empty": {
+      "title": "No organizations",
+      "description": "Create your first organization to get started"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "invite": "Invite User",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "last_active": "Last Active",
+    "empty": {
+      "title": "No users",
+      "description": "Invite users to start collaborating"
+    },
+    "status_values": {
+      "active": "active",
+      "invited": "invited",
+      "suspended": "suspended"
+    }
+  },
+  "roles": {
+    "title": "Roles",
+    "new": "New Role",
+    "superadmin": "Superadmin",
+    "org_admin": "Organization Admin",
+    "manager": "Manager",
+    "contributor": "Contributor",
+    "viewer": "Viewer",
+    "description": "Description",
+    "permissions_count": "{{count}} permissions"
+  },
+  "permissions": {
+    "title": "Permissions",
+    "grant": "Grant",
+    "revoke": "Revoke"
+  },
+  "settings": {
+    "title": "System Settings",
+    "general": "General",
+    "security": "Security",
+    "localization": "Localization",
+    "default_language": "Default Language",
+    "save": "Save Settings"
+  },
+  "audit_log": {
+    "title": "Audit Log",
+    "actor": "Actor",
+    "action": "Action",
+    "target": "Target",
+    "timestamp": "Timestamp",
+    "empty": {
+      "title": "No events",
+      "description": "Audit events will appear here"
+    }
+  }
+}

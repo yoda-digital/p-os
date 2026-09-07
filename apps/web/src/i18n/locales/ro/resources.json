@@ -1,0 +1,15 @@
+{
+  "title": "Resurse",
+  "empty": {
+    "title": "Nicio resursă",
+    "description": "Urmărirea resurselor va apărea aici"
+  },
+  "table": {
+    "name": "Nume",
+    "type": "Tip",
+    "capacity": "Capacitate",
+    "available": "Disponibil",
+    "utilization": "Utilizare",
+    "cost": "Cost"
+  }
+}

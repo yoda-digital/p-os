@@ -1,0 +1,40 @@
+{
+  "title": "Evidence",
+  "attach": "Attach Evidence",
+  "filters": {
+    "all": "all",
+    "valid": "valid",
+    "stale": "stale",
+    "invalid": "invalid",
+    "disputed": "disputed",
+    "unknown": "unknown"
+  },
+  "empty": {
+    "title": "No evidence",
+    "description": "Attach evidence to support or verify process state",
+    "action": "Attach Evidence"
+  },
+  "relation": {
+    "supports": "Supports",
+    "contradicts": "Contradicts",
+    "verifies": "Verifies",
+    "invalidates": "Invalidates",
+    "establishes_provenance": "Establishes Provenance",
+    "establishes_authority": "Establishes Authority",
+    "establishes_compliance": "Establishes Compliance"
+  },
+  "card": {
+    "confidence": "Confidence: {{value}}%",
+    "subjects": "Subjects: {{value}}",
+    "fresh_until": "Fresh until: {{value}}",
+    "observed": "Observed: {{value}}",
+    "not_available": "N/A"
+  },
+  "create": {
+    "title": "Attach Evidence",
+    "relation_label": "Relation",
+    "subject_label": "Subject ID (Move/Entity)",
+    "subject_placeholder": "UUID of the subject",
+    "confidence_label": "Confidence (0-1)"
+  }
+}

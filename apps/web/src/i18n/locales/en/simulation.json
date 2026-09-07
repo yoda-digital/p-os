@@ -1,0 +1,31 @@
+{
+  "title": "Simulation",
+  "new_simulation": "New Simulation",
+  "intro": "Fork the case state to explore hypothetical scenarios without affecting canonical truth.",
+  "presets": {
+    "deadline": "What if the deadline moves to next week?",
+    "unavailable": "What if a key person becomes unavailable?",
+    "strategy_b": "What if we choose strategy B instead?",
+    "budget": "What if the budget is reduced by 30%?"
+  },
+  "empty": {
+    "title": "No simulations",
+    "description": "Create a simulation to explore what-if scenarios",
+    "action": "Create Simulation"
+  },
+  "card": {
+    "badge": "Simulation",
+    "changes_title": "Hypothetical Changes:",
+    "adopt": "Adopt Changes"
+  },
+  "create": {
+    "title": "Create Simulation",
+    "title_label": "Title",
+    "title_placeholder": "What if...?",
+    "description_label": "Description",
+    "description_placeholder": "Describe the scenario...",
+    "changes_label": "Hypothetical Changes (one per line)",
+    "changes_placeholder": "Deadline extended by 2 weeks\nLead developer unavailable",
+    "submit": "Create"
+  }
+}

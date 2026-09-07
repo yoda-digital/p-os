@@ -1,0 +1,51 @@
+{
+  "panel": {
+    "title": "Steer Execution",
+    "type_label": "Steering Type",
+    "instruction_label": "Instruction",
+    "instruction_placeholder": "What should the executor do differently?",
+    "send": "Send",
+    "sent": "Sent"
+  },
+  "class": {
+    "advisory": "Advisory — Suggestion",
+    "constraint": "Constraint — Must follow",
+    "redirect": "Redirect — Change direction",
+    "pause": "Pause — Halt temporarily",
+    "hard_stop": "Hard Stop — Terminate now",
+    "fork": "Fork — Split approach",
+    "reassign": "Reassign — Change executor"
+  },
+  "delivery_state": {
+    "issued": "issued",
+    "delivered_to_edge": "delivered to edge",
+    "delivered_to_executor": "delivered to executor",
+    "acknowledged": "acknowledged",
+    "applied": "applied"
+  },
+  "drawer": {
+    "title": "Move Detail",
+    "not_found": "Move not found",
+    "state_vector": "State Vector",
+    "readiness": "Readiness",
+    "execution": "Execution",
+    "verification": "Verification",
+    "attention": "Attention",
+    "risk": "Risk",
+    "temporal": "Temporal",
+    "outcome": "Outcome",
+    "actions": "Actions",
+    "action_activate": "Activate",
+    "action_pause": "Pause",
+    "action_resume": "Resume",
+    "action_cancel": "Cancel",
+    "action_satisfy": "Satisfy",
+    "dependencies": "Dependencies ({{count}})",
+    "attempts": "Attempts ({{count}})",
+    "no_attempts": "No attempts yet",
+    "model": "Model: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Created: {{value}}",
+    "revision": "Revision: {{value}}"
+  }
+}

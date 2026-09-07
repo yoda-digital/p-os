@@ -1,0 +1,35 @@
+{
+  "title": "Process Intelligence",
+  "metrics": {
+    "cycle_time": "Cycle Time",
+    "waiting_time": "Waiting Time",
+    "rework_count": "Rework Count",
+    "failed_attempts": "Failed Attempts",
+    "human_attention_time": "Human Attention",
+    "evidence_gaps": "Evidence Gaps",
+    "completion_reliability": "Completion Reliability",
+    "context_rotations": "Context Rotations",
+    "steering_frequency": "Steering Frequency"
+  },
+  "empty": {
+    "title": "No metrics",
+    "description": "Metrics will appear once the case has activity"
+  },
+  "drift": {
+    "title": "Process Drift ({{count}} deviations)",
+    "type": "Type: {{value}}"
+  },
+  "severity": {
+    "high": "high",
+    "medium": "medium",
+    "low": "low"
+  },
+  "architect": {
+    "title": "AI Process Architect",
+    "description": "Process analysis active. Suggestions will appear when patterns are detected in execution history."
+  },
+  "guardian": {
+    "title": "Process Guardian",
+    "description": "Monitoring for scope drift, policy breaches, stale evidence, deadline risk, and unauthorized work."
+  }
+}

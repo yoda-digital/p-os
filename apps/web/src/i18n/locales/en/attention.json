@@ -1,0 +1,19 @@
+{
+  "title": "Attention Queue",
+  "stats": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "empty": {
+    "title": "All clear",
+    "description": "No attention items require your input"
+  },
+  "item": {
+    "action_required": "Action",
+    "blocking_impact": "Blocking {{count}} move",
+    "blocking_impact_plural": "Blocking {{count}} moves",
+    "view": "View"
+  }
+}

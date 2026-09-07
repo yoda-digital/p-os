@@ -1,0 +1,40 @@
+{
+  "title": "Доказательства",
+  "attach": "Прикрепить доказательство",
+  "filters": {
+    "all": "все",
+    "valid": "действительно",
+    "stale": "устарело",
+    "invalid": "недействительно",
+    "disputed": "оспаривается",
+    "unknown": "неизвестно"
+  },
+  "empty": {
+    "title": "Нет доказательств",
+    "description": "Прикрепите доказательства, чтобы подтвердить или проверить состояние процесса",
+    "action": "Прикрепить доказательство"
+  },
+  "relation": {
+    "supports": "Подтверждает",
+    "contradicts": "Противоречит",
+    "verifies": "Проверяет",
+    "invalidates": "Опровергает",
+    "establishes_provenance": "Устанавливает происхождение",
+    "establishes_authority": "Устанавливает полномочия",
+    "establishes_compliance": "Устанавливает соответствие"
+  },
+  "card": {
+    "confidence": "Уверенность: {{value}}%",
+    "subjects": "Субъекты: {{value}}",
+    "fresh_until": "Актуально до: {{value}}",
+    "observed": "Зафиксировано: {{value}}",
+    "not_available": "Н/Д"
+  },
+  "create": {
+    "title": "Прикрепить доказательство",
+    "relation_label": "Отношение",
+    "subject_label": "ID субъекта (ход/сущность)",
+    "subject_placeholder": "UUID субъекта",
+    "confidence_label": "Уверенность (0-1)"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Actori & Agenți",
+  "empty": {
+    "title": "Niciun actor",
+    "description": "Actorii și agenții vor apărea aici"
+  },
+  "class": {
+    "human": "uman",
+    "ai_agent": "agent AI",
+    "team": "echipă",
+    "organization": "organizație",
+    "external_authority": "autoritate externă",
+    "software_service": "serviciu software",
+    "executor_runtime": "mediu de execuție"
+  }
+}

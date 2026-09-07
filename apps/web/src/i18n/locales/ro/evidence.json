@@ -1,0 +1,40 @@
+{
+  "title": "Dovezi",
+  "attach": "Atașează dovadă",
+  "filters": {
+    "all": "toate",
+    "valid": "valid",
+    "stale": "expirat",
+    "invalid": "invalid",
+    "disputed": "contestat",
+    "unknown": "necunoscut"
+  },
+  "empty": {
+    "title": "Nicio dovadă",
+    "description": "Atașează dovezi pentru a susține sau verifica starea procesului",
+    "action": "Atașează dovadă"
+  },
+  "relation": {
+    "supports": "Susține",
+    "contradicts": "Contrazice",
+    "verifies": "Verifică",
+    "invalidates": "Invalidează",
+    "establishes_provenance": "Stabilește proveniența",
+    "establishes_authority": "Stabilește autoritatea",
+    "establishes_compliance": "Stabilește conformitatea"
+  },
+  "card": {
+    "confidence": "Încredere: {{value}}%",
+    "subjects": "Subiecte: {{value}}",
+    "fresh_until": "Valabil până la: {{value}}",
+    "observed": "Observat: {{value}}",
+    "not_available": "N/A"
+  },
+  "create": {
+    "title": "Atașează dovadă",
+    "relation_label": "Relație",
+    "subject_label": "ID Subiect (Mutare/Entitate)",
+    "subject_placeholder": "UUID-ul subiectului",
+    "confidence_label": "Încredere (0-1)"
+  }
+}

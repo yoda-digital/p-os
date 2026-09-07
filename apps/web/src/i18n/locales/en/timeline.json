@@ -1,0 +1,29 @@
+{
+  "title": "Timeline",
+  "filter": {
+    "all": "All"
+  },
+  "empty": {
+    "title": "No events yet",
+    "description": "Events will appear here as the case evolves"
+  },
+  "event_types": {
+    "CaseCreated": "Case Created",
+    "CaseUpdated": "Case Updated",
+    "CaseClosed": "Case Closed",
+    "MoveCreated": "Move Created",
+    "MoveActivated": "Move Activated",
+    "MovePaused": "Move Paused",
+    "MoveResumed": "Move Resumed",
+    "MoveCancelled": "Move Cancelled",
+    "MoveSatisfied": "Move Satisfied",
+    "AttemptStarted": "Attempt Started",
+    "AttemptSucceeded": "Attempt Succeeded",
+    "AttemptFailed": "Attempt Failed",
+    "EvidenceAttached": "Evidence Attached",
+    "DecisionCreated": "Decision Created",
+    "DecisionResolved": "Decision Resolved",
+    "SteeringIssued": "Steering Issued",
+    "RuleEvaluated": "Rule Evaluated"
+  }
+}

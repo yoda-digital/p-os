@@ -1,0 +1,75 @@
+{
+  "title": "Administrare",
+  "nav": {
+    "organizations": "Organizații",
+    "users": "Utilizatori",
+    "roles": "Roluri",
+    "permissions": "Permisiuni",
+    "settings": "Setări sistem",
+    "audit_log": "Jurnal de audit"
+  },
+  "organizations": {
+    "title": "Organizații",
+    "new": "Organizație nouă",
+    "name": "Nume",
+    "members": "Membri",
+    "created": "Creată",
+    "empty": {
+      "title": "Nicio organizație",
+      "description": "Creează prima organizație pentru a începe"
+    }
+  },
+  "users": {
+    "title": "Utilizatori",
+    "invite": "Invită utilizator",
+    "name": "Nume",
+    "email": "Email",
+    "role": "Rol",
+    "status": "Stare",
+    "last_active": "Ultima activitate",
+    "empty": {
+      "title": "Niciun utilizator",
+      "description": "Invită utilizatori pentru a începe colaborarea"
+    },
+    "status_values": {
+      "active": "activ",
+      "invited": "invitat",
+      "suspended": "suspendat"
+    }
+  },
+  "roles": {
+    "title": "Roluri",
+    "new": "Rol nou",
+    "superadmin": "Super-administrator",
+    "org_admin": "Administrator organizație",
+    "manager": "Manager",
+    "contributor": "Contribuitor",
+    "viewer": "Vizualizator",
+    "description": "Descriere",
+    "permissions_count": "{{count}} permisiuni"
+  },
+  "permissions": {
+    "title": "Permisiuni",
+    "grant": "Acordă",
+    "revoke": "Revocă"
+  },
+  "settings": {
+    "title": "Setări sistem",
+    "general": "General",
+    "security": "Securitate",
+    "localization": "Localizare",
+    "default_language": "Limba implicită",
+    "save": "Salvează setările"
+  },
+  "audit_log": {
+    "title": "Jurnal de audit",
+    "actor": "Actor",
+    "action": "Acțiune",
+    "target": "Țintă",
+    "timestamp": "Data/ora",
+    "empty": {
+      "title": "Niciun eveniment",
+      "description": "Evenimentele de audit vor apărea aici"
+    }
+  }
+}

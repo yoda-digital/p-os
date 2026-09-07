@@ -1,0 +1,51 @@
+{
+  "panel": {
+    "title": "Управление выполнением",
+    "type_label": "Тип указания",
+    "instruction_label": "Инструкция",
+    "instruction_placeholder": "Что исполнитель должен сделать иначе?",
+    "send": "Отправить",
+    "sent": "Отправлено"
+  },
+  "class": {
+    "advisory": "Рекомендация — Предложение",
+    "constraint": "Ограничение — Обязательно к исполнению",
+    "redirect": "Перенаправление — Изменить направление",
+    "pause": "Пауза — Временно остановить",
+    "hard_stop": "Полная остановка — Прекратить немедленно",
+    "fork": "Разветвление — Разделить подход",
+    "reassign": "Переназначение — Сменить исполнителя"
+  },
+  "delivery_state": {
+    "issued": "выдано",
+    "delivered_to_edge": "доставлено на edge",
+    "delivered_to_executor": "доставлено исполнителю",
+    "acknowledged": "подтверждено",
+    "applied": "применено"
+  },
+  "drawer": {
+    "title": "Детали хода",
+    "not_found": "Ход не найден",
+    "state_vector": "Вектор состояния",
+    "readiness": "Готовность",
+    "execution": "Выполнение",
+    "verification": "Проверка",
+    "attention": "Внимание",
+    "risk": "Риск",
+    "temporal": "Сроки",
+    "outcome": "Результат",
+    "actions": "Действия",
+    "action_activate": "Активировать",
+    "action_pause": "Пауза",
+    "action_resume": "Возобновить",
+    "action_cancel": "Отменить",
+    "action_satisfy": "Завершить",
+    "dependencies": "Зависимости ({{count}})",
+    "attempts": "Попытки ({{count}})",
+    "no_attempts": "Пока нет попыток",
+    "model": "Модель: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Создано: {{value}}",
+    "revision": "Ревизия: {{value}}"
+  }
+}

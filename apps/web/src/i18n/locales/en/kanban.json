@@ -1,0 +1,75 @@
+{
+  "board": {
+    "title": "Kanban Board",
+    "new_move": "New Move"
+  },
+  "empty": {
+    "title": "No moves yet",
+    "description": "Create your first move to get started",
+    "action": "Create Move"
+  },
+  "columns": {
+    "BACKLOG": "Backlog",
+    "READY": "Ready",
+    "ACTIVE": "Active",
+    "WAITING": "Waiting",
+    "NEEDS_INPUT": "Needs Input",
+    "VERIFY": "Verify",
+    "DONE": "Done"
+  },
+  "class": {
+    "ACT": "Act",
+    "OBSERVE": "Observe",
+    "ASK": "Ask",
+    "WAIT": "Wait",
+    "DECIDE": "Decide",
+    "COMMUNICATE": "Communicate",
+    "VERIFY": "Verify",
+    "DELEGATE": "Delegate",
+    "ESCALATE": "Escalate",
+    "APPROVE": "Approve",
+    "REJECT": "Reject",
+    "STOP": "Stop"
+  },
+  "class_full": {
+    "ACT": "Act — Execute a task",
+    "OBSERVE": "Observe — Gather information",
+    "ASK": "Ask — Request information",
+    "WAIT": "Wait — Await external event",
+    "DECIDE": "Decide — Make a decision",
+    "COMMUNICATE": "Communicate — Send information",
+    "VERIFY": "Verify — Check correctness",
+    "DELEGATE": "Delegate — Assign to another",
+    "ESCALATE": "Escalate — Raise urgency",
+    "APPROVE": "Approve — Grant permission",
+    "REJECT": "Reject — Deny request",
+    "STOP": "Stop — Halt execution"
+  },
+  "card": {
+    "assigned": "assigned",
+    "evidence": "evidence",
+    "dependency": "dep",
+    "dependencies": "deps"
+  },
+  "create_move": {
+    "title": "Create Move",
+    "title_label": "Title",
+    "title_placeholder": "What needs to happen?",
+    "type_label": "Type",
+    "priority_label": "Priority",
+    "objective_label": "Objective",
+    "objective_placeholder": "Describe the objective...",
+    "risk_label": "Risk",
+    "deadline_label": "Deadline",
+    "constraints_label": "Constraints (one per line)",
+    "constraints_placeholder": "Do not modify public API\nMust pass all tests",
+    "submit": "Create Move"
+  },
+  "risk": {
+    "none": "None",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  }
+}

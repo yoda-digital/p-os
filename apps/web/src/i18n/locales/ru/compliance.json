@@ -1,0 +1,21 @@
+{
+  "title": "Соответствие правилам",
+  "empty": {
+    "title": "Правила не определены",
+    "description": "Здесь появятся правила и ограничения"
+  },
+  "status": {
+    "satisfied": "выполнено",
+    "unsatisfied": "не выполнено",
+    "unknown": "неизвестно",
+    "violated": "нарушено",
+    "waived": "отменено",
+    "not_applicable": "неприменимо",
+    "at_risk": "под риском"
+  },
+  "detail": {
+    "type": "Тип: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Создано: {{value}}"
+  }
+}

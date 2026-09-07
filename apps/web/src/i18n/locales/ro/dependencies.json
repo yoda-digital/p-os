@@ -1,0 +1,7 @@
+{
+  "title": "Graf de dependențe",
+  "empty": {
+    "title": "Nicio mutare",
+    "description": "Creează mutări pentru a vedea graful de dependențe"
+  }
+}

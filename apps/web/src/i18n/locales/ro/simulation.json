@@ -1,0 +1,31 @@
+{
+  "title": "Simulare",
+  "new_simulation": "Simulare nouă",
+  "intro": "Bifurcă starea cazului pentru a explora scenarii ipotetice fără a afecta adevărul canonic.",
+  "presets": {
+    "deadline": "Ce se întâmplă dacă termenul limită se mută la săptămâna viitoare?",
+    "unavailable": "Ce se întâmplă dacă o persoană cheie devine indisponibilă?",
+    "strategy_b": "Ce se întâmplă dacă alegem strategia B în loc?",
+    "budget": "Ce se întâmplă dacă bugetul se reduce cu 30%?"
+  },
+  "empty": {
+    "title": "Nicio simulare",
+    "description": "Creează o simulare pentru a explora scenarii ipotetice",
+    "action": "Creează simulare"
+  },
+  "card": {
+    "badge": "Simulare",
+    "changes_title": "Modificări ipotetice:",
+    "adopt": "Adoptă modificările"
+  },
+  "create": {
+    "title": "Creează simulare",
+    "title_label": "Titlu",
+    "title_placeholder": "Ce se întâmplă dacă...?",
+    "description_label": "Descriere",
+    "description_placeholder": "Descrie scenariul...",
+    "changes_label": "Modificări ipotetice (una pe linie)",
+    "changes_placeholder": "Termenul extins cu 2 săptămâni\nDezvoltatorul principal indisponibil",
+    "submit": "Creează"
+  }
+}

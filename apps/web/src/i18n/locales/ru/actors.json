@@ -1,0 +1,16 @@
+{
+  "title": "Участники и агенты",
+  "empty": {
+    "title": "Нет участников",
+    "description": "Здесь появятся участники и агенты"
+  },
+  "class": {
+    "human": "человек",
+    "ai_agent": "ИИ-агент",
+    "team": "команда",
+    "organization": "организация",
+    "external_authority": "внешний орган",
+    "software_service": "программный сервис",
+    "executor_runtime": "среда выполнения"
+  }
+}

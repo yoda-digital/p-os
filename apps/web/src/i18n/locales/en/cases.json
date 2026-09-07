@@ -1,0 +1,44 @@
+{
+  "list": {
+    "title": "Cases",
+    "subtitle": "Manage your processes and situations",
+    "new_case": "New Case",
+    "filters": {
+      "all": "all",
+      "open": "open",
+      "dormant": "dormant",
+      "closed": "closed",
+      "archived": "archived"
+    },
+    "empty": {
+      "title": "No cases found",
+      "description_all": "Create your first case to get started",
+      "description_filtered": "No {{filter}} cases",
+      "action": "Create Case"
+    }
+  },
+  "types": {
+    "general": "General",
+    "software": "Software Development",
+    "procurement": "Procurement / Tender",
+    "investigation": "Investigation",
+    "research": "Research",
+    "negotiation": "Negotiation / Sales",
+    "incident": "Incident Response",
+    "logistics": "Physical Logistics"
+  },
+  "create": {
+    "title": "Create Case",
+    "title_label": "Title",
+    "title_placeholder": "What is this case about?",
+    "description_label": "Description",
+    "description_placeholder": "Describe the situation...",
+    "type_label": "Type",
+    "intent_label": "Primary Intent",
+    "intent_placeholder": "What is this case trying to achieve?",
+    "submit": "Create Case"
+  },
+  "detail": {
+    "not_found": "Case not found"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "app_name": "Universal Process OS",
+  "nav": {
+    "cases": "Cazuri",
+    "all_cases": "Toate cazurile",
+    "views": "Vizualizări",
+    "settings": "Setări",
+    "admin": "Administrare",
+    "logout": "Ieșire",
+    "sign_out": "Ieșire din cont"
+  },
+  "nav_tabs": {
+    "kanban": "Kanban",
+    "attention": "Atenție",
+    "timeline": "Cronologie",
+    "dependencies": "Dependențe",
+    "evidence": "Dovezi",
+    "decisions": "Decizii",
+    "compliance": "Conformitate",
+    "actors": "Actori",
+    "resources": "Resurse",
+    "risk": "Risc",
+    "why": "DE CE",
+    "time_travel": "Călătorie în timp",
+    "simulation": "Simulare",
+    "intelligence": "Inteligență"
+  },
+  "actions": {
+    "create": "Creează",
+    "edit": "Editează",
+    "delete": "Șterge",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "close": "Închide",
+    "confirm": "Confirmă",
+    "submit": "Trimite",
+    "search": "Caută",
+    "filter": "Filtrează",
+    "refresh": "Reîncarcă",
+    "back": "Înapoi",
+    "next": "Următorul",
+    "previous": "Anterior",
+    "loading": "Se încarcă...",
+    "saving": "Se salvează...",
+    "no_results": "Niciun rezultat",
+    "error": "Eroare",
+    "success": "Succes",
+    "view_all": "Vezi toate",
+    "sign_in": "Conectare",
+    "sign_up": "Înregistrare",
+    "select": "Selectează",
+    "adopt_changes": "Adoptă modificările",
+    "ask": "Întreabă",
+    "send": "Trimite",
+    "attach": "Atașează",
+    "resolve": "Rezolvă"
+  },
+  "status": {
+    "open": "deschis",
+    "closed": "închis",
+    "dormant": "inactiv",
+    "archived": "arhivat",
+    "void": "anulat",
+    "active": "activ",
+    "paused": "în pauză",
+    "running": "în execuție",
+    "not_started": "neînceput",
+    "finished": "finalizat",
+    "satisfied": "satisfăcut",
+    "unsatisfied": "nesatisfăcut",
+    "queued": "în așteptare",
+    "starting": "pornește"
+  },
+  "priority": {
+    "critical": "Critic",
+    "high": "Înalt",
+    "medium": "Mediu",
+    "low": "Scăzut"
+  },
+  "language": {
+    "ro": "Română",
+    "ru": "Русский",
+    "en": "English",
+    "interface": "Limba interfeței",
+    "content": "Limba conținutului"
+  },
+  "time": {
+    "just_now": "chiar acum",
+    "minutes_ago": "acum {{count}} minute",
+    "hours_ago": "acum {{count}} ore",
+    "days_ago": "acum {{count}} zile"
+  },
+  "user": {
+    "profile": "Profil",
+    "organization": "Organizație",
+    "switch_org": "Schimbă organizația",
+    "default_name": "Utilizator"
+  },
+  "errors": {
+    "network": "Eroare de rețea",
+    "unauthorized": "Neautorizat",
+    "forbidden": "Acces interzis",
+    "not_found": "Nu a fost găsit",
+    "server_error": "Eroare de server",
+    "validation": "Date invalide"
+  }
+}

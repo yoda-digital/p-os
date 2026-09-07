@@ -1,0 +1,19 @@
+{
+  "title": "Очередь внимания",
+  "stats": {
+    "critical": "Критический",
+    "high": "Высокий",
+    "medium": "Средний",
+    "low": "Низкий"
+  },
+  "empty": {
+    "title": "Всё в порядке",
+    "description": "Ни один элемент не требует вашего внимания"
+  },
+  "item": {
+    "action_required": "Требуется действие",
+    "blocking_impact": "Блокирует {{count}} ход",
+    "blocking_impact_plural": "Блокирует {{count}} ходов",
+    "view": "Открыть"
+  }
+}

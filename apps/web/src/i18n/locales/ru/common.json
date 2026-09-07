@@ -1,0 +1,107 @@
+{
+  "app_name": "Universal Process OS",
+  "nav": {
+    "cases": "Дела",
+    "all_cases": "Все дела",
+    "views": "Разделы",
+    "settings": "Настройки",
+    "admin": "Администрирование",
+    "logout": "Выход",
+    "sign_out": "Выйти из аккаунта"
+  },
+  "nav_tabs": {
+    "kanban": "Канбан",
+    "attention": "Внимание",
+    "timeline": "Хронология",
+    "dependencies": "Зависимости",
+    "evidence": "Доказательства",
+    "decisions": "Решения",
+    "compliance": "Соответствие",
+    "actors": "Участники",
+    "resources": "Ресурсы",
+    "risk": "Риски",
+    "why": "ПОЧЕМУ",
+    "time_travel": "Путешествие во времени",
+    "simulation": "Симуляция",
+    "intelligence": "Аналитика"
+  },
+  "actions": {
+    "create": "Создать",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "close": "Закрыть",
+    "confirm": "Подтвердить",
+    "submit": "Отправить",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "refresh": "Обновить",
+    "back": "Назад",
+    "next": "Далее",
+    "previous": "Назад",
+    "loading": "Загрузка...",
+    "saving": "Сохранение...",
+    "no_results": "Нет результатов",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "view_all": "Показать все",
+    "sign_in": "Войти",
+    "sign_up": "Регистрация",
+    "select": "Выбрать",
+    "adopt_changes": "Принять изменения",
+    "ask": "Спросить",
+    "send": "Отправить",
+    "attach": "Прикрепить",
+    "resolve": "Разрешить"
+  },
+  "status": {
+    "open": "открыто",
+    "closed": "закрыто",
+    "dormant": "неактивно",
+    "archived": "в архиве",
+    "void": "аннулировано",
+    "active": "активно",
+    "paused": "на паузе",
+    "running": "выполняется",
+    "not_started": "не начато",
+    "finished": "завершено",
+    "satisfied": "выполнено",
+    "unsatisfied": "не выполнено",
+    "queued": "в очереди",
+    "starting": "запускается"
+  },
+  "priority": {
+    "critical": "Критический",
+    "high": "Высокий",
+    "medium": "Средний",
+    "low": "Низкий"
+  },
+  "language": {
+    "ro": "Română",
+    "ru": "Русский",
+    "en": "English",
+    "interface": "Язык интерфейса",
+    "content": "Язык контента"
+  },
+  "time": {
+    "just_now": "только что",
+    "minutes_ago": "{{count}} мин. назад",
+    "hours_ago": "{{count}} ч. назад",
+    "days_ago": "{{count}} дн. назад"
+  },
+  "user": {
+    "profile": "Профиль",
+    "organization": "Организация",
+    "switch_org": "Сменить организацию",
+    "default_name": "Пользователь"
+  },
+  "errors": {
+    "network": "Ошибка сети",
+    "unauthorized": "Не авторизовано",
+    "forbidden": "Доступ запрещён",
+    "not_found": "Не найдено",
+    "server_error": "Ошибка сервера",
+    "validation": "Некорректные данные"
+  }
+}

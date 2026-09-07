@@ -1,0 +1,18 @@
+{
+  "title": "WHY Explorer",
+  "intro": "Ask why any state exists. The system traces the causal chain through process history.",
+  "presets": {
+    "blocked": "WHY is this move blocked?",
+    "not_ready": "WHY is this move not ready?",
+    "attention": "WHY does this require my attention?",
+    "stale_evidence": "WHY is evidence stale?",
+    "deferred": "WHY was this decision deferred?"
+  },
+  "input_placeholder": "WHY is [move/state/decision] in [condition]?",
+  "ask": "Ask",
+  "error_fallback": "Failed to get explanation",
+  "result": {
+    "causal_chain": "Causal Chain",
+    "explanation": "Explanation"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Risk Overview",
+  "at_risk_count": "{{count}} at risk",
+  "levels": {
+    "critical": "critical",
+    "high": "high",
+    "medium": "medium",
+    "low": "low",
+    "none": "none"
+  },
+  "section_title": "{{level}} Risk ({{count}})",
+  "empty": {
+    "title": "No moves",
+    "description": "Create moves to see risk assessment"
+  }
+}

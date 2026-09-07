@@ -1,0 +1,44 @@
+{
+  "list": {
+    "title": "Дела",
+    "subtitle": "Управляйте своими процессами и ситуациями",
+    "new_case": "Новое дело",
+    "filters": {
+      "all": "все",
+      "open": "открыто",
+      "dormant": "неактивно",
+      "closed": "закрыто",
+      "archived": "в архиве"
+    },
+    "empty": {
+      "title": "Дела не найдены",
+      "description_all": "Создайте своё первое дело, чтобы начать",
+      "description_filtered": "Нет дел со статусом «{{filter}}»",
+      "action": "Создать дело"
+    }
+  },
+  "types": {
+    "general": "Общее",
+    "software": "Разработка ПО",
+    "procurement": "Закупки / Тендер",
+    "investigation": "Расследование",
+    "research": "Исследование",
+    "negotiation": "Переговоры / Продажи",
+    "incident": "Реагирование на инцидент",
+    "logistics": "Физическая логистика"
+  },
+  "create": {
+    "title": "Создать дело",
+    "title_label": "Название",
+    "title_placeholder": "О чём это дело?",
+    "description_label": "Описание",
+    "description_placeholder": "Опишите ситуацию...",
+    "type_label": "Тип",
+    "intent_label": "Основная цель",
+    "intent_placeholder": "Чего должно достичь это дело?",
+    "submit": "Создать дело"
+  },
+  "detail": {
+    "not_found": "Дело не найдено"
+  }
+}
