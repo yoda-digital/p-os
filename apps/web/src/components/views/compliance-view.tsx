@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Badge } from '../common/badge';
 import { FullPageSpinner } from '../common/spinner';
@@ -13,6 +14,7 @@ const statusVariant: Record<string, string> = {
 };
 
 export function ComplianceView() {
+  const { t, i18n } = useTranslation('compliance');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: rules, isLoading } = useQuery({
     queryKey: ['rules', caseId],
@@ -23,7 +25,7 @@ export function ComplianceView() {
 
   if (isLoading) return <FullPageSpinner />;
   if (!rules || rules.length === 0) {
-    return <EmptyState icon={<Shield className="w-12 h-12" />} title="No rules defined" description="Rules and constraints will appear here" />;
+    return <EmptyState icon={<Shield className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />;
   }
 
   // Group by type
@@ -42,7 +44,7 @@ export function ComplianceView() {
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Shield className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Rule Compliance</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       <div className="space-y-4">
@@ -63,14 +65,14 @@ export function ComplianceView() {
                       <span className="text-sm text-slate-700 dark:text-slate-300">{rule.statement}</span>
                     </div>
                     <Badge variant={(statusVariant[rule.evaluation_status] || 'neutral') as any}>
-                      {rule.evaluation_status}
+                      {t(`status.${rule.evaluation_status}`, { defaultValue: rule.evaluation_status })}
                     </Badge>
                   </button>
                   {expanded.has(rule.id) && (
                     <div className="px-4 pb-3 pl-11 text-xs text-slate-500 dark:text-slate-400 space-y-1">
-                      <p>Type: {rule.type}</p>
-                      <p>ID: {rule.id}</p>
-                      <p>Created: {new Date(rule.created_at).toLocaleString()}</p>
+                      <p>{t('detail.type', { value: rule.type })}</p>
+                      <p>{t('detail.id', { value: rule.id })}</p>
+                      <p>{t('detail.created', { value: new Date(rule.created_at).toLocaleString(i18n.language) })}</p>
                     </div>
                   )}
                 </div>

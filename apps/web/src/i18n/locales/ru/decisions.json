@@ -1,0 +1,38 @@
+{
+  "title": "Решения",
+  "new_decision": "Новое решение",
+  "pending": "Ожидают ({{count}})",
+  "resolved": "Приняты ({{count}})",
+  "state": {
+    "draft": "черновик",
+    "requested": "запрошено",
+    "in_review": "на рассмотрении",
+    "decided": "решено",
+    "deferred": "отложено",
+    "superseded": "заменено",
+    "cancelled": "отменено"
+  },
+  "select": "Выбрать",
+  "ai_confidence": "Уверенность ИИ: {{value}}%",
+  "blocking_moves": "Блокирует {{count}} ход(ов)",
+  "empty": {
+    "title": "Нет решений",
+    "description": "Решения появятся, когда процессу потребуется человеческое суждение",
+    "action": "Создать решение"
+  },
+  "create": {
+    "title": "Создать решение",
+    "question_label": "Вопрос",
+    "question_placeholder": "Что нужно решить?",
+    "context_label": "Контекст",
+    "context_placeholder": "Соответствующий контекст...",
+    "submit": "Создать"
+  },
+  "resolve": {
+    "title": "Принять решение",
+    "selected": "Выбрано:",
+    "rationale_label": "Обоснование",
+    "rationale_placeholder": "Почему этот вариант?",
+    "submit": "Подтвердить"
+  }
+}

@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMoves } from '../../hooks/use-moves';
 import { FullPageSpinner } from '../common/spinner';
 import { EmptyState } from '../common/empty-state';
@@ -23,6 +24,7 @@ const outcomeColors: Record<string, string> = {
 };
 
 export function DependencyView() {
+  const { t } = useTranslation('dependencies');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: moves, isLoading } = useMoves(caseId);
   const { openMoveDetail } = useCaseStore();
@@ -75,14 +77,14 @@ export function DependencyView() {
   if (isLoading) return <FullPageSpinner />;
 
   if (!graph || graph.moves.length === 0) {
-    return <EmptyState icon={<GitBranch className="w-12 h-12" />} title="No moves" description="Create moves to see the dependency graph" />;
+    return <EmptyState icon={<GitBranch className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />;
   }
 
   return (
     <div className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <GitBranch className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Dependency Graph</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       <div className="overflow-auto bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">

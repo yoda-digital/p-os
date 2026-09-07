@@ -1,0 +1,51 @@
+{
+  "panel": {
+    "title": "Ghidează execuția",
+    "type_label": "Tip de ghidare",
+    "instruction_label": "Instrucțiune",
+    "instruction_placeholder": "Ce ar trebui să facă executorul diferit?",
+    "send": "Trimite",
+    "sent": "Trimis"
+  },
+  "class": {
+    "advisory": "Consultativ — Sugestie",
+    "constraint": "Constrângere — Trebuie urmată",
+    "redirect": "Redirecționare — Schimbă direcția",
+    "pause": "Pauză — Oprește temporar",
+    "hard_stop": "Oprire totală — Termină acum",
+    "fork": "Bifurcare — Împarte abordarea",
+    "reassign": "Realocare — Schimbă executorul"
+  },
+  "delivery_state": {
+    "issued": "emisă",
+    "delivered_to_edge": "livrată la edge",
+    "delivered_to_executor": "livrată la executor",
+    "acknowledged": "confirmată",
+    "applied": "aplicată"
+  },
+  "drawer": {
+    "title": "Detalii mutare",
+    "not_found": "Mutare negăsită",
+    "state_vector": "Vector de stare",
+    "readiness": "Pregătire",
+    "execution": "Execuție",
+    "verification": "Verificare",
+    "attention": "Atenție",
+    "risk": "Risc",
+    "temporal": "Temporal",
+    "outcome": "Rezultat",
+    "actions": "Acțiuni",
+    "action_activate": "Activează",
+    "action_pause": "Pauză",
+    "action_resume": "Reia",
+    "action_cancel": "Anulează",
+    "action_satisfy": "Satisface",
+    "dependencies": "Dependențe ({{count}})",
+    "attempts": "Încercări ({{count}})",
+    "no_attempts": "Nicio încercare încă",
+    "model": "Model: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Creat: {{value}}",
+    "revision": "Revizie: {{value}}"
+  }
+}

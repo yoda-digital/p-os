@@ -1,0 +1,16 @@
+{
+  "title": "Обзор рисков",
+  "at_risk_count": "{{count}} под риском",
+  "levels": {
+    "critical": "критический",
+    "high": "высокий",
+    "medium": "средний",
+    "low": "низкий",
+    "none": "нет"
+  },
+  "section_title": "Риск: {{level}} ({{count}})",
+  "empty": {
+    "title": "Нет ходов",
+    "description": "Создайте ходы, чтобы увидеть оценку риска"
+  }
+}

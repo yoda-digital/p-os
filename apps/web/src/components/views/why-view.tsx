@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, type WhyExplanation } from '../../lib/api';
 import { Button } from '../common/button';
 import { Textarea } from '../common/textarea';
@@ -7,6 +8,7 @@ import { Badge } from '../common/badge';
 import { HelpCircle, ArrowDown, Search } from 'lucide-react';
 
 export function WhyView() {
+  const { t, i18n } = useTranslation('why');
   const { caseId } = useParams<{ caseId: string }>();
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,29 +23,29 @@ export function WhyView() {
       const res = await api.explainWhy(caseId, question);
       setResult(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get explanation');
+      setError(err instanceof Error ? err.message : t('error_fallback'));
     } finally {
       setLoading(false);
     }
   };
 
   const presetQuestions = [
-    'WHY is this move blocked?',
-    'WHY is this move not ready?',
-    'WHY does this require my attention?',
-    'WHY is evidence stale?',
-    'WHY was this decision deferred?',
+    t('presets.blocked'),
+    t('presets.not_ready'),
+    t('presets.attention'),
+    t('presets.stale_evidence'),
+    t('presets.deferred'),
   ];
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <HelpCircle className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">WHY Explorer</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        Ask why any state exists. The system traces the causal chain through process history.
+        {t('intro')}
       </p>
 
       {/* Preset questions */}
@@ -65,12 +67,12 @@ export function WhyView() {
           <Textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="WHY is [move/state/decision] in [condition]?"
+            placeholder={t('input_placeholder')}
             className="min-h-[60px]"
           />
         </div>
         <Button onClick={handleAsk} loading={loading} disabled={!question.trim()} className="self-end">
-          <Search className="w-4 h-4" /> Ask
+          <Search className="w-4 h-4" /> {t('ask')}
         </Button>
       </div>
 
@@ -88,7 +90,7 @@ export function WhyView() {
           {/* Causal Chain */}
           {result.causal_chain.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-3">Causal Chain</h4>
+              <h4 className="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-3">{t('result.causal_chain')}</h4>
               <div className="space-y-2">
                 {result.causal_chain.map((node, i) => (
                   <div key={node.id}>
@@ -100,7 +102,7 @@ export function WhyView() {
                       <div className="flex-1 pb-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="info">{node.type}</Badge>
-                          <span className="text-xs text-slate-400">{new Date(node.timestamp).toLocaleString()}</span>
+                          <span className="text-xs text-slate-400">{new Date(node.timestamp).toLocaleString(i18n.language)}</span>
                         </div>
                         <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">{node.description}</p>
                       </div>
@@ -113,7 +115,7 @@ export function WhyView() {
 
           {/* Explanation */}
           <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-            <h4 className="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">Explanation</h4>
+            <h4 className="text-xs font-semibold uppercase text-slate-500 tracking-wider mb-2">{t('result.explanation')}</h4>
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{result.explanation}</p>
           </div>
         </div>

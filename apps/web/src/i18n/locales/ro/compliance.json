@@ -1,0 +1,21 @@
+{
+  "title": "Conformitate reguli",
+  "empty": {
+    "title": "Nicio regulă definită",
+    "description": "Regulile și constrângerile vor apărea aici"
+  },
+  "status": {
+    "satisfied": "satisfăcută",
+    "unsatisfied": "nesatisfăcută",
+    "unknown": "necunoscută",
+    "violated": "încălcată",
+    "waived": "renunțată",
+    "not_applicable": "neaplicabilă",
+    "at_risk": "în risc"
+  },
+  "detail": {
+    "type": "Tip: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Creat: {{value}}"
+  }
+}

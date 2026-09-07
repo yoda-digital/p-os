@@ -1,0 +1,38 @@
+{
+  "title": "Decizii",
+  "new_decision": "Decizie nouă",
+  "pending": "În așteptare ({{count}})",
+  "resolved": "Rezolvate ({{count}})",
+  "state": {
+    "draft": "ciornă",
+    "requested": "solicitată",
+    "in_review": "în evaluare",
+    "decided": "decisă",
+    "deferred": "amânată",
+    "superseded": "înlocuită",
+    "cancelled": "anulată"
+  },
+  "select": "Selectează",
+  "ai_confidence": "Încredere AI: {{value}}%",
+  "blocking_moves": "Blochează {{count}} mutare(mutări)",
+  "empty": {
+    "title": "Nicio decizie",
+    "description": "Deciziile vor apărea când procesul necesită judecată umană",
+    "action": "Creează decizie"
+  },
+  "create": {
+    "title": "Creează decizie",
+    "question_label": "Întrebare",
+    "question_placeholder": "Ce trebuie decis?",
+    "context_label": "Context",
+    "context_placeholder": "Context relevant...",
+    "submit": "Creează"
+  },
+  "resolve": {
+    "title": "Rezolvă decizie",
+    "selected": "Selectat:",
+    "rationale_label": "Motivație",
+    "rationale_placeholder": "De ce această opțiune?",
+    "submit": "Rezolvă"
+  }
+}

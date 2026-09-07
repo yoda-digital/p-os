@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTimeline } from '../../hooks/use-timeline';
 import { FullPageSpinner } from '../common/spinner';
 import { EmptyState } from '../common/empty-state';
@@ -26,6 +27,7 @@ const eventVariant: Record<string, string> = {
 };
 
 export function TimelineView() {
+  const { t, i18n } = useTranslation('timeline');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: entries, isLoading } = useTimeline(caseId);
   const [filter, setFilter] = useState('all');
@@ -49,7 +51,7 @@ export function TimelineView() {
     <div className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Timeline</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       {/* Filter */}
@@ -58,21 +60,21 @@ export function TimelineView() {
           onClick={() => setFilter('all')}
           className={`px-3 py-1 text-xs rounded-full ${filter === 'all' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
         >
-          All
+          {t('filter.all')}
         </button>
-        {allTypes.map(t => (
+        {allTypes.map(evtType => (
           <button
-            key={t}
-            onClick={() => setFilter(t)}
-            className={`px-3 py-1 text-xs rounded-full ${filter === t ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+            key={evtType}
+            onClick={() => setFilter(evtType)}
+            className={`px-3 py-1 text-xs rounded-full ${filter === evtType ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
           >
-            {t}
+            {t(`event_types.${evtType}`, { defaultValue: evtType })}
           </button>
         ))}
       </div>
 
       {(!filtered || filtered.length === 0) ? (
-        <EmptyState icon={<Clock className="w-12 h-12" />} title="No events yet" description="Events will appear here as the case evolves" />
+        <EmptyState icon={<Clock className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />
       ) : (
         <div className="relative">
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
@@ -93,10 +95,10 @@ export function TimelineView() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Badge variant={variant as any}>{entry.type}</Badge>
+                        <Badge variant={variant as any}>{t(`event_types.${entry.type}`, { defaultValue: entry.type })}</Badge>
                         <span className="text-sm text-slate-700 dark:text-slate-300">{entry.summary}</span>
                       </div>
-                      <span className="text-xs text-slate-400">{new Date(entry.occurred_at).toLocaleString()}</span>
+                      <span className="text-xs text-slate-400">{new Date(entry.occurred_at).toLocaleString(i18n.language)}</span>
                     </div>
                     {isExpanded && Object.keys(entry.details).length > 0 && (
                       <pre className="mt-2 text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 rounded p-2 overflow-x-auto">

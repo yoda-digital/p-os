@@ -1,0 +1,113 @@
+{
+  "nav": {
+    "profile": "Profil",
+    "organization": "Organizație",
+    "teams": "Echipe",
+    "members": "Membri",
+    "invitations": "Invitații",
+    "policies": "Politici"
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Setările contului tău personal",
+    "avatar_url": "URL avatar",
+    "display_name": "Nume afișat",
+    "email": "Email",
+    "language": "Limba interfeței",
+    "timezone": "Fus orar",
+    "save": "Salvează modificările",
+    "saved": "Salvat"
+  },
+  "org": {
+    "title": "Setări organizație",
+    "subtitle": "Gestionează structura departamentală a organizației tale",
+    "new_unit": "Unitate nouă",
+    "edit_unit": "Editează unitatea",
+    "unit_name": "Nume",
+    "unit_description": "Descriere",
+    "parent_unit": "Unitate părinte",
+    "no_parent": "Niciuna (nivel superior)",
+    "empty": {
+      "title": "Nicio unitate organizațională",
+      "description": "Creează departamente sau unități pentru a structura organizația"
+    }
+  },
+  "teams": {
+    "title": "Echipe",
+    "subtitle": "Grupuri interfuncționale care pot fi alocate cazurilor",
+    "new": "Echipă nouă",
+    "name": "Nume",
+    "description": "Descriere",
+    "default_case_role": "Rol implicit pe caz",
+    "members": "Membri",
+    "member_count": "{{count}} membri",
+    "select_member": "Selectează un membru…",
+    "assign_case": "Alocă unui caz",
+    "select_case": "Selectează un caz…",
+    "assign": "Alocă",
+    "empty": {
+      "title": "Nicio echipă",
+      "description": "Creează prima echipă pentru a organiza membrii"
+    }
+  },
+  "members": {
+    "title": "Membri",
+    "subtitle": "Membrii organizației și rolurile lor",
+    "invite": "Invită membru",
+    "invite_email": "Email",
+    "send_invite": "Trimite invitația",
+    "name": "Nume",
+    "email": "Email",
+    "status": "Stare",
+    "teams": "Echipe",
+    "role": "Rol",
+    "empty": {
+      "title": "Niciun membru",
+      "description": "Invită persoane să se alăture organizației tale"
+    }
+  },
+  "invitations": {
+    "title": "Invitații",
+    "subtitle": "Urmărește și gestionează invitațiile trimise de organizația ta",
+    "email": "Email",
+    "role": "Rol",
+    "status": "Stare",
+    "invited_by": "Invitat de",
+    "expires": "Expiră",
+    "actions": "Acțiuni",
+    "resend": "Retrimite",
+    "revoke": "Revocă",
+    "filters": {
+      "all": "Toate",
+      "pending": "În așteptare",
+      "accepted": "Acceptate",
+      "revoked": "Revocate",
+      "expired": "Expirate"
+    },
+    "empty": {
+      "title": "Nicio invitație",
+      "description": "Invitațiile trimise vor apărea aici"
+    }
+  },
+  "policies": {
+    "title": "Politici organizație",
+    "subtitle": "Reguli de acces granulare pentru organizația ta",
+    "new": "Politică nouă",
+    "edit": "Editează politica",
+    "name": "Nume",
+    "description": "Descriere",
+    "effect": "Efect",
+    "scope": "Domeniu",
+    "allow": "Permite",
+    "deny": "Interzice",
+    "priority": "Prioritate",
+    "actions": "Acțiuni (separate prin virgulă)",
+    "subject": "Condiții subiect",
+    "resource": "Condiții resursă",
+    "inactive": "inactivă",
+    "empty": {
+      "title": "Nicio politică",
+      "description": "Creează o politică pentru a personaliza regulile de acces"
+    }
+  }
+}

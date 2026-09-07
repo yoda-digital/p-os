@@ -1,0 +1,29 @@
+{
+  "title": "Cronologie",
+  "filter": {
+    "all": "Toate"
+  },
+  "empty": {
+    "title": "Niciun eveniment încă",
+    "description": "Evenimentele vor apărea aici pe măsură ce cazul evoluează"
+  },
+  "event_types": {
+    "CaseCreated": "Caz creat",
+    "CaseUpdated": "Caz actualizat",
+    "CaseClosed": "Caz închis",
+    "MoveCreated": "Mutare creată",
+    "MoveActivated": "Mutare activată",
+    "MovePaused": "Mutare pusă pe pauză",
+    "MoveResumed": "Mutare reluată",
+    "MoveCancelled": "Mutare anulată",
+    "MoveSatisfied": "Mutare finalizată",
+    "AttemptStarted": "Încercare începută",
+    "AttemptSucceeded": "Încercare reușită",
+    "AttemptFailed": "Încercare eșuată",
+    "EvidenceAttached": "Dovadă atașată",
+    "DecisionCreated": "Decizie creată",
+    "DecisionResolved": "Decizie rezolvată",
+    "SteeringIssued": "Ghidare emisă",
+    "RuleEvaluated": "Regulă evaluată"
+  }
+}

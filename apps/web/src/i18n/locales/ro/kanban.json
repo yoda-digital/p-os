@@ -1,0 +1,75 @@
+{
+  "board": {
+    "title": "Panou Kanban",
+    "new_move": "Mutare nouă"
+  },
+  "empty": {
+    "title": "Nicio mutare încă",
+    "description": "Creează prima ta mutare pentru a începe",
+    "action": "Creează mutare"
+  },
+  "columns": {
+    "BACKLOG": "Restanțe",
+    "READY": "Pregătit",
+    "ACTIVE": "Activ",
+    "WAITING": "În așteptare",
+    "NEEDS_INPUT": "Necesită informații",
+    "VERIFY": "Verificare",
+    "DONE": "Finalizat"
+  },
+  "class": {
+    "ACT": "Acțiune",
+    "OBSERVE": "Observare",
+    "ASK": "Întrebare",
+    "WAIT": "Așteptare",
+    "DECIDE": "Decizie",
+    "COMMUNICATE": "Comunicare",
+    "VERIFY": "Verificare",
+    "DELEGATE": "Delegare",
+    "ESCALATE": "Escaladare",
+    "APPROVE": "Aprobare",
+    "REJECT": "Respingere",
+    "STOP": "Oprire"
+  },
+  "class_full": {
+    "ACT": "Acțiune — Execută o sarcină",
+    "OBSERVE": "Observare — Colectează informații",
+    "ASK": "Întrebare — Solicită informații",
+    "WAIT": "Așteptare — Așteaptă un eveniment extern",
+    "DECIDE": "Decizie — Ia o decizie",
+    "COMMUNICATE": "Comunicare — Trimite informații",
+    "VERIFY": "Verificare — Verifică corectitudinea",
+    "DELEGATE": "Delegare — Atribuie altcuiva",
+    "ESCALATE": "Escaladare — Ridică urgența",
+    "APPROVE": "Aprobare — Acordă permisiunea",
+    "REJECT": "Respingere — Refuză cererea",
+    "STOP": "Oprire — Oprește execuția"
+  },
+  "card": {
+    "assigned": "atribuit(e)",
+    "evidence": "dovezi",
+    "dependency": "dependență",
+    "dependencies": "dependențe"
+  },
+  "create_move": {
+    "title": "Creează mutare",
+    "title_label": "Titlu",
+    "title_placeholder": "Ce trebuie să se întâmple?",
+    "type_label": "Tip",
+    "priority_label": "Prioritate",
+    "objective_label": "Obiectiv",
+    "objective_placeholder": "Descrie obiectivul...",
+    "risk_label": "Risc",
+    "deadline_label": "Termen limită",
+    "constraints_label": "Constrângeri (una pe linie)",
+    "constraints_placeholder": "Nu modifica API-ul public\nTrebuie să treacă toate testele",
+    "submit": "Creează mutare"
+  },
+  "risk": {
+    "none": "Niciun risc",
+    "low": "Scăzut",
+    "medium": "Mediu",
+    "high": "Înalt",
+    "critical": "Critic"
+  }
+}

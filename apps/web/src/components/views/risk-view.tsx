@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useMoves } from '../../hooks/use-moves';
 import { FullPageSpinner } from '../common/spinner';
 import { EmptyState } from '../common/empty-state';
@@ -15,6 +16,8 @@ const riskVariant: Record<string, string> = {
 };
 
 export function RiskView() {
+  const { t } = useTranslation('risk');
+  const { t: tCommon } = useTranslation('common');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: moves, isLoading } = useMoves(caseId);
   const { openMoveDetail } = useCaseStore();
@@ -29,16 +32,16 @@ export function RiskView() {
   const totalRisked = byRisk.filter(r => r.level !== 'none').reduce((n, r) => n + r.moves.length, 0);
 
   if (!moves || moves.length === 0) {
-    return <EmptyState icon={<AlertTriangle className="w-12 h-12" />} title="No moves" description="Create moves to see risk assessment" />;
+    return <EmptyState icon={<AlertTriangle className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />;
   }
 
   return (
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <AlertTriangle className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Risk Overview</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
         {totalRisked > 0 && (
-          <Badge variant="danger">{totalRisked} at risk</Badge>
+          <Badge variant="danger">{t('at_risk_count', { count: totalRisked })}</Badge>
         )}
       </div>
 
@@ -50,7 +53,7 @@ export function RiskView() {
             <div key={level} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
               <div className={`w-4 h-4 rounded-full mx-auto mb-2 ${riskColors[level]}`} />
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{count}</p>
-              <p className="text-xs text-slate-500 capitalize">{level}</p>
+              <p className="text-xs text-slate-500">{t(`levels.${level}`)}</p>
             </div>
           );
         })}
@@ -62,7 +65,7 @@ export function RiskView() {
           <div key={level}>
             <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${riskColors[level]}`} />
-              {level} Risk ({riskMoves.length})
+              {t('section_title', { level: t(`levels.${level}`), count: riskMoves.length })}
             </h3>
             <div className="space-y-2">
               {riskMoves.map(m => (
@@ -74,8 +77,8 @@ export function RiskView() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-slate-900 dark:text-white">{m.title}</span>
                     <div className="flex items-center gap-2">
-                      <Badge variant={(riskVariant[m.risk] || 'neutral') as any}>{m.risk}</Badge>
-                      <Badge variant="neutral">{m.execution}</Badge>
+                      <Badge variant={(riskVariant[m.risk] || 'neutral') as any}>{t(`levels.${m.risk}`, { defaultValue: m.risk })}</Badge>
+                      <Badge variant="neutral">{tCommon(`status.${m.execution}`, { defaultValue: m.execution })}</Badge>
                     </div>
                   </div>
                 </button>

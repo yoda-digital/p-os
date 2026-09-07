@@ -1,0 +1,21 @@
+{
+  "title": "Rule Compliance",
+  "empty": {
+    "title": "No rules defined",
+    "description": "Rules and constraints will appear here"
+  },
+  "status": {
+    "satisfied": "satisfied",
+    "unsatisfied": "unsatisfied",
+    "unknown": "unknown",
+    "violated": "violated",
+    "waived": "waived",
+    "not_applicable": "not applicable",
+    "at_risk": "at risk"
+  },
+  "detail": {
+    "type": "Type: {{value}}",
+    "id": "ID: {{value}}",
+    "created": "Created: {{value}}"
+  }
+}

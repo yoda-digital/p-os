@@ -1,0 +1,16 @@
+{
+  "title": "Actors & Agents",
+  "empty": {
+    "title": "No actors",
+    "description": "Actors and agents will appear here"
+  },
+  "class": {
+    "human": "human",
+    "ai_agent": "ai agent",
+    "team": "team",
+    "organization": "organization",
+    "external_authority": "external authority",
+    "software_service": "software service",
+    "executor_runtime": "executor runtime"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "title": "Explorator DE CE",
+  "intro": "Întreabă de ce există o anumită stare. Sistemul urmărește lanțul cauzal prin istoricul procesului.",
+  "presets": {
+    "blocked": "DE CE este blocată această mutare?",
+    "not_ready": "DE CE nu este pregătită această mutare?",
+    "attention": "DE CE necesită aceasta atenția mea?",
+    "stale_evidence": "DE CE este dovada expirată?",
+    "deferred": "DE CE a fost amânată această decizie?"
+  },
+  "input_placeholder": "DE CE este [mutare/stare/decizie] în [condiție]?",
+  "ask": "Întreabă",
+  "error_fallback": "Nu s-a putut obține explicația",
+  "result": {
+    "causal_chain": "Lanț cauzal",
+    "explanation": "Explicație"
+  }
+}

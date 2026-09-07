@@ -1,0 +1,44 @@
+{
+  "list": {
+    "title": "Cazuri",
+    "subtitle": "Gestionează procesele și situațiile",
+    "new_case": "Caz nou",
+    "filters": {
+      "all": "toate",
+      "open": "deschis",
+      "dormant": "inactiv",
+      "closed": "închis",
+      "archived": "arhivat"
+    },
+    "empty": {
+      "title": "Niciun caz găsit",
+      "description_all": "Creează primul tău caz pentru a începe",
+      "description_filtered": "Niciun caz {{filter}}",
+      "action": "Creează caz"
+    }
+  },
+  "types": {
+    "general": "General",
+    "software": "Dezvoltare software",
+    "procurement": "Achiziții / Licitație",
+    "investigation": "Investigație",
+    "research": "Cercetare",
+    "negotiation": "Negociere / Vânzări",
+    "incident": "Răspuns la incident",
+    "logistics": "Logistică fizică"
+  },
+  "create": {
+    "title": "Creează caz",
+    "title_label": "Titlu",
+    "title_placeholder": "Despre ce este acest caz?",
+    "description_label": "Descriere",
+    "description_placeholder": "Descrie situația...",
+    "type_label": "Tip",
+    "intent_label": "Intenție principală",
+    "intent_placeholder": "Ce încearcă acest caz să realizeze?",
+    "submit": "Creează caz"
+  },
+  "detail": {
+    "not_found": "Caz negăsit"
+  }
+}

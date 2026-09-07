@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAttention } from '../../hooks/use-attention';
 import { Badge } from '../common/badge';
 import { FullPageSpinner } from '../common/spinner';
@@ -13,6 +14,7 @@ const priorityConfig: Record<string, { variant: string; icon: string }> = {
 };
 
 export function AttentionView() {
+  const { t, i18n } = useTranslation('attention');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: items, isLoading } = useAttention(caseId);
 
@@ -33,7 +35,7 @@ export function AttentionView() {
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Bell className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Attention Queue</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       {/* Stats */}
@@ -43,7 +45,7 @@ export function AttentionView() {
           return (
             <div key={p} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-center">
               <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats[p]}</p>
-              <p className="text-xs text-slate-500 capitalize">{cfg.icon} {p}</p>
+              <p className="text-xs text-slate-500">{cfg.icon} {t(`stats.${p}`)}</p>
             </div>
           );
         })}
@@ -52,8 +54,8 @@ export function AttentionView() {
       {unresolved.length === 0 ? (
         <EmptyState
           icon={<Bell className="w-12 h-12" />}
-          title="All clear"
-          description="No attention items require your input"
+          title={t('empty.title')}
+          description={t('empty.description')}
         />
       ) : (
         <div className="space-y-3">
@@ -64,21 +66,25 @@ export function AttentionView() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge variant={cfg.variant as any} dot>{item.priority}</Badge>
+                      <Badge variant={cfg.variant as any} dot>{t(`stats.${item.priority}`, { defaultValue: item.priority })}</Badge>
                       {item.deadline && (
                         <span className="text-xs text-slate-400 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {new Date(item.deadline).toLocaleDateString()}
+                          {new Date(item.deadline).toLocaleDateString(i18n.language)}
                         </span>
                       )}
                     </div>
                     <p className="text-sm font-medium text-slate-900 dark:text-white">{item.reason}</p>
                     {item.action_required && (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Action: {item.action_required}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('item.action_required')}: {item.action_required}</p>
                     )}
                     {item.blocking_impact > 0 && (
                       <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> Blocking {item.blocking_impact} move{item.blocking_impact > 1 ? 's' : ''}
+                        <AlertTriangle className="w-3 h-3" />
+                        {' '}
+                        {item.blocking_impact > 1
+                          ? t('item.blocking_impact_plural', { count: item.blocking_impact })
+                          : t('item.blocking_impact', { count: item.blocking_impact })}
                       </p>
                     )}
                   </div>
@@ -87,7 +93,7 @@ export function AttentionView() {
                       to={`/cases/${caseId}/kanban`}
                       className="text-xs text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
                     >
-                      View <ArrowRight className="w-3 h-3" />
+                      {t('item.view')} <ArrowRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>

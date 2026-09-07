@@ -1,0 +1,16 @@
+{
+  "title": "Prezentare risc",
+  "at_risk_count": "{{count}} în risc",
+  "levels": {
+    "critical": "critic",
+    "high": "înalt",
+    "medium": "mediu",
+    "low": "scăzut",
+    "none": "niciun"
+  },
+  "section_title": "Risc {{level}} ({{count}})",
+  "empty": {
+    "title": "Nicio mutare",
+    "description": "Creează mutări pentru a vedea evaluarea riscului"
+  }
+}

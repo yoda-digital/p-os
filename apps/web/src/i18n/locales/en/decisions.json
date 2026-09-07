@@ -1,0 +1,38 @@
+{
+  "title": "Decisions",
+  "new_decision": "New Decision",
+  "pending": "Pending ({{count}})",
+  "resolved": "Resolved ({{count}})",
+  "state": {
+    "draft": "draft",
+    "requested": "requested",
+    "in_review": "in review",
+    "decided": "decided",
+    "deferred": "deferred",
+    "superseded": "superseded",
+    "cancelled": "cancelled"
+  },
+  "select": "Select",
+  "ai_confidence": "AI confidence: {{value}}%",
+  "blocking_moves": "Blocking {{count}} move(s)",
+  "empty": {
+    "title": "No decisions",
+    "description": "Decisions will appear when the process requires human judgment",
+    "action": "Create Decision"
+  },
+  "create": {
+    "title": "Create Decision",
+    "question_label": "Question",
+    "question_placeholder": "What needs to be decided?",
+    "context_label": "Context",
+    "context_placeholder": "Relevant background...",
+    "submit": "Create"
+  },
+  "resolve": {
+    "title": "Resolve Decision",
+    "selected": "Selected:",
+    "rationale_label": "Rationale",
+    "rationale_placeholder": "Why this option?",
+    "submit": "Resolve"
+  }
+}

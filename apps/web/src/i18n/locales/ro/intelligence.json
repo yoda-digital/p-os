@@ -1,0 +1,35 @@
+{
+  "title": "Inteligență de proces",
+  "metrics": {
+    "cycle_time": "Timp de ciclu",
+    "waiting_time": "Timp de așteptare",
+    "rework_count": "Reluări",
+    "failed_attempts": "Încercări eșuate",
+    "human_attention_time": "Timp atenție umană",
+    "evidence_gaps": "Lacune de dovezi",
+    "completion_reliability": "Fiabilitate finalizare",
+    "context_rotations": "Rotații de context",
+    "steering_frequency": "Frecvență ghidare"
+  },
+  "empty": {
+    "title": "Nicio metrică",
+    "description": "Metricile vor apărea odată ce cazul are activitate"
+  },
+  "drift": {
+    "title": "Deviere de proces ({{count}} devieri)",
+    "type": "Tip: {{value}}"
+  },
+  "severity": {
+    "high": "ridicat",
+    "medium": "mediu",
+    "low": "scăzut"
+  },
+  "architect": {
+    "title": "Arhitectul AI de proces",
+    "description": "Analiza procesului este activă. Sugestiile vor apărea când sunt detectate tipare în istoricul de execuție."
+  },
+  "guardian": {
+    "title": "Gardianul procesului",
+    "description": "Monitorizare pentru deviere de scop, încălcări de politică, dovezi expirate, risc de termen și lucru neautorizat."
+  }
+}

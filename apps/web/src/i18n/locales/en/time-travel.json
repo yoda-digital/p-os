@@ -1,0 +1,20 @@
+{
+  "title": "Time Travel",
+  "empty": {
+    "title": "No history",
+    "description": "Events will appear here as the case evolves"
+  },
+  "slider": {
+    "label": "Select event ({{count}} total)"
+  },
+  "events": {
+    "title": "Events"
+  },
+  "snapshot": {
+    "title": "State Snapshot",
+    "at_event": "Snapshot at event {{id}}...",
+    "case": "Case",
+    "moves": "Moves ({{count}})",
+    "select_prompt": "Select an event to view the snapshot"
+  }
+}

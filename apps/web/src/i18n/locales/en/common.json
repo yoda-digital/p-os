@@ -1,0 +1,107 @@
+{
+  "app_name": "Universal Process OS",
+  "nav": {
+    "cases": "Cases",
+    "all_cases": "All Cases",
+    "views": "Views",
+    "settings": "Settings",
+    "admin": "Admin",
+    "logout": "Logout",
+    "sign_out": "Sign Out"
+  },
+  "nav_tabs": {
+    "kanban": "Kanban",
+    "attention": "Attention",
+    "timeline": "Timeline",
+    "dependencies": "Dependencies",
+    "evidence": "Evidence",
+    "decisions": "Decisions",
+    "compliance": "Compliance",
+    "actors": "Actors",
+    "resources": "Resources",
+    "risk": "Risk",
+    "why": "WHY",
+    "time_travel": "Time Travel",
+    "simulation": "Simulation",
+    "intelligence": "Intelligence"
+  },
+  "actions": {
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "no_results": "No results",
+    "error": "Error",
+    "success": "Success",
+    "view_all": "View All",
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "select": "Select",
+    "adopt_changes": "Adopt Changes",
+    "ask": "Ask",
+    "send": "Send",
+    "attach": "Attach",
+    "resolve": "Resolve"
+  },
+  "status": {
+    "open": "open",
+    "closed": "closed",
+    "dormant": "dormant",
+    "archived": "archived",
+    "void": "void",
+    "active": "active",
+    "paused": "paused",
+    "running": "running",
+    "not_started": "not started",
+    "finished": "finished",
+    "satisfied": "satisfied",
+    "unsatisfied": "unsatisfied",
+    "queued": "queued",
+    "starting": "starting"
+  },
+  "priority": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "language": {
+    "ro": "Română",
+    "ru": "Русский",
+    "en": "English",
+    "interface": "Interface Language",
+    "content": "Content Language"
+  },
+  "time": {
+    "just_now": "just now",
+    "minutes_ago": "{{count}} minutes ago",
+    "hours_ago": "{{count}} hours ago",
+    "days_ago": "{{count}} days ago"
+  },
+  "user": {
+    "profile": "Profile",
+    "organization": "Organization",
+    "switch_org": "Switch Organization",
+    "default_name": "User"
+  },
+  "errors": {
+    "network": "Network error",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "not_found": "Not found",
+    "server_error": "Server error",
+    "validation": "Invalid data"
+  }
+}

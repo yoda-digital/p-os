@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useEvidence, useAttachEvidence } from '../../hooks/use-evidence';
 import { Badge } from '../common/badge';
 import { Button } from '../common/button';
@@ -17,17 +18,17 @@ const relationIcons: Record<string, typeof Shield> = {
   supports: Shield, contradicts: XCircle, verifies: FileCheck, invalidates: AlertTriangle,
 };
 
-const RELATIONS = [
-  { value: 'supports', label: 'Supports' },
-  { value: 'contradicts', label: 'Contradicts' },
-  { value: 'verifies', label: 'Verifies' },
-  { value: 'invalidates', label: 'Invalidates' },
-  { value: 'establishes_provenance', label: 'Establishes Provenance' },
-  { value: 'establishes_authority', label: 'Establishes Authority' },
-  { value: 'establishes_compliance', label: 'Establishes Compliance' },
-];
+const RELATION_VALUES = [
+  'supports', 'contradicts', 'verifies', 'invalidates',
+  'establishes_provenance', 'establishes_authority', 'establishes_compliance',
+] as const;
+
+const FILTER_VALUES = ['all', 'valid', 'stale', 'invalid', 'disputed', 'unknown'] as const;
 
 export function EvidenceView() {
+  const { t, i18n } = useTranslation('evidence');
+  const { t: tCommon } = useTranslation('common');
+  const RELATIONS = RELATION_VALUES.map((value) => ({ value, label: t(`relation.${value}`) }));
   const { caseId } = useParams<{ caseId: string }>();
   const { data: evidence, isLoading } = useEvidence(caseId);
   const attachEvidence = useAttachEvidence(caseId!);
@@ -57,22 +58,22 @@ export function EvidenceView() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <FileCheck className="w-5 h-5 text-slate-500" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Evidence</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
         </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4" /> Attach Evidence
+          <Plus className="w-4 h-4" /> {t('attach')}
         </Button>
       </div>
 
       {/* Filter */}
       <div className="flex gap-2 mb-6">
-        {['all', 'valid', 'stale', 'invalid', 'disputed', 'unknown'].map(f => (
+        {FILTER_VALUES.map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-3 py-1 text-xs rounded-full capitalize ${filter === f ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+            className={`px-3 py-1 text-xs rounded-full ${filter === f ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
           >
-            {f}
+            {t(`filters.${f}`)}
           </button>
         ))}
       </div>
@@ -80,9 +81,9 @@ export function EvidenceView() {
       {(!filtered || filtered.length === 0) ? (
         <EmptyState
           icon={<FileCheck className="w-12 h-12" />}
-          title="No evidence"
-          description="Attach evidence to support or verify process state"
-          action={{ label: 'Attach Evidence', onClick: () => setCreateOpen(true) }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          action={{ label: t('empty.action'), onClick: () => setCreateOpen(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -93,17 +94,17 @@ export function EvidenceView() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Icon className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">{ev.relation}</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t(`relation.${ev.relation}`, { defaultValue: ev.relation })}</span>
                   </div>
-                  <Badge variant={validityVariant[ev.validity] as any}>{ev.validity}</Badge>
+                  <Badge variant={validityVariant[ev.validity] as any}>{t(`filters.${ev.validity}`, { defaultValue: ev.validity })}</Badge>
                 </div>
                 <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
-                  <p>Confidence: {(ev.confidence * 100).toFixed(0)}%</p>
+                  <p>{t('card.confidence', { value: (ev.confidence * 100).toFixed(0) })}</p>
                   {ev.subject_refs.length > 0 && (
-                    <p>Subjects: {ev.subject_refs.map(s => `${s.type}:${s.id.slice(0, 8)}`).join(', ')}</p>
+                    <p>{t('card.subjects', { value: ev.subject_refs.map(s => `${s.type}:${s.id.slice(0, 8)}`).join(', ') })}</p>
                   )}
-                  {ev.fresh_until && <p>Fresh until: {new Date(ev.fresh_until).toLocaleDateString()}</p>}
-                  <p>Observed: {ev.observed_at ? new Date(ev.observed_at).toLocaleDateString() : 'N/A'}</p>
+                  {ev.fresh_until && <p>{t('card.fresh_until', { value: new Date(ev.fresh_until).toLocaleDateString(i18n.language) })}</p>}
+                  <p>{t('card.observed', { value: ev.observed_at ? new Date(ev.observed_at).toLocaleDateString(i18n.language) : t('card.not_available') })}</p>
                 </div>
               </div>
             );
@@ -111,14 +112,14 @@ export function EvidenceView() {
         </div>
       )}
 
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title="Attach Evidence">
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title={t('create.title')}>
         <form onSubmit={handleCreate} className="space-y-4">
-          <Select label="Relation" value={newRelation} onChange={(e) => setNewRelation(e.target.value)} options={RELATIONS} />
-          <Input label="Subject ID (Move/Entity)" value={newSubjectId} onChange={(e) => setNewSubjectId(e.target.value)} placeholder="UUID of the subject" />
-          <Input label="Confidence (0-1)" type="number" step="0.1" min="0" max="1" value={newConfidence} onChange={(e) => setNewConfidence(e.target.value)} />
+          <Select label={t('create.relation_label')} value={newRelation} onChange={(e) => setNewRelation(e.target.value)} options={RELATIONS} />
+          <Input label={t('create.subject_label')} value={newSubjectId} onChange={(e) => setNewSubjectId(e.target.value)} placeholder={t('create.subject_placeholder')} />
+          <Input label={t('create.confidence_label')} type="number" step="0.1" min="0" max="1" value={newConfidence} onChange={(e) => setNewConfidence(e.target.value)} />
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button type="submit" loading={attachEvidence.isPending}>Attach</Button>
+            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>{tCommon('actions.cancel')}</Button>
+            <Button type="submit" loading={attachEvidence.isPending}>{tCommon('actions.attach')}</Button>
           </div>
         </form>
       </Dialog>

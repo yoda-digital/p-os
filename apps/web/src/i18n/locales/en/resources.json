@@ -1,0 +1,15 @@
+{
+  "title": "Resources",
+  "empty": {
+    "title": "No resources",
+    "description": "Resource tracking will appear here"
+  },
+  "table": {
+    "name": "Name",
+    "type": "Type",
+    "capacity": "Capacity",
+    "available": "Available",
+    "utilization": "Utilization",
+    "cost": "Cost"
+  }
+}

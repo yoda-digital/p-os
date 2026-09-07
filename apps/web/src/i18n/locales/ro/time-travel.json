@@ -1,0 +1,20 @@
+{
+  "title": "Călătorie în timp",
+  "empty": {
+    "title": "Niciun istoric",
+    "description": "Evenimentele vor apărea aici pe măsură ce cazul evoluează"
+  },
+  "slider": {
+    "label": "Selectează eveniment ({{count}} total)"
+  },
+  "events": {
+    "title": "Evenimente"
+  },
+  "snapshot": {
+    "title": "Instantaneu de stare",
+    "at_event": "Instantaneu la evenimentul {{id}}...",
+    "case": "Caz",
+    "moves": "Mutări ({{count}})",
+    "select_prompt": "Selectează un eveniment pentru a vedea instantaneul"
+  }
+}

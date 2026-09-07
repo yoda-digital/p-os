@@ -1,4 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '../common/badge';
 import {
   Play, Pause, CheckCircle2, AlertTriangle, Clock,
@@ -7,19 +8,10 @@ import {
 } from 'lucide-react';
 import type { KanbanCard as KanbanCardType } from '../../lib/api';
 
-const classColors: Record<string, { variant: string; label: string }> = {
-  ACT: { variant: 'info', label: 'Act' },
-  OBSERVE: { variant: 'purple', label: 'Observe' },
-  ASK: { variant: 'orange', label: 'Ask' },
-  WAIT: { variant: 'warning', label: 'Wait' },
-  DECIDE: { variant: 'danger', label: 'Decide' },
-  COMMUNICATE: { variant: 'info', label: 'Communicate' },
-  VERIFY: { variant: 'purple', label: 'Verify' },
-  DELEGATE: { variant: 'neutral', label: 'Delegate' },
-  ESCALATE: { variant: 'danger', label: 'Escalate' },
-  APPROVE: { variant: 'success', label: 'Approve' },
-  REJECT: { variant: 'danger', label: 'Reject' },
-  STOP: { variant: 'danger', label: 'Stop' },
+const classVariants: Record<string, string> = {
+  ACT: 'info', OBSERVE: 'purple', ASK: 'orange', WAIT: 'warning',
+  DECIDE: 'danger', COMMUNICATE: 'info', VERIFY: 'purple', DELEGATE: 'neutral',
+  ESCALATE: 'danger', APPROVE: 'success', REJECT: 'danger', STOP: 'danger',
 };
 
 const priorityIcons: Record<string, string> = {
@@ -53,6 +45,8 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
+  const { t } = useTranslation('kanban');
+  const { t: tCommon, i18n } = useTranslation('common');
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: card.move_id,
   });
@@ -61,7 +55,7 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
     : undefined;
 
-  const classInfo = classColors[card.class] || classColors.ACT;
+  const classVariant = classVariants[card.class] || classVariants.ACT;
   const execution = (card as any).execution ?? (card as any).execution_state ?? 'not_started';
   const ExecIcon = executionIcons[execution] || Minus;
   const isOverdue = card.deadline && new Date(card.deadline) < new Date();
@@ -87,10 +81,10 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
       {/* Top row: priority + class badge */}
       <div className="flex items-center gap-1.5 mb-1.5">
         <span className="text-xs">{priorityIcons[card.priority] || '⚪'}</span>
-        <Badge variant={classInfo.variant as any}>{classInfo.label}</Badge>
+        <Badge variant={classVariant as any}>{t(`class.${card.class}`, { defaultValue: card.class })}</Badge>
         {card.risk !== 'none' && (
           <Badge variant={riskVariant[card.risk] as any} dot>
-            <AlertTriangle className="w-3 h-3" /> {card.risk}
+            <AlertTriangle className="w-3 h-3" /> {t(`risk.${card.risk}`, { defaultValue: card.risk })}
           </Badge>
         )}
       </div>
@@ -104,7 +98,7 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
       <div className="flex items-center gap-1.5 mb-2">
         <ExecIcon className={`w-3.5 h-3.5 ${execution === 'running' ? 'animate-spin text-emerald-500' : 'text-slate-400'}`} />
         <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
-          {execution}
+          {tCommon(`status.${execution}`, { defaultValue: execution })}
         </span>
       </div>
 
@@ -113,7 +107,7 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
         {/* Assigned actors */}
         {(card as any).assigned_actor_ids?.length > 0 && (
           <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Eye className="w-3 h-3" /> {(card as any).assigned_actor_ids.length} assigned
+            <Eye className="w-3 h-3" /> {(card as any).assigned_actor_ids.length} {t('card.assigned')}
           </span>
         )}
 
@@ -121,7 +115,7 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
         {card.deadline && (
           <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-red-500' : isAtRisk ? 'text-amber-500' : 'text-slate-400'}`}>
             <Clock className="w-3 h-3" />
-            {new Date(card.deadline).toLocaleDateString()}
+            {new Date(card.deadline).toLocaleDateString(i18n.language)}
           </span>
         )}
 
@@ -136,14 +130,14 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
         {evidenceCount > 0 && (
           <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" />
-            {evidenceCount} evidence
+            {evidenceCount} {t('card.evidence')}
           </span>
         )}
 
         {/* Dependencies */}
         {blockedByCount > 0 && (
           <Badge variant="danger">
-            <Link2 className="w-3 h-3" /> {blockedByCount} dep{blockedByCount > 1 ? 's' : ''}
+            <Link2 className="w-3 h-3" /> {blockedByCount} {blockedByCount > 1 ? t('card.dependencies') : t('card.dependency')}
           </Badge>
         )}
 

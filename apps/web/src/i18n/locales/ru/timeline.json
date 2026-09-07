@@ -1,0 +1,29 @@
+{
+  "title": "Хронология",
+  "filter": {
+    "all": "Все"
+  },
+  "empty": {
+    "title": "Пока нет событий",
+    "description": "События будут появляться по мере развития дела"
+  },
+  "event_types": {
+    "CaseCreated": "Дело создано",
+    "CaseUpdated": "Дело обновлено",
+    "CaseClosed": "Дело закрыто",
+    "MoveCreated": "Ход создан",
+    "MoveActivated": "Ход активирован",
+    "MovePaused": "Ход приостановлен",
+    "MoveResumed": "Ход возобновлён",
+    "MoveCancelled": "Ход отменён",
+    "MoveSatisfied": "Ход завершён",
+    "AttemptStarted": "Попытка начата",
+    "AttemptSucceeded": "Попытка успешна",
+    "AttemptFailed": "Попытка не удалась",
+    "EvidenceAttached": "Доказательство прикреплено",
+    "DecisionCreated": "Решение создано",
+    "DecisionResolved": "Решение принято",
+    "SteeringIssued": "Указание выдано",
+    "RuleEvaluated": "Правило оценено"
+  }
+}

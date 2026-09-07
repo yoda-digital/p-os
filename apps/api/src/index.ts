@@ -24,6 +24,14 @@ import { simulationRoutes } from './routes/simulation.js';
 import { intelligenceRoutes } from './routes/intelligence.js';
 import { packRoutes } from './routes/packs.js';
 import { commandRoutes } from './routes/commands.js';
+import { invitationRoutes } from './routes/invitations.js';
+import { teamManagementRoutes, caseTeamRoutes } from './routes/teams-management.js';
+import { orgUnitRoutes } from './routes/org-units.js';
+import { policyManagementRoutes } from './routes/policy-management.js';
+import { memberRoutes } from './routes/members.js';
+import { caseAccessRoutes } from './routes/case-access.js';
+import { auditRoutes } from './routes/audit.js';
+import { adminRoutes } from './routes/admin.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -34,6 +42,30 @@ async function main() {
   const sql = getDb(getConnectionString());
   console.log('[API] Running migrations...');
   await runMigrations(sql);
+
+  // Bootstrap superadmin from env var
+  const superadminEmail = process.env['SUPERADMIN_EMAIL'];
+  if (superadminEmail) {
+    const [existing] = await sql`
+      SELECT u.id FROM users u
+      JOIN memberships m ON m.user_id = u.id
+      WHERE u.email = ${superadminEmail}
+      AND m.organization_id = '00000000-0000-0000-0000-000000000000'
+    `;
+    if (!existing) {
+      console.log(`[API] SUPERADMIN_EMAIL set — ${superadminEmail} will be granted superadmin on next login/register`);
+      await sql`
+        INSERT INTO invitations (organization_id, email, role, token, status, invited_by, expires_at)
+        VALUES ('00000000-0000-0000-0000-000000000000', ${superadminEmail}, 'superadmin',
+                ${'system-bootstrap-' + Date.now()}, 'pending',
+                '00000000-0000-0000-0000-000000000000',
+                NOW() + INTERVAL '365 days')
+        ON CONFLICT DO NOTHING
+      `;
+    } else {
+      console.log(`[API] SUPERADMIN_EMAIL set — ${superadminEmail} is already a superadmin`);
+    }
+  }
 
   const app = new Hono();
 
@@ -68,6 +100,19 @@ async function main() {
   app.route('/api/v1/intelligence', intelligenceRoutes(sql));
   app.route('/api/v1/packs', packRoutes(sql));
   app.route('/api/v1/commands', commandRoutes(sql));
+
+  // RBAC / multi-user routes
+  app.route('/api/v1/invitations', invitationRoutes(sql));
+  app.route('/api/v1/teams', teamManagementRoutes(sql));
+  app.route('/api/v1/org-units', orgUnitRoutes(sql));
+  app.route('/api/v1/policies', policyManagementRoutes(sql));
+  app.route('/api/v1/members', memberRoutes(sql));
+  app.route('/api/v1/cases/:id/access', caseAccessRoutes(sql));
+  app.route('/api/v1/cases/:caseId/teams', caseTeamRoutes(sql));
+  app.route('/api/v1/audit', auditRoutes(sql));
+
+  // Admin routes (system org only)
+  app.route('/api/v1/admin', adminRoutes(sql));
 
   // Seed default process packs
   await seedProcessPacks(sql);

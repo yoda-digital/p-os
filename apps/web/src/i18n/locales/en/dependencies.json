@@ -1,0 +1,7 @@
+{
+  "title": "Dependency Graph",
+  "empty": {
+    "title": "No moves",
+    "description": "Create moves to see the dependency graph"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "nav": {
+    "profile": "Profile",
+    "organization": "Organization",
+    "teams": "Teams",
+    "members": "Members",
+    "invitations": "Invitations",
+    "policies": "Policies"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your personal account settings",
+    "avatar_url": "Avatar URL",
+    "display_name": "Display Name",
+    "email": "Email",
+    "language": "Interface Language",
+    "timezone": "Timezone",
+    "save": "Save Changes",
+    "saved": "Saved"
+  },
+  "org": {
+    "title": "Organization Settings",
+    "subtitle": "Manage your organization's departmental structure",
+    "new_unit": "New Unit",
+    "edit_unit": "Edit Unit",
+    "unit_name": "Name",
+    "unit_description": "Description",
+    "parent_unit": "Parent Unit",
+    "no_parent": "None (top-level)",
+    "empty": {
+      "title": "No organizational units",
+      "description": "Create departments or units to structure your organization"
+    }
+  },
+  "teams": {
+    "title": "Teams",
+    "subtitle": "Cross-functional groups that can be assigned to cases",
+    "new": "New Team",
+    "name": "Name",
+    "description": "Description",
+    "default_case_role": "Default Case Role",
+    "members": "Members",
+    "member_count": "{{count}} members",
+    "select_member": "Select a member…",
+    "assign_case": "Assign to Case",
+    "select_case": "Select a case…",
+    "assign": "Assign",
+    "empty": {
+      "title": "No teams",
+      "description": "Create your first team to start organizing members"
+    }
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Organization members and their roles",
+    "invite": "Invite Member",
+    "invite_email": "Email",
+    "send_invite": "Send Invitation",
+    "name": "Name",
+    "email": "Email",
+    "status": "Status",
+    "teams": "Teams",
+    "role": "Role",
+    "empty": {
+      "title": "No members",
+      "description": "Invite people to join your organization"
+    }
+  },
+  "invitations": {
+    "title": "Invitations",
+    "subtitle": "Track and manage invitations sent to your organization",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "invited_by": "Invited By",
+    "expires": "Expires",
+    "actions": "Actions",
+    "resend": "Resend",
+    "revoke": "Revoke",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    },
+    "empty": {
+      "title": "No invitations",
+      "description": "Invitations you send will appear here"
+    }
+  },
+  "policies": {
+    "title": "Organization Policies",
+    "subtitle": "Fine-grained access rules for your organization",
+    "new": "New Policy",
+    "edit": "Edit Policy",
+    "name": "Name",
+    "description": "Description",
+    "effect": "Effect",
+    "scope": "Scope",
+    "allow": "Allow",
+    "deny": "Deny",
+    "priority": "Priority",
+    "actions": "Actions (comma-separated)",
+    "subject": "Subject Conditions",
+    "resource": "Resource Conditions",
+    "inactive": "inactive",
+    "empty": {
+      "title": "No policies",
+      "description": "Create a policy to customize access rules"
+    }
+  }
+}

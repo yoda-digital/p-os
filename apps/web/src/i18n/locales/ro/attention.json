@@ -1,0 +1,19 @@
+{
+  "title": "Coada de atenție",
+  "stats": {
+    "critical": "Critic",
+    "high": "Înalt",
+    "medium": "Mediu",
+    "low": "Scăzut"
+  },
+  "empty": {
+    "title": "Totul e în regulă",
+    "description": "Niciun element nu necesită intervenția ta"
+  },
+  "item": {
+    "action_required": "Acțiune necesară",
+    "blocking_impact": "Blochează {{count}} mutare",
+    "blocking_impact_plural": "Blochează {{count}} mutări",
+    "view": "Vezi"
+  }
+}
