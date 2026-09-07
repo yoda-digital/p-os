@@ -5,6 +5,7 @@ import { AppLayout } from './components/layout/app-layout';
 import { LoginPage } from './components/auth/login-page';
 import { RegisterPage } from './components/auth/register-page';
 import { InvitationAccept } from './components/auth/invitation-accept';
+import { PairingPage } from './components/pairing/pairing-page';
 import { CaseList } from './components/case/case-list';
 import { CaseDetail } from './components/case/case-detail';
 import { KanbanBoard } from './components/kanban/kanban-board';
@@ -83,6 +84,9 @@ export function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/invite/:token" element={<InvitationAccept />} />
       <Route element={<AuthGuard />}>
+        {/* Standalone — device pairing (spec section 8), no AppLayout chrome */}
+        <Route path="/pair" element={<PairingPage />} />
+
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/cases" replace />} />
           <Route path="/cases" element={<CaseList />} />
