@@ -4,50 +4,8 @@
   "description": "Universal Process OS — semantic control plane for evolving processes with AI-native execution",
   "author": "Universal Process OS",
   "homepage": "https://ai-kanban.yoda.digital",
-  "skills": [],
-  "agents": [],
-  "hooks": {
-    "SessionStart": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/session-start.js"
-      }
-    ],
-    "PreToolUse": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/pre-tool-use.js"
-      }
-    ],
-    "PostToolUse": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/post-tool-use.js"
-      }
-    ],
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/stop.js"
-      }
-    ],
-    "TaskCreated": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/task-created.js"
-      }
-    ],
-    "TaskCompleted": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/task-completed.js"
-      }
-    ],
-    "SessionEnd": [
-      {
-        "type": "command",
-        "command": "node plugin/claude-code/hooks/session-end.js"
-      }
-    ]
-  }
+  "skills": ["skills/*.md"],
+  "agents": ["agents/*.md"],
+  "hooks": "hooks/hooks.json",
+  "mcpServers": ".mcp.json"
 }
