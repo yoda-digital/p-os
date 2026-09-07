@@ -24,6 +24,14 @@ import { simulationRoutes } from './routes/simulation.js';
 import { intelligenceRoutes } from './routes/intelligence.js';
 import { packRoutes } from './routes/packs.js';
 import { commandRoutes } from './routes/commands.js';
+import { invitationRoutes } from './routes/invitations.js';
+import { teamManagementRoutes, caseTeamRoutes } from './routes/teams-management.js';
+import { orgUnitRoutes } from './routes/org-units.js';
+import { policyManagementRoutes } from './routes/policy-management.js';
+import { memberRoutes } from './routes/members.js';
+import { caseAccessRoutes } from './routes/case-access.js';
+import { auditRoutes } from './routes/audit.js';
+import { adminRoutes } from './routes/admin.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -68,6 +76,19 @@ async function main() {
   app.route('/api/v1/intelligence', intelligenceRoutes(sql));
   app.route('/api/v1/packs', packRoutes(sql));
   app.route('/api/v1/commands', commandRoutes(sql));
+
+  // RBAC / multi-user routes
+  app.route('/api/v1/invitations', invitationRoutes(sql));
+  app.route('/api/v1/teams', teamManagementRoutes(sql));
+  app.route('/api/v1/org-units', orgUnitRoutes(sql));
+  app.route('/api/v1/policies', policyManagementRoutes(sql));
+  app.route('/api/v1/members', memberRoutes(sql));
+  app.route('/api/v1/cases/:id/access', caseAccessRoutes(sql));
+  app.route('/api/v1/cases/:caseId/teams', caseTeamRoutes(sql));
+  app.route('/api/v1/audit', auditRoutes(sql));
+
+  // Admin routes (system org only)
+  app.route('/api/v1/admin', adminRoutes(sql));
 
   // Seed default process packs
   await seedProcessPacks(sql);
