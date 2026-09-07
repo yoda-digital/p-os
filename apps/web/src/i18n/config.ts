@@ -22,6 +22,7 @@ import roSimulation from './locales/ro/simulation.json';
 import roIntelligence from './locales/ro/intelligence.json';
 import roSteering from './locales/ro/steering.json';
 import roAdmin from './locales/ro/admin.json';
+import roSettings from './locales/ro/settings.json';
 
 import ruCommon from './locales/ru/common.json';
 import ruAuth from './locales/ru/auth.json';
@@ -42,6 +43,7 @@ import ruSimulation from './locales/ru/simulation.json';
 import ruIntelligence from './locales/ru/intelligence.json';
 import ruSteering from './locales/ru/steering.json';
 import ruAdmin from './locales/ru/admin.json';
+import ruSettings from './locales/ru/settings.json';
 
 import enCommon from './locales/en/common.json';
 import enAuth from './locales/en/auth.json';
@@ -62,11 +64,12 @@ import enSimulation from './locales/en/simulation.json';
 import enIntelligence from './locales/en/intelligence.json';
 import enSteering from './locales/en/steering.json';
 import enAdmin from './locales/en/admin.json';
+import enSettings from './locales/en/settings.json';
 
 const ns = [
   'common', 'auth', 'cases', 'kanban', 'attention', 'timeline', 'dependencies',
   'evidence', 'decisions', 'compliance', 'actors', 'resources', 'risk', 'why',
-  'time-travel', 'simulation', 'intelligence', 'steering', 'admin',
+  'time-travel', 'simulation', 'intelligence', 'steering', 'admin', 'settings',
 ] as const;
 
 i18n
@@ -79,21 +82,21 @@ i18n
         timeline: roTimeline, dependencies: roDependencies, evidence: roEvidence, decisions: roDecisions,
         compliance: roCompliance, actors: roActors, resources: roResources, risk: roRisk, why: roWhy,
         'time-travel': roTimeTravel, simulation: roSimulation, intelligence: roIntelligence,
-        steering: roSteering, admin: roAdmin,
+        steering: roSteering, admin: roAdmin, settings: roSettings,
       },
       ru: {
         common: ruCommon, auth: ruAuth, cases: ruCases, kanban: ruKanban, attention: ruAttention,
         timeline: ruTimeline, dependencies: ruDependencies, evidence: ruEvidence, decisions: ruDecisions,
         compliance: ruCompliance, actors: ruActors, resources: ruResources, risk: ruRisk, why: ruWhy,
         'time-travel': ruTimeTravel, simulation: ruSimulation, intelligence: ruIntelligence,
-        steering: ruSteering, admin: ruAdmin,
+        steering: ruSteering, admin: ruAdmin, settings: ruSettings,
       },
       en: {
         common: enCommon, auth: enAuth, cases: enCases, kanban: enKanban, attention: enAttention,
         timeline: enTimeline, dependencies: enDependencies, evidence: enEvidence, decisions: enDecisions,
         compliance: enCompliance, actors: enActors, resources: enResources, risk: enRisk, why: enWhy,
         'time-travel': enTimeTravel, simulation: enSimulation, intelligence: enIntelligence,
-        steering: enSteering, admin: enAdmin,
+        steering: enSteering, admin: enAdmin, settings: enSettings,
       },
     },
     fallbackLng: 'ro',

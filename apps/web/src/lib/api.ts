@@ -44,7 +44,7 @@ export interface Membership { organization_id: string; role: string; organizatio
 export interface User {
   id: string; email: string; display_name: string; organization_id?: string;
   preferred_language?: string; timezone?: string; avatar_url?: string; status?: string;
-  memberships?: Membership[];
+  memberships?: Membership[]; is_system?: boolean;
 }
 export interface UpdateProfileInput { preferred_language?: string; timezone?: string; display_name?: string; avatar_url?: string; }
 export interface SwitchOrgResponse { token: string; organization: { id: string; name: string; role: string }; }
@@ -171,7 +171,80 @@ export const api = {
 
   // Resources — API uses /v1/resources?caseId=xxx
   listResources: (caseId: string) => request<Resource[]>(`/v1/resources?caseId=${caseId}`),
+
+  // ===== Admin (system org only) =====
+  listAdminOrgs: () => request<AdminOrganization[]>('/v1/admin/organizations'),
+  createAdminOrg: (data: CreateOrgInput) =>
+    request<AdminOrganization>('/v1/admin/organizations', { method: 'POST', body: JSON.stringify(data) }),
+  updateAdminOrg: (id: string, data: UpdateOrgInput) =>
+    request<AdminOrganization>(`/v1/admin/organizations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  listAdminUsers: (params: AdminUserListParams = {}) =>
+    request<AdminUserListResult>(`/v1/admin/users${toQueryString(params)}`),
+  updateAdminUser: (id: string, data: UpdateAdminUserInput) =>
+    request<AdminUser>(`/v1/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  impersonateUser: (id: string) =>
+    request<ImpersonateResponse>(`/v1/admin/impersonate/${id}`, { method: 'POST' }),
+  endImpersonation: () =>
+    request<EndImpersonationResponse>('/v1/admin/impersonate/end', { method: 'POST' }),
+  getAdminHealth: () => request<AdminHealth>('/v1/admin/health'),
+
+  // ===== Audit =====
+  listAudit: (params: AuditListParams = {}) =>
+    request<AuditListResult>(`/v1/audit${toQueryString(params)}`),
+
+  // ===== Teams =====
+  listTeams: () => request<Team[]>('/v1/teams'),
+  createTeam: (data: CreateTeamInput) =>
+    request<Team>('/v1/teams', { method: 'POST', body: JSON.stringify(data) }),
+  updateTeam: (id: string, data: UpdateTeamInput) =>
+    request<Team>(`/v1/teams/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  addTeamMember: (teamId: string, userId: string, role?: string) =>
+    request<void>(`/v1/teams/${teamId}/members`, { method: 'POST', body: JSON.stringify({ user_id: userId, role }) }),
+  removeTeamMember: (teamId: string, userId: string) =>
+    request<void>(`/v1/teams/${teamId}/members/${userId}`, { method: 'DELETE' }),
+  assignTeamToCase: (caseId: string, teamId: string, role?: string) =>
+    request<void>(`/v1/cases/${caseId}/teams`, { method: 'POST', body: JSON.stringify({ team_id: teamId, role }) }),
+
+  // ===== Org Members =====
+  listMembers: () => request<OrgMember[]>('/v1/members'),
+  updateMember: (id: string, role: string) =>
+    request<void>(`/v1/members/${id}`, { method: 'PATCH', body: JSON.stringify({ role }) }),
+  removeMember: (id: string) => request<void>(`/v1/members/${id}`, { method: 'DELETE' }),
+
+  // ===== Invitations =====
+  listInvitations: (status?: string) =>
+    request<Invitation[]>(`/v1/invitations${status ? `?status=${status}` : ''}`),
+  createInvitation: (data: CreateInvitationInput) =>
+    request<Invitation>('/v1/invitations', { method: 'POST', body: JSON.stringify(data) }),
+  revokeInvitation: (id: string) =>
+    request<{ status: string }>(`/v1/invitations/${id}/revoke`, { method: 'POST' }),
+  acceptInvitation: (token: string) =>
+    request<{ status: string; organization_id: string }>(`/v1/invitations/${token}/accept`, { method: 'POST' }),
+
+  // ===== ABAC Policies =====
+  listPolicies: () => request<Policy[]>('/v1/policies'),
+  createPolicy: (data: CreatePolicyInput) =>
+    request<Policy>('/v1/policies', { method: 'POST', body: JSON.stringify(data) }),
+  updatePolicy: (id: string, data: UpdatePolicyInput) =>
+    request<Policy>(`/v1/policies/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deletePolicy: (id: string) => request<void>(`/v1/policies/${id}`, { method: 'DELETE' }),
+
+  // ===== Organizational Units =====
+  listOrgUnits: () => request<OrgUnit[]>('/v1/org-units'),
+  createOrgUnit: (data: CreateOrgUnitInput) =>
+    request<OrgUnit>('/v1/org-units', { method: 'POST', body: JSON.stringify(data) }),
+  updateOrgUnit: (id: string, data: UpdateOrgUnitInput) =>
+    request<OrgUnit>(`/v1/org-units/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 };
+
+function toQueryString<P extends object>(params: P): string {
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
+    if (v !== undefined && v !== '') qs.set(k, String(v));
+  }
+  const s = qs.toString();
+  return s ? `?${s}` : '';
+}
 
 // ===== Types =====
 export interface Case {
@@ -284,3 +357,97 @@ export interface Attempt { id: string; case_id: string; move_id: string; executo
 export interface Resource { id: string; case_id: string; type: string; name: string; capacity?: unknown; available?: unknown; reserved?: unknown; cost_per_unit?: unknown; consumable: boolean; created_at: string; revision: number; }
 
 export interface CreateSteeringInput { class: string; instruction: string; attempt_id?: string; }
+
+// ===== Admin =====
+export interface AdminOrganization {
+  id: string; name: string; slug: string; status: string; is_system?: boolean;
+  settings: Record<string, unknown>; max_users?: number | null; max_cases?: number | null;
+  created_at: string; user_count: number; case_count: number;
+}
+export interface CreateOrgInput { name: string; slug?: string; settings?: Record<string, unknown>; }
+export interface UpdateOrgInput { name?: string; status?: string; settings?: Record<string, unknown>; }
+
+export interface AdminUserMembership { organization_id: string; role: string; org_name: string; }
+export interface AdminUser {
+  id: string; email: string; display_name: string; status: string;
+  last_login_at?: string; login_count: number; created_at: string;
+  memberships: AdminUserMembership[] | null;
+}
+export interface AdminUserListParams { search?: string; status?: string; limit?: number; offset?: number; }
+export interface AdminUserListResult { users: AdminUser[]; limit: number; offset: number; }
+export interface UpdateAdminUserInput { status?: string; display_name?: string; roles?: string[]; }
+
+export interface ImpersonateResponse { token: string; impersonating: { user_id: string; email: string; display_name: string; organization_id: string }; }
+export interface EndImpersonationResponse { token?: string; status?: string; user?: { user_id: string; email: string; display_name: string } }
+
+export interface AdminHealth {
+  users: { total_users: number; active_users: number; daily_active: number; weekly_active: number; monthly_active: number };
+  organizations: { total_organizations: number };
+  cases: { total_cases: number; active_cases: number };
+  events: { total_events: number };
+  audit: { total_audit_entries: number; audit_entries_24h: number };
+  tables: { table_name: string; total_size: string; row_count: number }[];
+  timestamp: string;
+}
+
+// ===== Audit =====
+export interface AuditEntry {
+  id: string; organization_id?: string; actor_id: string; actor_email: string;
+  action: string; resource_type: string; resource_id?: string;
+  details: Record<string, unknown>; ip_address?: string; user_agent?: string;
+  impersonated_by?: string; created_at: string;
+}
+export interface AuditListParams {
+  action?: string; resource_type?: string; resource_id?: string; actor_id?: string;
+  from?: string; to?: string; limit?: number; offset?: number;
+}
+export interface AuditListResult { entries: AuditEntry[]; limit: number; offset: number; }
+
+// ===== Teams =====
+export interface Team {
+  id: string; organization_id: string; name: string; description?: string;
+  status: string; default_case_role: string; policies: Record<string, unknown>;
+  created_at: string; member_count: number;
+}
+export interface CreateTeamInput { name: string; description?: string; default_case_role?: string; }
+export interface UpdateTeamInput { name?: string; description?: string; status?: string; default_case_role?: string; policies?: Record<string, unknown>; }
+
+// ===== Org Members =====
+export interface MemberTeam { team_id: string; role: string; team_name: string; }
+export interface OrgMember {
+  id: string; email: string; display_name: string; avatar_url?: string; status: string;
+  last_login_at?: string; role: string; joined_at: string; teams: MemberTeam[] | null;
+}
+
+// ===== Invitations =====
+export interface Invitation {
+  id: string; organization_id: string; email: string; role: string;
+  team_id?: string; workspace_id?: string; token?: string; status: string;
+  message?: string; invited_by: string; invited_by_name?: string; invited_by_email?: string;
+  expires_at: string; accepted_at?: string; accepted_by?: string; created_at: string;
+}
+export interface CreateInvitationInput { email: string; role?: string; team_id?: string; workspace_id?: string; message?: string; }
+
+// ===== ABAC Policies =====
+export interface AttributeCondition { attribute: string; operator: string; value: unknown; }
+export interface Policy {
+  id: string; organization_id: string | null; name: string; description?: string;
+  subject: AttributeCondition[]; actions: string[]; resource: AttributeCondition[];
+  environment: AttributeCondition[]; effect: 'allow' | 'deny'; priority: number;
+  scope: string; active: boolean; created_by: string; created_at: string; updated_at: string;
+}
+export interface CreatePolicyInput {
+  name: string; description?: string; subject: AttributeCondition[]; actions: string[];
+  resource: AttributeCondition[]; environment?: AttributeCondition[]; effect: 'allow' | 'deny';
+  priority?: number; scope?: string;
+}
+export type UpdatePolicyInput = Partial<CreatePolicyInput> & { active?: boolean };
+
+// ===== Organizational Units =====
+export interface OrgUnit {
+  id: string; organization_id: string; parent_id?: string | null; name: string;
+  description?: string; metadata: Record<string, unknown>; created_at: string; updated_at: string;
+  member_count: number; child_count: number;
+}
+export interface CreateOrgUnitInput { name: string; parent_id?: string; description?: string; metadata?: Record<string, unknown>; }
+export interface UpdateOrgUnitInput { name?: string; parent_id?: string | null; description?: string; metadata?: Record<string, unknown>; }

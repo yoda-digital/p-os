@@ -1,75 +1,147 @@
 {
   "title": "Admin",
+  "not_found": "This page could not be found.",
   "nav": {
+    "dashboard": "Dashboard",
     "organizations": "Organizations",
     "users": "Users",
-    "roles": "Roles",
-    "permissions": "Permissions",
-    "settings": "System Settings",
-    "audit_log": "Audit Log"
+    "audit": "Audit Log",
+    "packs": "Process Packs",
+    "policies": "Policies",
+    "health": "System Health"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "System-wide overview",
+    "cards": {
+      "organizations": "Organizations",
+      "users": "Users",
+      "cases": "Cases",
+      "events": "Events"
+    },
+    "active_users": "Active Users",
+    "daily_active": "Daily active",
+    "weekly_active": "Weekly active",
+    "monthly_active": "Monthly active",
+    "audit_activity": "Audit Activity",
+    "total_entries": "Total entries",
+    "entries_24h": "Last 24 hours",
+    "active_cases": "Active cases",
+    "recent_activity": "Recent Activity"
   },
   "organizations": {
     "title": "Organizations",
+    "subtitle": "Manage all organizations on the system",
     "new": "New Organization",
+    "search_placeholder": "Search by name or slug…",
     "name": "Name",
-    "members": "Members",
+    "slug": "Slug",
+    "slug_placeholder": "auto-generated from name",
+    "status": "Status",
+    "users": "Users",
+    "cases": "Cases",
     "created": "Created",
+    "system": "System",
+    "disable": "Disable",
+    "enable": "Enable",
     "empty": {
       "title": "No organizations",
-      "description": "Create your first organization to get started"
+      "description": "Create the first organization to get started"
     }
   },
   "users": {
     "title": "Users",
-    "invite": "Invite User",
+    "subtitle": "Search and manage every user on the system",
+    "search_placeholder": "Search by name or email…",
+    "all_statuses": "All statuses",
     "name": "Name",
     "email": "Email",
-    "role": "Role",
     "status": "Status",
+    "system_role": "System Role",
     "last_active": "Last Active",
-    "empty": {
-      "title": "No users",
-      "description": "Invite users to start collaborating"
-    },
+    "suspend": "Suspend",
+    "disable": "Disable",
+    "reactivate": "Reactivate",
     "status_values": {
       "active": "active",
-      "invited": "invited",
-      "suspended": "suspended"
+      "suspended": "suspended",
+      "disabled": "disabled"
+    },
+    "roles": {
+      "none": "No system role",
+      "superadmin": "Superadmin",
+      "support": "Support",
+      "auditor": "Auditor"
+    },
+    "empty": {
+      "title": "No users found",
+      "description": "Try adjusting your search or status filter"
     }
   },
-  "roles": {
-    "title": "Roles",
-    "new": "New Role",
-    "superadmin": "Superadmin",
-    "org_admin": "Organization Admin",
-    "manager": "Manager",
-    "contributor": "Contributor",
-    "viewer": "Viewer",
-    "description": "Description",
-    "permissions_count": "{{count}} permissions"
-  },
-  "permissions": {
-    "title": "Permissions",
-    "grant": "Grant",
-    "revoke": "Revoke"
-  },
-  "settings": {
-    "title": "System Settings",
-    "general": "General",
-    "security": "Security",
-    "localization": "Localization",
-    "default_language": "Default Language",
-    "save": "Save Settings"
-  },
-  "audit_log": {
+  "audit": {
     "title": "Audit Log",
-    "actor": "Actor",
+    "subtitle": "System-wide audit trail across every organization",
     "action": "Action",
-    "target": "Target",
+    "action_placeholder": "e.g. case.create",
+    "resource_type": "Resource Type",
+    "resource_type_placeholder": "e.g. case",
+    "actor_id": "Actor ID",
+    "actor_id_placeholder": "user UUID",
+    "from": "From",
+    "to": "To",
     "timestamp": "Timestamp",
+    "actor": "Actor",
+    "resource": "Resource",
+    "details": "Details",
+    "impersonated": "impersonated",
+    "showing": "Showing {{count}} entries (offset {{offset}})",
     "empty": {
-      "title": "No events",
-      "description": "Audit events will appear here"
+      "title": "No audit entries",
+      "description": "Audit events will appear here as they happen"
+    }
+  },
+  "packs": {
+    "title": "Process Packs",
+    "subtitle": "Process packs installed on the system",
+    "created": "Created",
+    "empty": {
+      "title": "No process packs",
+      "description": "No process packs are installed yet"
+    }
+  },
+  "policies": {
+    "title": "System Policies",
+    "subtitle": "System-level ABAC policies applied across every organization",
+    "new": "New Policy",
+    "edit": "Edit Policy",
+    "name": "Name",
+    "description": "Description",
+    "effect": "Effect",
+    "allow": "Allow",
+    "deny": "Deny",
+    "priority": "Priority",
+    "actions": "Actions (comma-separated)",
+    "subject": "Subject Conditions",
+    "resource": "Resource Conditions",
+    "inactive": "inactive",
+    "empty": {
+      "title": "No system policies",
+      "description": "Create a system-level policy to get started"
+    }
+  },
+  "health": {
+    "title": "System Health",
+    "last_updated": "Last updated",
+    "refresh": "Refresh",
+    "db_stats": "Database Tables",
+    "table_name": "Table",
+    "row_count": "Rows",
+    "total_size": "Size",
+    "cards": {
+      "total_events": "Total Events",
+      "active_sessions": "Active Users (24h)",
+      "audit_24h": "Audit Entries (24h)",
+      "audit_total": "Total Audit Entries"
     }
   }
 }

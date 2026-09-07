@@ -4,11 +4,12 @@ import {
   LayoutGrid, Bell, Clock, GitBranch, Shield, FileCheck,
   Users, Package, AlertTriangle, HelpCircle, History,
   FlaskConical, BarChart3, Plus, FolderOpen, Settings,
-  Kanban, Scale,
+  Kanban, Scale, ShieldCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreateCaseDialog } from '../case/create-case-dialog';
+import { useAuthStore } from '../../stores/auth-store';
 
 const viewTabs = [
   { path: 'kanban', key: 'kanban', icon: Kanban },
@@ -32,6 +33,7 @@ export function Sidebar() {
   const { caseId } = useParams();
   const { data: cases } = useCases();
   const [createOpen, setCreateOpen] = useState(false);
+  const isSystem = useAuthStore((s) => s.user?.is_system);
 
   return (
     <>
@@ -94,14 +96,42 @@ export function Sidebar() {
         )}
 
         {/* Bottom */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-0.5">
           <NavLink
             to="/cases"
             className="flex items-center gap-2 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md"
           >
-            <Settings className="w-4 h-4" />
+            <FolderOpen className="w-4 h-4" />
             {t('nav.all_cases')}
           </NavLink>
+          <NavLink
+            to="/settings/profile"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-2 py-1.5 text-sm rounded-md ${
+                isActive
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`
+            }
+          >
+            <Settings className="w-4 h-4" />
+            {t('nav.settings')}
+          </NavLink>
+          {isSystem && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-2 py-1.5 text-sm rounded-md ${
+                  isActive
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`
+              }
+            >
+              <ShieldCheck className="w-4 h-4" />
+              {t('nav.admin')}
+            </NavLink>
+          )}
         </div>
       </aside>
 

@@ -1,19 +1,49 @@
 {
   "title": "Administrare",
+  "not_found": "Această pagină nu a fost găsită.",
   "nav": {
+    "dashboard": "Tablou de bord",
     "organizations": "Organizații",
     "users": "Utilizatori",
-    "roles": "Roluri",
-    "permissions": "Permisiuni",
-    "settings": "Setări sistem",
-    "audit_log": "Jurnal de audit"
+    "audit": "Jurnal de audit",
+    "packs": "Pachete de proces",
+    "policies": "Politici",
+    "health": "Stare sistem"
+  },
+  "dashboard": {
+    "title": "Tablou de bord",
+    "subtitle": "Prezentare generală la nivel de sistem",
+    "cards": {
+      "organizations": "Organizații",
+      "users": "Utilizatori",
+      "cases": "Cazuri",
+      "events": "Evenimente"
+    },
+    "active_users": "Utilizatori activi",
+    "daily_active": "Activi zilnic",
+    "weekly_active": "Activi săptămânal",
+    "monthly_active": "Activi lunar",
+    "audit_activity": "Activitate de audit",
+    "total_entries": "Total intrări",
+    "entries_24h": "Ultimele 24 ore",
+    "active_cases": "Cazuri active",
+    "recent_activity": "Activitate recentă"
   },
   "organizations": {
     "title": "Organizații",
+    "subtitle": "Gestionează toate organizațiile din sistem",
     "new": "Organizație nouă",
+    "search_placeholder": "Caută după nume sau slug…",
     "name": "Nume",
-    "members": "Membri",
+    "slug": "Slug",
+    "slug_placeholder": "generat automat din nume",
+    "status": "Stare",
+    "users": "Utilizatori",
+    "cases": "Cazuri",
     "created": "Creată",
+    "system": "Sistem",
+    "disable": "Dezactivează",
+    "enable": "Activează",
     "empty": {
       "title": "Nicio organizație",
       "description": "Creează prima organizație pentru a începe"
@@ -21,55 +51,97 @@
   },
   "users": {
     "title": "Utilizatori",
-    "invite": "Invită utilizator",
+    "subtitle": "Caută și gestionează toți utilizatorii din sistem",
+    "search_placeholder": "Caută după nume sau email…",
+    "all_statuses": "Toate stările",
     "name": "Nume",
     "email": "Email",
-    "role": "Rol",
     "status": "Stare",
+    "system_role": "Rol de sistem",
     "last_active": "Ultima activitate",
-    "empty": {
-      "title": "Niciun utilizator",
-      "description": "Invită utilizatori pentru a începe colaborarea"
-    },
+    "suspend": "Suspendă",
+    "disable": "Dezactivează",
+    "reactivate": "Reactivează",
     "status_values": {
       "active": "activ",
-      "invited": "invitat",
-      "suspended": "suspendat"
+      "suspended": "suspendat",
+      "disabled": "dezactivat"
+    },
+    "roles": {
+      "none": "Fără rol de sistem",
+      "superadmin": "Super-administrator",
+      "support": "Suport",
+      "auditor": "Auditor"
+    },
+    "empty": {
+      "title": "Niciun utilizator găsit",
+      "description": "Încearcă să ajustezi căutarea sau filtrul de stare"
     }
   },
-  "roles": {
-    "title": "Roluri",
-    "new": "Rol nou",
-    "superadmin": "Super-administrator",
-    "org_admin": "Administrator organizație",
-    "manager": "Manager",
-    "contributor": "Contribuitor",
-    "viewer": "Vizualizator",
-    "description": "Descriere",
-    "permissions_count": "{{count}} permisiuni"
-  },
-  "permissions": {
-    "title": "Permisiuni",
-    "grant": "Acordă",
-    "revoke": "Revocă"
-  },
-  "settings": {
-    "title": "Setări sistem",
-    "general": "General",
-    "security": "Securitate",
-    "localization": "Localizare",
-    "default_language": "Limba implicită",
-    "save": "Salvează setările"
-  },
-  "audit_log": {
+  "audit": {
     "title": "Jurnal de audit",
-    "actor": "Actor",
+    "subtitle": "Jurnal de audit la nivel de sistem pentru toate organizațiile",
     "action": "Acțiune",
-    "target": "Țintă",
+    "action_placeholder": "ex. case.create",
+    "resource_type": "Tip resursă",
+    "resource_type_placeholder": "ex. case",
+    "actor_id": "ID actor",
+    "actor_id_placeholder": "UUID utilizator",
+    "from": "De la",
+    "to": "Până la",
     "timestamp": "Data/ora",
+    "actor": "Actor",
+    "resource": "Resursă",
+    "details": "Detalii",
+    "impersonated": "impersonat",
+    "showing": "Se afișează {{count}} intrări (offset {{offset}})",
     "empty": {
-      "title": "Niciun eveniment",
-      "description": "Evenimentele de audit vor apărea aici"
+      "title": "Niciun eveniment de audit",
+      "description": "Evenimentele de audit vor apărea aici pe măsură ce au loc"
+    }
+  },
+  "packs": {
+    "title": "Pachete de proces",
+    "subtitle": "Pachetele de proces instalate în sistem",
+    "created": "Creat",
+    "empty": {
+      "title": "Niciun pachet de proces",
+      "description": "Niciun pachet de proces nu este încă instalat"
+    }
+  },
+  "policies": {
+    "title": "Politici de sistem",
+    "subtitle": "Politici ABAC la nivel de sistem aplicate în toate organizațiile",
+    "new": "Politică nouă",
+    "edit": "Editează politica",
+    "name": "Nume",
+    "description": "Descriere",
+    "effect": "Efect",
+    "allow": "Permite",
+    "deny": "Interzice",
+    "priority": "Prioritate",
+    "actions": "Acțiuni (separate prin virgulă)",
+    "subject": "Condiții subiect",
+    "resource": "Condiții resursă",
+    "inactive": "inactivă",
+    "empty": {
+      "title": "Nicio politică de sistem",
+      "description": "Creează o politică la nivel de sistem pentru a începe"
+    }
+  },
+  "health": {
+    "title": "Stare sistem",
+    "last_updated": "Ultima actualizare",
+    "refresh": "Reîmprospătează",
+    "db_stats": "Tabele bază de date",
+    "table_name": "Tabel",
+    "row_count": "Rânduri",
+    "total_size": "Dimensiune",
+    "cards": {
+      "total_events": "Total evenimente",
+      "active_sessions": "Utilizatori activi (24h)",
+      "audit_24h": "Intrări audit (24h)",
+      "audit_total": "Total intrări audit"
     }
   }
 }
