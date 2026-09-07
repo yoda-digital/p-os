@@ -43,6 +43,30 @@ async function main() {
   console.log('[API] Running migrations...');
   await runMigrations(sql);
 
+  // Bootstrap superadmin from env var
+  const superadminEmail = process.env['SUPERADMIN_EMAIL'];
+  if (superadminEmail) {
+    const [existing] = await sql`
+      SELECT u.id FROM users u
+      JOIN memberships m ON m.user_id = u.id
+      WHERE u.email = ${superadminEmail}
+      AND m.organization_id = '00000000-0000-0000-0000-000000000000'
+    `;
+    if (!existing) {
+      console.log(`[API] SUPERADMIN_EMAIL set — ${superadminEmail} will be granted superadmin on next login/register`);
+      await sql`
+        INSERT INTO invitations (organization_id, email, role, token, status, invited_by, expires_at)
+        VALUES ('00000000-0000-0000-0000-000000000000', ${superadminEmail}, 'superadmin',
+                ${'system-bootstrap-' + Date.now()}, 'pending',
+                '00000000-0000-0000-0000-000000000000',
+                NOW() + INTERVAL '365 days')
+        ON CONFLICT DO NOTHING
+      `;
+    } else {
+      console.log(`[API] SUPERADMIN_EMAIL set — ${superadminEmail} is already a superadmin`);
+    }
+  }
+
   const app = new Hono();
 
   // Global middleware

@@ -6,6 +6,8 @@ import { auditLog } from '../middleware/audit.js';
 
 type Sql = ReturnType<typeof postgres>;
 
+const SYSTEM_ORG_ID = '00000000-0000-0000-0000-000000000000';
+
 function hashPassword(password: string): string {
   const salt = randomBytes(16).toString('hex');
   const hash = scryptSync(password, salt, 64).toString('hex');
@@ -48,6 +50,8 @@ export function authRoutes(sql: Sql) {
     const passwordHash = hashPassword(body.password);
     const orgName = body.organization_name ?? `${body.display_name}'s Organization`;
 
+    let isSystem = false;
+
     await sql.begin(async (tx) => {
       // Create organization
       await tx`
@@ -80,6 +84,27 @@ export function authRoutes(sql: Sql) {
                 ${sql.json(['*'])},
                 ${userId}, 0)
       `;
+
+      // Auto-accept any pending system org invitations for this email
+      const [pendingSystemInvite] = await tx`
+        SELECT id FROM invitations
+        WHERE email = ${body.email}
+          AND organization_id = ${SYSTEM_ORG_ID}
+          AND status = 'pending'
+          AND expires_at > NOW()
+        LIMIT 1
+      `;
+      if (pendingSystemInvite) {
+        await tx`
+          INSERT INTO memberships (user_id, organization_id, role, status)
+          VALUES (${userId}, ${SYSTEM_ORG_ID}, 'superadmin', 'active')
+        `;
+        await tx`
+          UPDATE invitations SET status = 'accepted', accepted_at = NOW(), accepted_by = ${userId}
+          WHERE id = ${pendingSystemInvite.id}
+        `;
+        isSystem = true;
+      }
     });
 
     const token = await signJwt({
@@ -87,6 +112,7 @@ export function authRoutes(sql: Sql) {
       email: body.email,
       organization_id: orgId,
       roles: ['admin'],
+      is_system: isSystem,
     });
 
     return c.json({
@@ -98,6 +124,7 @@ export function authRoutes(sql: Sql) {
         organization_id: orgId,
         workspace_id: workspaceId,
         actor_id: actorId,
+        is_system: isSystem,
       },
     }, 201);
   });
@@ -115,9 +142,43 @@ export function authRoutes(sql: Sql) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
-    // Get membership
+    // Auto-accept any pending system org invitations for this email
+    const [pendingSystemInvite] = await sql`
+      SELECT id FROM invitations
+      WHERE email = ${body.email}
+        AND organization_id = ${SYSTEM_ORG_ID}
+        AND status = 'pending'
+        AND expires_at > NOW()
+      LIMIT 1
+    `;
+    if (pendingSystemInvite) {
+      // Check if membership already exists
+      const [existingSystemMembership] = await sql`
+        SELECT 1 FROM memberships WHERE user_id = ${user.id} AND organization_id = ${SYSTEM_ORG_ID}
+      `;
+      if (!existingSystemMembership) {
+        await sql`
+          INSERT INTO memberships (user_id, organization_id, role, status)
+          VALUES (${user.id}, ${SYSTEM_ORG_ID}, 'superadmin', 'active')
+        `;
+      }
+      await sql`
+        UPDATE invitations SET status = 'accepted', accepted_at = NOW(), accepted_by = ${user.id}
+        WHERE id = ${pendingSystemInvite.id}
+      `;
+    }
+
+    // Check if user has system org membership
+    const [systemMembership] = await sql`
+      SELECT 1 FROM memberships
+      WHERE user_id = ${user.id} AND organization_id = ${SYSTEM_ORG_ID}
+    `;
+    const isSystem = !!systemMembership;
+
+    // Get membership (prefer non-system org for default context)
     const [membership] = await sql`
-      SELECT organization_id, role FROM memberships WHERE user_id = ${user.id}
+      SELECT organization_id, role FROM memberships
+      WHERE user_id = ${user.id} AND organization_id != ${SYSTEM_ORG_ID}
       LIMIT 1
     `;
 
@@ -130,6 +191,7 @@ export function authRoutes(sql: Sql) {
       email: user.email as string,
       organization_id: membership.organization_id as string,
       roles: [membership.role as string],
+      is_system: isSystem,
     });
 
     return c.json({
@@ -139,6 +201,7 @@ export function authRoutes(sql: Sql) {
         email: user.email,
         display_name: user.display_name,
         organization_id: membership.organization_id,
+        is_system: isSystem,
       },
     });
   });
@@ -155,7 +218,14 @@ export function authRoutes(sql: Sql) {
       WHERE m.user_id = ${authUser.user_id}
     `;
 
-    return c.json({ ...user, memberships });
+    // Check if user has system org membership
+    const [systemMembership] = await sql`
+      SELECT 1 FROM memberships
+      WHERE user_id = ${authUser.user_id} AND organization_id = ${SYSTEM_ORG_ID}
+    `;
+    const isSystem = !!systemMembership;
+
+    return c.json({ ...user, memberships, is_system: isSystem });
   });
 
   // PATCH /profile — update user profile (language, timezone, display_name, avatar)
@@ -213,8 +283,12 @@ export function authRoutes(sql: Sql) {
       return c.json({ error: 'Not a member of this organization', error_key: 'auth.not_member' }, 403);
     }
 
-    // Check if the target org is the system org — if so, mark is_system
-    const isSystem = body.organization_id === '00000000-0000-0000-0000-000000000000';
+    // Check if user has system org membership (superadmin regardless of active org)
+    const [sysCheck] = await sql`
+      SELECT 1 FROM memberships
+      WHERE user_id = ${authUser.user_id} AND organization_id = ${SYSTEM_ORG_ID}
+    `;
+    const isSystem = !!sysCheck;
 
     // Get user's preferred language
     const [userRow] = await sql`SELECT preferred_language FROM users WHERE id = ${authUser.user_id}`;
