@@ -40,7 +40,14 @@ export class ApiError extends Error {
 
 // ===== AUTH =====
 export interface AuthResponse { token: string; user: User; }
-export interface User { id: string; email: string; display_name: string; organization_id?: string; }
+export interface Membership { organization_id: string; role: string; organization_name: string; }
+export interface User {
+  id: string; email: string; display_name: string; organization_id?: string;
+  preferred_language?: string; timezone?: string; avatar_url?: string; status?: string;
+  memberships?: Membership[];
+}
+export interface UpdateProfileInput { preferred_language?: string; timezone?: string; display_name?: string; avatar_url?: string; }
+export interface SwitchOrgResponse { token: string; organization: { id: string; name: string; role: string }; }
 
 export const api = {
   // Auth
@@ -49,6 +56,10 @@ export const api = {
   register: (email: string, password: string, display_name: string) =>
     request<AuthResponse>('/v1/auth/register', { method: 'POST', body: JSON.stringify({ email, password, display_name }) }),
   getProfile: () => request<User>('/v1/auth/profile'),
+  updateProfile: (data: UpdateProfileInput) =>
+    request<User>('/v1/auth/profile', { method: 'PATCH', body: JSON.stringify(data) }),
+  switchOrg: (organizationId: string) =>
+    request<SwitchOrgResponse>('/v1/auth/switch-org', { method: 'POST', body: JSON.stringify({ organization_id: organizationId }) }),
 
   // Cases
   listCases: () => request<Case[]>('/v1/cases'),

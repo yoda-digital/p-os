@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DndContext, DragOverlay, closestCorners, type DragStartEvent, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useKanban, useMoveCard } from '../../hooks/use-kanban';
 import { KanbanColumn } from './kanban-column';
@@ -14,13 +15,13 @@ import { Button } from '../common/button';
 import type { KanbanCard as KanbanCardType, KanbanColumnData } from '../../lib/api';
 
 const COLUMNS = [
-  { id: 'BACKLOG', label: 'Backlog', color: 'slate' },
-  { id: 'READY', label: 'Ready', color: 'blue' },
-  { id: 'ACTIVE', label: 'Active', color: 'emerald' },
-  { id: 'WAITING', label: 'Waiting', color: 'amber' },
-  { id: 'NEEDS_INPUT', label: 'Needs Input', color: 'orange' },
-  { id: 'VERIFY', label: 'Verify', color: 'purple' },
-  { id: 'DONE', label: 'Done', color: 'green' },
+  { id: 'BACKLOG', color: 'slate' },
+  { id: 'READY', color: 'blue' },
+  { id: 'ACTIVE', color: 'emerald' },
+  { id: 'WAITING', color: 'amber' },
+  { id: 'NEEDS_INPUT', color: 'orange' },
+  { id: 'VERIFY', color: 'purple' },
+  { id: 'DONE', color: 'green' },
 ] as const;
 
 const DRAG_COMMAND_MAP: Record<string, Record<string, string>> = {
@@ -33,6 +34,7 @@ const DRAG_COMMAND_MAP: Record<string, Record<string, string>> = {
 };
 
 export function KanbanBoard() {
+  const { t } = useTranslation('kanban');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: kanban, isLoading } = useKanban(caseId);
   const moveCard = useMoveCard(caseId!);
@@ -91,19 +93,19 @@ export function KanbanBoard() {
       <div className="flex items-center justify-between px-6 py-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <div className="flex items-center gap-2">
           <Kanban className="w-5 h-5 text-slate-500" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Kanban Board</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('board.title')}</h2>
         </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4" /> New Move
+          <Plus className="w-4 h-4" /> {t('board.new_move')}
         </Button>
       </div>
 
       {!hasCards && !isLoading ? (
         <EmptyState
           icon={<Kanban className="w-12 h-12" />}
-          title="No moves yet"
-          description="Create your first move to get started"
-          action={{ label: 'Create Move', onClick: () => setCreateOpen(true) }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          action={{ label: t('empty.action'), onClick: () => setCreateOpen(true) }}
         />
       ) : (
         <DndContext
@@ -118,7 +120,7 @@ export function KanbanBoard() {
                 <KanbanColumn
                   key={col.id}
                   id={col.id}
-                  label={col.label}
+                  label={t(`columns.${col.id}`)}
                   color={col.color}
                   cards={columns[col.id] || []}
                   onCardClick={openMoveDetail}

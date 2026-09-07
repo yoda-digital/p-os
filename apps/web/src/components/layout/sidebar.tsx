@@ -7,26 +7,28 @@ import {
   Kanban, Scale,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CreateCaseDialog } from '../case/create-case-dialog';
 
 const viewTabs = [
-  { path: 'kanban', label: 'Kanban', icon: Kanban },
-  { path: 'attention', label: 'Attention', icon: Bell },
-  { path: 'timeline', label: 'Timeline', icon: Clock },
-  { path: 'dependencies', label: 'Dependencies', icon: GitBranch },
-  { path: 'evidence', label: 'Evidence', icon: FileCheck },
-  { path: 'decisions', label: 'Decisions', icon: Scale },
-  { path: 'compliance', label: 'Compliance', icon: Shield },
-  { path: 'actors', label: 'Actors', icon: Users },
-  { path: 'resources', label: 'Resources', icon: Package },
-  { path: 'risk', label: 'Risk', icon: AlertTriangle },
-  { path: 'why', label: 'WHY', icon: HelpCircle },
-  { path: 'time-travel', label: 'Time Travel', icon: History },
-  { path: 'simulation', label: 'Simulation', icon: FlaskConical },
-  { path: 'intelligence', label: 'Intelligence', icon: BarChart3 },
-];
+  { path: 'kanban', key: 'kanban', icon: Kanban },
+  { path: 'attention', key: 'attention', icon: Bell },
+  { path: 'timeline', key: 'timeline', icon: Clock },
+  { path: 'dependencies', key: 'dependencies', icon: GitBranch },
+  { path: 'evidence', key: 'evidence', icon: FileCheck },
+  { path: 'decisions', key: 'decisions', icon: Scale },
+  { path: 'compliance', key: 'compliance', icon: Shield },
+  { path: 'actors', key: 'actors', icon: Users },
+  { path: 'resources', key: 'resources', icon: Package },
+  { path: 'risk', key: 'risk', icon: AlertTriangle },
+  { path: 'why', key: 'why', icon: HelpCircle },
+  { path: 'time-travel', key: 'time_travel', icon: History },
+  { path: 'simulation', key: 'simulation', icon: FlaskConical },
+  { path: 'intelligence', key: 'intelligence', icon: BarChart3 },
+] as const;
 
 export function Sidebar() {
+  const { t } = useTranslation('common');
   const { caseId } = useParams();
   const { data: cases } = useCases();
   const [createOpen, setCreateOpen] = useState(false);
@@ -37,7 +39,7 @@ export function Sidebar() {
         {/* Cases Section */}
         <div className="p-3 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">Cases</span>
+            <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">{t('nav.cases')}</span>
             <button
               onClick={() => setCreateOpen(true)}
               className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
@@ -63,7 +65,7 @@ export function Sidebar() {
               </NavLink>
             ))}
             {(!cases || cases.length === 0) && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 px-2 py-2">No cases yet</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 px-2 py-2">{t('actions.no_results')}</p>
             )}
           </div>
         </div>
@@ -71,8 +73,8 @@ export function Sidebar() {
         {/* View Tabs (when a case is selected) */}
         {caseId && (
           <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">
-            <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider px-2 mb-2 block">Views</span>
-            {viewTabs.map(({ path, label, icon: Icon }) => (
+            <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider px-2 mb-2 block">{t('nav.views')}</span>
+            {viewTabs.map(({ path, key, icon: Icon }) => (
               <NavLink
                 key={path}
                 to={`/cases/${caseId}/${path}`}
@@ -85,7 +87,7 @@ export function Sidebar() {
                 }
               >
                 <Icon className="w-4 h-4 shrink-0" />
-                {label}
+                {t(`nav_tabs.${key}`)}
               </NavLink>
             ))}
           </nav>
@@ -98,7 +100,7 @@ export function Sidebar() {
             className="flex items-center gap-2 px-2 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md"
           >
             <Settings className="w-4 h-4" />
-            All Cases
+            {t('nav.all_cases')}
           </NavLink>
         </div>
       </aside>

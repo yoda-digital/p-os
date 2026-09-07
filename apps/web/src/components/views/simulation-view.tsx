@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useSimulations } from '../../hooks/use-timeline';
 import { api, type CreateSimulationInput } from '../../lib/api';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,6 +14,8 @@ import { EmptyState } from '../common/empty-state';
 import { FlaskConical, Plus, GitFork, Clock } from 'lucide-react';
 
 export function SimulationView() {
+  const { t, i18n } = useTranslation('simulation');
+  const { t: tCommon } = useTranslation('common');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: simulations, isLoading } = useSimulations(caseId);
   const qc = useQueryClient();
@@ -45,10 +48,10 @@ export function SimulationView() {
   };
 
   const presets = [
-    'What if the deadline moves to next week?',
-    'What if a key person becomes unavailable?',
-    'What if we choose strategy B instead?',
-    'What if the budget is reduced by 30%?',
+    t('presets.deadline'),
+    t('presets.unavailable'),
+    t('presets.strategy_b'),
+    t('presets.budget'),
   ];
 
   return (
@@ -56,15 +59,15 @@ export function SimulationView() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FlaskConical className="w-5 h-5 text-slate-500" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Simulation</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
         </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4" /> New Simulation
+          <Plus className="w-4 h-4" /> {t('new_simulation')}
         </Button>
       </div>
 
       <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        Fork the case state to explore hypothetical scenarios without affecting canonical truth.
+        {t('intro')}
       </p>
 
       {/* Presets */}
@@ -83,9 +86,9 @@ export function SimulationView() {
       {(!simulations || simulations.length === 0) ? (
         <EmptyState
           icon={<FlaskConical className="w-12 h-12" />}
-          title="No simulations"
-          description="Create a simulation to explore what-if scenarios"
-          action={{ label: 'Create Simulation', onClick: () => setCreateOpen(true) }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          action={{ label: t('empty.action'), onClick: () => setCreateOpen(true) }}
         />
       ) : (
         <div className="space-y-4">
@@ -96,12 +99,12 @@ export function SimulationView() {
                   <GitFork className="w-4 h-4 text-purple-500" />
                   <h3 className="text-base font-medium text-slate-900 dark:text-white">{sim.title}</h3>
                 </div>
-                <Badge variant="purple">Simulation</Badge>
+                <Badge variant="purple">{t('card.badge')}</Badge>
               </div>
               {sim.description && <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{sim.description}</p>}
               {Array.isArray(sim.hypothetical_changes) && sim.hypothetical_changes.length > 0 && (
                 <div className="mb-3">
-                  <h4 className="text-xs font-semibold text-slate-500 mb-1">Hypothetical Changes:</h4>
+                  <h4 className="text-xs font-semibold text-slate-500 mb-1">{t('card.changes_title')}</h4>
                   <ul className="list-disc list-inside text-sm text-slate-600 dark:text-slate-400 space-y-1">
                     {sim.hypothetical_changes.map((c: any, i: number) => (
                       <li key={i}>{typeof c === 'string' ? c : c.description || JSON.stringify(c)}</li>
@@ -110,22 +113,22 @@ export function SimulationView() {
                 </div>
               )}
               <div className="flex items-center gap-4 text-xs text-slate-400">
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(sim.created_at).toLocaleString()}</span>
-                <Button size="sm" variant="secondary">Adopt Changes</Button>
+                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(sim.created_at).toLocaleString(i18n.language)}</span>
+                <Button size="sm" variant="secondary">{t('card.adopt')}</Button>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title="Create Simulation">
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title={t('create.title')}>
         <form onSubmit={handleCreate} className="space-y-4">
-          <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What if...?" required autoFocus />
-          <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the scenario..." />
-          <Textarea label="Hypothetical Changes (one per line)" value={changes} onChange={(e) => setChanges(e.target.value)} placeholder="Deadline extended by 2 weeks&#10;Lead developer unavailable" />
+          <Input label={t('create.title_label')} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('create.title_placeholder')} required autoFocus />
+          <Textarea label={t('create.description_label')} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('create.description_placeholder')} />
+          <Textarea label={t('create.changes_label')} value={changes} onChange={(e) => setChanges(e.target.value)} placeholder={t('create.changes_placeholder')} />
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button type="submit" loading={creating}>Create</Button>
+            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>{tCommon('actions.cancel')}</Button>
+            <Button type="submit" loading={creating}>{t('create.submit')}</Button>
           </div>
         </form>
       </Dialog>

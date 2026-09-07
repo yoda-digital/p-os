@@ -6,8 +6,12 @@ import { Sidebar } from './sidebar';
 import { Hexagon, LogOut, User } from 'lucide-react';
 import { Dropdown, DropdownItem } from '../common/dropdown';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../common/language-switcher';
+import { OrgSwitcher } from '../common/org-switcher';
 
 export function AppLayout() {
+  const { t } = useTranslation('common');
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const loadProfile = useAuthStore((s) => s.loadProfile);
@@ -28,22 +32,24 @@ export function AppLayout() {
           <div className="flex items-center gap-3">
             <Hexagon className="w-6 h-6 text-emerald-600" />
             <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              Universal Process OS
+              {t('app_name')}
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <OrgSwitcher />
+            <LanguageSwitcher />
             <Dropdown
               align="right"
               trigger={
                 <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-sm">
                   <User className="w-4 h-4 text-slate-500" />
-                  <span className="text-slate-700 dark:text-slate-300">{user?.display_name || user?.email || 'User'}</span>
+                  <span className="text-slate-700 dark:text-slate-300">{user?.display_name || user?.email || t('user.default_name')}</span>
                 </button>
               }
             >
               <DropdownItem onClick={logout}>
                 <span className="flex items-center gap-2">
-                  <LogOut className="w-4 h-4" /> Sign Out
+                  <LogOut className="w-4 h-4" /> {t('nav.sign_out')}
                 </span>
               </DropdownItem>
             </Dropdown>

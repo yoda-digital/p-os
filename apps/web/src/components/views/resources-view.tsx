@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { FullPageSpinner } from '../common/spinner';
 import { EmptyState } from '../common/empty-state';
@@ -7,6 +8,7 @@ import { Package, Gauge } from 'lucide-react';
 import { Badge } from '../common/badge';
 
 export function ResourcesView() {
+  const { t } = useTranslation('resources');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: resources, isLoading } = useQuery({
     queryKey: ['resources', caseId],
@@ -16,26 +18,26 @@ export function ResourcesView() {
 
   if (isLoading) return <FullPageSpinner />;
   if (!resources || resources.length === 0) {
-    return <EmptyState icon={<Package className="w-12 h-12" />} title="No resources" description="Resource tracking will appear here" />;
+    return <EmptyState icon={<Package className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />;
   }
 
   return (
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Package className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Resources</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Capacity</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Available</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Utilization</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Cost</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.name')}</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.type')}</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.capacity')}</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.available')}</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.utilization')}</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('table.cost')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

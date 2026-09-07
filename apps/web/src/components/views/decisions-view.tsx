@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useDecisions, useCreateDecision, useResolveDecision } from '../../hooks/use-decisions';
 import { Badge } from '../common/badge';
 import { Button } from '../common/button';
@@ -16,6 +17,8 @@ const stateVariant: Record<string, string> = {
 };
 
 export function DecisionsView() {
+  const { t } = useTranslation('decisions');
+  const { t: tCommon } = useTranslation('common');
   const { caseId } = useParams<{ caseId: string }>();
   const { data: decisions, isLoading } = useDecisions(caseId);
   const createDecision = useCreateDecision(caseId!);
@@ -52,10 +55,10 @@ export function DecisionsView() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Scale className="w-5 h-5 text-slate-500" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Decisions</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
         </div>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4" /> New Decision
+          <Plus className="w-4 h-4" /> {t('new_decision')}
         </Button>
       </div>
 
@@ -63,14 +66,14 @@ export function DecisionsView() {
       {pending.length > 0 && (
         <div className="mb-8">
           <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-            Pending ({pending.length})
+            {t('pending', { count: pending.length })}
           </h3>
           <div className="space-y-4">
             {pending.map(d => (
               <div key={d.id} className="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800 p-5">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="text-base font-medium text-slate-900 dark:text-white">{d.question}</h4>
-                  <Badge variant={stateVariant[d.state] as any}>{d.state.replace(/_/g, ' ')}</Badge>
+                  <Badge variant={stateVariant[d.state] as any}>{t(`state.${d.state}`, { defaultValue: d.state })}</Badge>
                 </div>
                 {d.context && <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{d.context}</p>}
 
@@ -87,7 +90,7 @@ export function DecisionsView() {
                           variant="secondary"
                           onClick={() => { setResolveId(d.id); setSelectedOption(opt.label); }}
                         >
-                          Select
+                          {t('select')}
                         </Button>
                       </div>
                     ))}
@@ -97,13 +100,13 @@ export function DecisionsView() {
                 {d.recommendation_confidence != null && (
                   <p className="text-xs text-slate-400 flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
-                    AI confidence: {(d.recommendation_confidence * 100).toFixed(0)}%
+                    {t('ai_confidence', { value: (d.recommendation_confidence * 100).toFixed(0) })}
                     {d.recommendation_rationale && ` — ${d.recommendation_rationale}`}
                   </p>
                 )}
 
                 {d.blocking_move_ids.length > 0 && (
-                  <p className="text-xs text-amber-600 mt-1">Blocking {d.blocking_move_ids.length} move(s)</p>
+                  <p className="text-xs text-amber-600 mt-1">{t('blocking_moves', { count: d.blocking_move_ids.length })}</p>
                 )}
               </div>
             ))}
@@ -115,7 +118,7 @@ export function DecisionsView() {
       {resolved.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-            Resolved ({resolved.length})
+            {t('resolved', { count: resolved.length })}
           </h3>
           <div className="space-y-3">
             {resolved.map(d => (
@@ -128,7 +131,7 @@ export function DecisionsView() {
                       {String(d.selected_option)} — {d.rationale}
                     </p>
                   </div>
-                  <Badge variant="success">Decided</Badge>
+                  <Badge variant="success">{t('state.decided')}</Badge>
                 </div>
               </div>
             ))}
@@ -139,33 +142,33 @@ export function DecisionsView() {
       {(!decisions || decisions.length === 0) && (
         <EmptyState
           icon={<Scale className="w-12 h-12" />}
-          title="No decisions"
-          description="Decisions will appear when the process requires human judgment"
-          action={{ label: 'Create Decision', onClick: () => setCreateOpen(true) }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          action={{ label: t('empty.action'), onClick: () => setCreateOpen(true) }}
         />
       )}
 
       {/* Create Dialog */}
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title="Create Decision">
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} title={t('create.title')}>
         <form onSubmit={handleCreate} className="space-y-4">
-          <Input label="Question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What needs to be decided?" required autoFocus />
-          <Textarea label="Context" value={context} onChange={(e) => setContext(e.target.value)} placeholder="Relevant background..." />
+          <Input label={t('create.question_label')} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={t('create.question_placeholder')} required autoFocus />
+          <Textarea label={t('create.context_label')} value={context} onChange={(e) => setContext(e.target.value)} placeholder={t('create.context_placeholder')} />
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button type="submit" loading={createDecision.isPending}>Create</Button>
+            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)}>{tCommon('actions.cancel')}</Button>
+            <Button type="submit" loading={createDecision.isPending}>{t('create.submit')}</Button>
           </div>
         </form>
       </Dialog>
 
       {/* Resolve Dialog */}
-      <Dialog open={!!resolveId} onClose={() => setResolveId(null)} title="Resolve Decision">
+      <Dialog open={!!resolveId} onClose={() => setResolveId(null)} title={t('resolve.title')}>
         <div className="space-y-4">
-          <p className="text-sm text-slate-600 dark:text-slate-400">Selected: <strong>{selectedOption}</strong></p>
-          <Textarea label="Rationale" value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder="Why this option?" />
+          <p className="text-sm text-slate-600 dark:text-slate-400">{t('resolve.selected')} <strong>{selectedOption}</strong></p>
+          <Textarea label={t('resolve.rationale_label')} value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder={t('resolve.rationale_placeholder')} />
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setResolveId(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setResolveId(null)}>{tCommon('actions.cancel')}</Button>
             <Button onClick={() => resolveId && handleResolve(resolveId, selectedOption)} loading={resolveDecision.isPending}>
-              Resolve
+              {t('resolve.submit')}
             </Button>
           </div>
         </div>

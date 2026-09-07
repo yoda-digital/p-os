@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Badge } from '../common/badge';
 import { FullPageSpinner } from '../common/spinner';
@@ -16,6 +17,7 @@ const classVariant: Record<string, string> = {
 };
 
 export function ActorsView() {
+  const { t } = useTranslation('actors');
   const { data: actors, isLoading } = useQuery({
     queryKey: ['actors'],
     queryFn: () => api.listActors(),
@@ -23,14 +25,14 @@ export function ActorsView() {
 
   if (isLoading) return <FullPageSpinner />;
   if (!actors || actors.length === 0) {
-    return <EmptyState icon={<Users className="w-12 h-12" />} title="No actors" description="Actors and agents will appear here" />;
+    return <EmptyState icon={<Users className="w-12 h-12" />} title={t('empty.title')} description={t('empty.description')} />;
   }
 
   return (
     <div className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Users className="w-5 h-5 text-slate-500" />
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Actors & Agents</h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('title')}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -44,7 +46,7 @@ export function ActorsView() {
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-slate-900 dark:text-white">{actor.display_name}</h4>
-                  <Badge variant={(classVariant[actor.class] || 'neutral') as any}>{actor.class.replace(/_/g, ' ')}</Badge>
+                  <Badge variant={(classVariant[actor.class] || 'neutral') as any}>{t(`class.${actor.class}`, { defaultValue: actor.class.replace(/_/g, ' ') })}</Badge>
                 </div>
               </div>
               {Array.isArray(actor.roles) && actor.roles.length > 0 && (

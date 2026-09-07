@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '../common/dialog';
 import { Input } from '../common/input';
 import { Textarea } from '../common/textarea';
@@ -7,16 +8,10 @@ import { Select } from '../common/select';
 import { Button } from '../common/button';
 import { useCreateCase } from '../../hooks/use-case';
 
-const CASE_TYPES = [
-  { value: 'general', label: 'General' },
-  { value: 'software', label: 'Software Development' },
-  { value: 'procurement', label: 'Procurement / Tender' },
-  { value: 'investigation', label: 'Investigation' },
-  { value: 'research', label: 'Research' },
-  { value: 'negotiation', label: 'Negotiation / Sales' },
-  { value: 'incident', label: 'Incident Response' },
-  { value: 'logistics', label: 'Physical Logistics' },
-];
+const CASE_TYPE_VALUES = [
+  'general', 'software', 'procurement', 'investigation',
+  'research', 'negotiation', 'incident', 'logistics',
+] as const;
 
 interface CreateCaseDialogProps {
   open: boolean;
@@ -24,6 +19,9 @@ interface CreateCaseDialogProps {
 }
 
 export function CreateCaseDialog({ open, onClose }: CreateCaseDialogProps) {
+  const { t } = useTranslation('cases');
+  const { t: tCommon } = useTranslation('common');
+  const CASE_TYPES = CASE_TYPE_VALUES.map((value) => ({ value, label: t(`types.${value}`) }));
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('general');
@@ -48,32 +46,32 @@ export function CreateCaseDialog({ open, onClose }: CreateCaseDialogProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} title="Create Case">
+    <Dialog open={open} onClose={onClose} title={t('create.title')}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Title"
+          label={t('create.title_label')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="What is this case about?"
+          placeholder={t('create.title_placeholder')}
           required
           autoFocus
         />
         <Textarea
-          label="Description"
+          label={t('create.description_label')}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe the situation..."
+          placeholder={t('create.description_placeholder')}
         />
-        <Select label="Type" value={type} onChange={(e) => setType(e.target.value)} options={CASE_TYPES} />
+        <Select label={t('create.type_label')} value={type} onChange={(e) => setType(e.target.value)} options={CASE_TYPES} />
         <Textarea
-          label="Primary Intent"
+          label={t('create.intent_label')}
           value={intentStatement}
           onChange={(e) => setIntentStatement(e.target.value)}
-          placeholder="What is this case trying to achieve?"
+          placeholder={t('create.intent_placeholder')}
         />
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button type="submit" loading={createCase.isPending}>Create Case</Button>
+          <Button type="button" variant="ghost" onClick={onClose}>{tCommon('actions.cancel')}</Button>
+          <Button type="submit" loading={createCase.isPending}>{t('create.submit')}</Button>
         </div>
       </form>
     </Dialog>
