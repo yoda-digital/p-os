@@ -42,6 +42,12 @@
         "type": "command",
         "command": "node plugin/claude-code/hooks/task-completed.js"
       }
+    ],
+    "SessionEnd": [
+      {
+        "type": "command",
+        "command": "node plugin/claude-code/hooks/session-end.js"
+      }
     ]
   }
 }
