@@ -90,7 +90,7 @@ export function simulationRoutes(sql: Sql) {
   app.post('/:id/adopt', async (c) => {
     const user = getUser(c);
     const id = c.req.param('id');
-    const body = await c.req.json<{ selected_event_ids?: string[]; confirm?: boolean }>().catch(() => ({}));
+    const body = await c.req.json<{ selected_event_ids?: string[]; confirm?: boolean }>().catch(() => ({ selected_event_ids: undefined as string[] | undefined, confirm: undefined as boolean | undefined }));
 
     const [fork] = await sql`SELECT * FROM simulation_forks WHERE id = ${id}`;
     if (!fork) return c.json({ error: 'Simulation fork not found' }, 404);

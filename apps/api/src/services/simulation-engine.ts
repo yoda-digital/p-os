@@ -119,7 +119,7 @@ export async function applyHypothetical(
     const id = crypto.randomUUID();
     const [row] = await sql`
       INSERT INTO simulation_events (id, simulation_id, type, data, sequence)
-      VALUES (${id}, ${simulationId}, ${evt.type}, ${sql.json(evt.data)}, ${nextSeq})
+      VALUES (${id}, ${simulationId}, ${evt.type}, ${sql.json(evt.data as any)}, ${nextSeq})
       RETURNING *
     `;
     inserted.push({
