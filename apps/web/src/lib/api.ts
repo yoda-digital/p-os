@@ -210,6 +210,13 @@ export const api = {
   createSimulation: (caseId: string, data: CreateSimulationInput) =>
     request<SimulationFork>('/v1/simulation', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
   listSimulations: (caseId: string) => request<SimulationFork[]>(`/v1/simulation?caseId=${caseId}`),
+  getSimulation: (simId: string) => request<SimulationFork>(`/v1/simulation/${simId}`),
+  applySimulationEvents: (simId: string, events: Array<{ type: string; data: Record<string, unknown> }>) =>
+    request<{ applied_count: number; events: unknown[] }>(`/v1/simulation/${simId}/apply`, { method: 'POST', body: JSON.stringify({ events }) }),
+  compareSimulation: (simId: string) =>
+    request<SimulationComparison>(`/v1/simulation/${simId}/compare`),
+  adoptSimulation: (simId: string, confirm: boolean, selectedEventIds?: string[]) =>
+    request<SimulationAdoptResult>(`/v1/simulation/${simId}/adopt`, { method: 'POST', body: JSON.stringify({ confirm, selected_event_ids: selectedEventIds }) }),
 
   // Search — API uses /v1/search?q=...&type=...
   search: (queryString: string) => request<SearchResponse>(`/v1/search?${queryString}`),
@@ -437,6 +444,8 @@ export interface HistoricalWhyResult { historical: boolean; at_sequence?: number
 
 export interface SimulationFork { id: string; source_case_id: string; fork_event_id?: string; title: string; description?: string; hypothetical_changes: unknown[]; created_at: string; }
 export interface CreateSimulationInput { title: string; description?: string; hypothetical_changes: unknown[]; fork_event_id?: string; }
+export interface SimulationComparison { simulation_id: string; differences: Array<{ type: 'added' | 'removed' | 'modified'; entity_type: string; entity_id: string; field?: string; canonical: unknown; simulated: unknown }>; }
+export interface SimulationAdoptResult { status: string; fork_id: string; adopted_count?: number; commands_created?: string[]; events_to_adopt?: number; events?: unknown[]; message?: string; }
 
 export interface SearchResultItem { id: string; type: string; title: string; description: string | null; case_id: string | null; relevance: number; created_at: string; metadata: Record<string, unknown>; }
 export interface SearchResponse { query: Record<string, unknown>; results: SearchResultItem[]; total: number; limit: number; offset: number; }
