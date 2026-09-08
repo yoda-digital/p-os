@@ -13,6 +13,8 @@ import { handleTaskCreated } from './task-created.js';
 import { handleTaskCompleted } from './task-completed.js';
 import { handlePreToolUse } from './pre-tool-use.js';
 import { handlePostToolUse } from './post-tool-use.js';
+import { handlePreCompact } from './pre-compact.js';
+import { handlePostCompact } from './post-compact.js';
 import { handleStop } from './stop.js';
 import { handleSessionEnd } from './session-end.js';
 
@@ -57,6 +59,8 @@ const handlers: Record<string, HookHandler> = {
   'task-completed': handleTaskCompleted,
   'pre-tool-use': handlePreToolUse,
   'post-tool-use': handlePostToolUse,
+  'pre-compact': handlePreCompact,
+  'post-compact': handlePostCompact,
   'stop': handleStop,
   'session-end': handleSessionEnd,
 };

@@ -114,10 +114,20 @@ function initSchema(database: Database.Database): void {
       last_blocked_at TEXT
     );
 
+    -- Context checkpoints for compact/resume recovery (spec §3.2)
+    CREATE TABLE IF NOT EXISTS context_checkpoints (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      case_id TEXT NOT NULL,
+      checkpoint_data TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_outbox_status ON outbox (status);
     CREATE INDEX IF NOT EXISTS idx_policy_mirror_expires_at ON policy_mirror (expires_at);
     CREATE INDEX IF NOT EXISTS idx_pending_steering_case_id ON pending_steering (case_id);
     CREATE INDEX IF NOT EXISTS idx_session_bindings_status ON session_bindings (status);
+    CREATE INDEX IF NOT EXISTS idx_context_checkpoints_session ON context_checkpoints (session_id, created_at DESC);
   `);
 }
 
