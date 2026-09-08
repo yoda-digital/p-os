@@ -44,3 +44,25 @@ export function useSteeringHistory(attemptId: string | undefined, moveId?: strin
     },
   });
 }
+
+/**
+ * Instruction version history for an attempt (spec §1.4).
+ * Each steering that is acknowledged creates a new instruction version,
+ * building a chronological record of how the instructions evolved.
+ */
+export interface InstructionVersion {
+  id: string;
+  attempt_id: string;
+  version: number;
+  instructions: string;
+  steering_id: string | null;
+  created_at: string;
+}
+
+export function useInstructionVersions(attemptId: string | undefined) {
+  return useQuery<InstructionVersion[]>({
+    queryKey: ['instruction-versions', attemptId],
+    queryFn: () => api.getInstructionVersions(attemptId!),
+    enabled: Boolean(attemptId),
+  });
+}

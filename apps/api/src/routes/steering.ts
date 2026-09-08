@@ -105,12 +105,28 @@ export function steeringRoutes(sql: Sql) {
       const updated = await updateSteeringStateTransactional(sql, id, 'acknowledged', {
         actorId: user.user_id,
       });
+
+      // Create an instruction version when steering is acknowledged (spec §1.4)
+      // Never rewrite prior instructions — each steering creates a new version.
+      await createInstructionVersion(sql, id);
+
       return c.json(updated);
     } catch (err) {
       if (err instanceof SteeringNotFoundError) return c.json({ error: err.message }, 404);
       if (err instanceof InvalidSteeringTransitionError) return c.json({ error: err.message }, 409);
       throw err;
     }
+  });
+
+  // GET /versions/:attemptId — instruction version history for an attempt
+  app.get('/versions/:attemptId', async (c) => {
+    const attemptId = c.req.param('attemptId');
+    const versions = await sql`
+      SELECT * FROM attempt_instruction_versions
+      WHERE attempt_id = ${attemptId}
+      ORDER BY version ASC
+    `;
+    return c.json(versions);
   });
 
   // GET / — steering history for an attempt or a move
@@ -125,4 +141,60 @@ export function steeringRoutes(sql: Sql) {
   });
 
   return app;
+}
+
+// ---------------------------------------------------------------------------
+// Instruction versioning (spec §1.4)
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a new instruction version when steering is acknowledged. Each
+ * steering creates a new version — we never rewrite prior instructions.
+ *
+ * E.g.:
+ *   Attempt #1 Instructions v1: "Implement auth module"
+ *   Attempt #1 Instructions v2: "Implement auth module. CONSTRAINT: Do not modify public API."
+ */
+async function createInstructionVersion(sql: Sql, steeringId: string): Promise<void> {
+  const [sc] = await sql`
+    SELECT sc.id, sc.attempt_id, sc.move_id, sc.instruction, sc.class,
+           m.objective
+    FROM steering_commands sc
+    JOIN moves m ON m.id = sc.move_id
+    WHERE sc.id = ${steeringId}
+  `;
+  if (!sc || !sc.attempt_id) return;
+
+  const attemptId = sc.attempt_id as string;
+
+  // Get the current highest version
+  const [maxRow] = await sql`
+    SELECT COALESCE(MAX(version), 0)::int AS max_version
+    FROM attempt_instruction_versions
+    WHERE attempt_id = ${attemptId}
+  `;
+  const nextVersion = (maxRow?.max_version ?? 0) + 1;
+
+  // Build the new instruction text: base objective + all applied steering
+  const appliedSteering = await sql`
+    SELECT class, instruction FROM steering_commands
+    WHERE attempt_id = ${attemptId}
+      AND state IN ('acknowledged', 'applied')
+    ORDER BY issued_at ASC
+  `;
+
+  const parts: string[] = [];
+  if (sc.objective) parts.push(sc.objective as string);
+
+  for (const s of appliedSteering) {
+    const prefix = s.class === 'constraint' ? 'CONSTRAINT' : s.class === 'redirect' ? 'REDIRECT' : 'STEERING';
+    parts.push(`${prefix}: ${s.instruction}`);
+  }
+
+  const fullInstructions = parts.join('. ');
+
+  await sql`
+    INSERT INTO attempt_instruction_versions (id, attempt_id, version, instructions, steering_id, created_at)
+    VALUES (${crypto.randomUUID()}, ${attemptId}, ${nextVersion}, ${fullInstructions}, ${steeringId}, NOW())
+  `;
 }

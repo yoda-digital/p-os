@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useMove, useAttempts } from '../../hooks/use-moves';
+import { useInstructionVersions } from '../../hooks/use-steering';
 import { Badge } from '../common/badge';
 import { Button } from '../common/button';
 import { SteeringComposer } from './steering-composer';
 import { Spinner } from '../common/spinner';
 import {
   X, Play, Pause, Square, GitFork, UserCheck, AlertTriangle,
-  Clock, Shield, CheckCircle2, Link2, HelpCircle,
+  Clock, Shield, CheckCircle2, Link2, HelpCircle, History,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useQueryClient } from '@tanstack/react-query';
@@ -164,6 +165,11 @@ export function MoveDetailDrawer({ open, onClose, moveId, caseId }: MoveDetailDr
               )}
             </div>
 
+            {/* Instruction Version History (spec §1.4) */}
+            {currentAttempt && (
+              <InstructionVersionHistory attemptId={currentAttempt.id} />
+            )}
+
             {/* Steering */}
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
               <SteeringComposer caseId={caseId} moveId={move.id} attemptId={currentAttempt?.id} />
@@ -179,6 +185,43 @@ export function MoveDetailDrawer({ open, onClose, moveId, caseId }: MoveDetailDr
         ) : (
           <div className="p-8 text-center text-slate-500">{t('drawer.not_found')}</div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Instruction Version History component
+// ---------------------------------------------------------------------------
+
+function InstructionVersionHistory({ attemptId }: { attemptId: string }) {
+  const { t, i18n } = useTranslation('steering');
+  const { data: versions, isLoading } = useInstructionVersions(attemptId);
+
+  if (isLoading || !versions || versions.length === 0) return null;
+
+  return (
+    <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+      <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider mb-2 flex items-center gap-1.5">
+        <History className="w-3.5 h-3.5" />
+        {t('drawer.instruction_versions', { defaultValue: 'Instruction Versions', count: versions.length })}
+      </h4>
+      <div className="space-y-2">
+        {versions.map((v) => (
+          <div key={v.id} className="bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('drawer.version_label', { defaultValue: 'v{{version}}', version: v.version })}
+              </span>
+              <span className="text-[10px] text-slate-400">
+                {new Date(v.created_at).toLocaleString(i18n.language)}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">
+              {v.instructions}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -58,6 +58,8 @@
     "model": "Model: {{value}}",
     "id": "ID: {{value}}",
     "created": "Creat: {{value}}",
-    "revision": "Revizie: {{value}}"
+    "revision": "Revizie: {{value}}",
+    "instruction_versions": "Versiuni instrucțiuni ({{count}})",
+    "version_label": "v{{version}}"
   }
 }

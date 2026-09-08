@@ -183,6 +183,8 @@ export const api = {
     const qs = params.attemptId ? `attemptId=${params.attemptId}` : `moveId=${params.moveId}`;
     return request<SteeringCommand[]>(`/v1/steering?${qs}`);
   },
+  getInstructionVersions: (attemptId: string) =>
+    request<InstructionVersion[]>(`/v1/steering/versions/${attemptId}`),
 
   // Time Travel — API uses /v1/time-travel?caseId=xxx
   getCaseAtEvent: (caseId: string, eventId: string) =>
@@ -413,6 +415,15 @@ export interface SteeringCommand {
 }
 
 export interface SendSteeringResult { status: string; steering_id: string; state: SteeringState; }
+
+export interface InstructionVersion {
+  id: string;
+  attempt_id: string;
+  version: number;
+  instructions: string;
+  steering_id: string | null;
+  created_at: string;
+}
 
 // ===== Admin =====
 export interface AdminOrganization {

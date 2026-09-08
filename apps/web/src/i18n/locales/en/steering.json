@@ -58,6 +58,8 @@
     "model": "Model: {{value}}",
     "id": "ID: {{value}}",
     "created": "Created: {{value}}",
-    "revision": "Revision: {{value}}"
+    "revision": "Revision: {{value}}",
+    "instruction_versions": "Instruction Versions ({{count}})",
+    "version_label": "v{{version}}"
   }
 }

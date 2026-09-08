@@ -58,6 +58,8 @@
     "model": "Модель: {{value}}",
     "id": "ID: {{value}}",
     "created": "Создано: {{value}}",
-    "revision": "Ревизия: {{value}}"
+    "revision": "Ревизия: {{value}}",
+    "instruction_versions": "Версии инструкций ({{count}})",
+    "version_label": "v{{version}}"
   }
 }
