@@ -8,28 +8,34 @@
     "human_attention_time": "Human Attention",
     "evidence_gaps": "Evidence Gaps",
     "completion_reliability": "Completion Reliability",
+    "cost": "Total Cost",
+    "executor_performance": "Executors",
     "context_rotations": "Context Rotations",
-    "steering_frequency": "Steering Frequency"
+    "steering_frequency": "Steering Commands"
   },
   "empty": {
     "title": "No metrics",
     "description": "Metrics will appear once the case has activity"
   },
   "drift": {
-    "title": "Process Drift ({{count}} deviations)",
+    "title": "Process Drift ({{count}} anomalies)",
     "type": "Type: {{value}}"
   },
   "severity": {
+    "critical": "critical",
     "high": "high",
     "medium": "medium",
     "low": "low"
   },
   "architect": {
     "title": "AI Process Architect",
-    "description": "Process analysis active. Suggestions will appear when patterns are detected in execution history."
+    "description": "Click Analyze to generate process optimization insights from metrics and drift patterns.",
+    "analyze": "Analyze",
+    "confidence": "{{value}}% confidence"
   },
   "guardian": {
     "title": "Process Guardian",
-    "description": "Monitoring for scope drift, policy breaches, stale evidence, deadline risk, and unauthorized work."
+    "description": "Click Check to scan for scope drift, policy breaches, stale evidence, deadline risk, unauthorized work, duplicate effort, and agent loops.",
+    "check": "Check"
   }
 }

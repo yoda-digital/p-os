@@ -1,35 +1,41 @@
 {
-  "title": "Inteligență de proces",
+  "title": "Inteligenta de proces",
   "metrics": {
     "cycle_time": "Timp de ciclu",
-    "waiting_time": "Timp de așteptare",
-    "rework_count": "Reluări",
-    "failed_attempts": "Încercări eșuate",
-    "human_attention_time": "Timp atenție umană",
+    "waiting_time": "Timp de asteptare",
+    "rework_count": "Reluari",
+    "failed_attempts": "Incercari esuate",
+    "human_attention_time": "Timp atentie umana",
     "evidence_gaps": "Lacune de dovezi",
     "completion_reliability": "Fiabilitate finalizare",
-    "context_rotations": "Rotații de context",
-    "steering_frequency": "Frecvență ghidare"
+    "cost": "Cost total",
+    "executor_performance": "Executori",
+    "context_rotations": "Rotatii de context",
+    "steering_frequency": "Comenzi de ghidare"
   },
   "empty": {
-    "title": "Nicio metrică",
-    "description": "Metricile vor apărea odată ce cazul are activitate"
+    "title": "Nicio metrica",
+    "description": "Metricile vor aparea odata ce cazul are activitate"
   },
   "drift": {
-    "title": "Deviere de proces ({{count}} devieri)",
+    "title": "Deviere de proces ({{count}} anomalii)",
     "type": "Tip: {{value}}"
   },
   "severity": {
+    "critical": "critica",
     "high": "ridicat",
     "medium": "mediu",
-    "low": "scăzut"
+    "low": "scazut"
   },
   "architect": {
     "title": "Arhitectul AI de proces",
-    "description": "Analiza procesului este activă. Sugestiile vor apărea când sunt detectate tipare în istoricul de execuție."
+    "description": "Click Analizeaza pentru a genera informatii de optimizare din metrici si tiparele de deviere.",
+    "analyze": "Analizeaza",
+    "confidence": "{{value}}% incredere"
   },
   "guardian": {
     "title": "Gardianul procesului",
-    "description": "Monitorizare pentru deviere de scop, încălcări de politică, dovezi expirate, risc de termen și lucru neautorizat."
+    "description": "Click Verifica pentru a scana devieri de scop, incalcari de politica, dovezi expirate, risc de termen, lucru neautorizat, efort duplicat si bucle de agent.",
+    "check": "Verifica"
   }
 }

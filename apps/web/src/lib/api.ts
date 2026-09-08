@@ -219,6 +219,14 @@ export const api = {
   // Process Intelligence — API uses /v1/intelligence?caseId=xxx
   getMetrics: (caseId: string) => request<ProcessMetrics>(`/v1/intelligence/metrics?caseId=${caseId}`),
   getDriftReport: (caseId: string) => request<DriftReport>(`/v1/intelligence/drift?caseId=${caseId}`),
+  analyzeProcess: (caseId: string) =>
+    request<ArchitectAnalysis>('/v1/intelligence/analyze', { method: 'POST', body: JSON.stringify({ caseId }) }),
+  runGuardianCheck: (caseId: string) =>
+    request<GuardianReport>('/v1/intelligence/guardian', { method: 'POST', body: JSON.stringify({ caseId }) }),
+  getInsights: (caseId: string, status?: string) =>
+    request<ProcessInsightRecord[]>(`/v1/intelligence/insights?caseId=${caseId}${status ? `&status=${status}` : ''}`),
+  updateInsight: (id: string, status: string) =>
+    request<ProcessInsightRecord>(`/v1/intelligence/insights/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
   // Process Packs
   listPacks: () => request<ProcessPack[]>('/v1/packs'),
@@ -433,9 +441,13 @@ export interface CreateSimulationInput { title: string; description?: string; hy
 export interface SearchResultItem { id: string; type: string; title: string; description: string | null; case_id: string | null; relevance: number; created_at: string; metadata: Record<string, unknown>; }
 export interface SearchResponse { query: Record<string, unknown>; results: SearchResultItem[]; total: number; limit: number; offset: number; }
 
-export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; rework_count: number; failed_attempts: number; human_attention_time?: string; evidence_gaps: number; completion_reliability?: number; cost?: unknown; executor_performance: Record<string, unknown>; context_rotations: number; steering_frequency: number; }
+export interface ProcessMetrics { case_id: string; computed_at: string; cycle_time_seconds?: number | null; waiting_time_seconds?: number | null; rework_count: number; failed_attempts: number; human_attention_time_seconds?: number | null; evidence_gaps: number; completion_reliability?: number | null; cost_usd?: number | null; executor_performance: Record<string, { total: number; succeeded: number; failed: number; avg_duration_seconds: number | null }>; context_rotations: number; steering_frequency: number; total_moves: number; completed_moves: number; active_moves: number; failed_moves: number; total_attempts: number; succeeded_attempts: number; }
 
-export interface DriftReport { expected_process: unknown; observed_process: unknown; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
+export interface DriftReport { case_id: string; computed_at: string; anomaly_count: number; anomalies: { type: string; description: string; severity: string; affected_move_ids: string[]; recommendation: string; evidence?: unknown }[]; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
+
+export interface ArchitectAnalysis { case_id: string; analyzed_at: string; insights: { type: string; recommendation: string; confidence: number; affected_move_ids: string[]; estimated_impact: string }[]; }
+export interface GuardianReport { case_id: string; checked_at: string; alert_count: number; alerts: { type: string; severity: string; description: string; affected_move_ids: string[]; recommended_action: string }[]; }
+export interface ProcessInsightRecord { id: string; case_id: string; type: string; source: string; recommendation: string; confidence: number; affected_move_ids: string[]; estimated_impact: string; status: string; created_at: string; }
 
 export interface ProcessPack { id: string; name: string; version: string; domain: string; created_at: string; }
 
