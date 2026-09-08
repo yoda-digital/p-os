@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMove, useAttempts } from '../../hooks/use-moves';
 import { Badge } from '../common/badge';
 import { Button } from '../common/button';
-import { SteeringPanel } from './steering-panel';
+import { SteeringComposer } from './steering-composer';
 import { Spinner } from '../common/spinner';
 import {
   X, Play, Pause, Square, GitFork, UserCheck, AlertTriangle,
@@ -36,6 +36,10 @@ export function MoveDetailDrawer({ open, onClose, moveId, caseId }: MoveDetailDr
   const qc = useQueryClient();
 
   if (!open) return null;
+
+  // The attempt steering targets: prefer a running attempt, else the most recent one
+  // (attempts are returned newest-first — see GET /v1/moves/:id/attempts).
+  const currentAttempt = attempts?.find((a) => a.state === 'running') ?? attempts?.[0];
 
   const handleAction = async (action: string) => {
     if (!moveId) return;
@@ -162,7 +166,7 @@ export function MoveDetailDrawer({ open, onClose, moveId, caseId }: MoveDetailDr
 
             {/* Steering */}
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-              <SteeringPanel caseId={caseId} moveId={move.id} />
+              <SteeringComposer caseId={caseId} moveId={move.id} attemptId={currentAttempt?.id} />
             </div>
 
             {/* Metadata */}

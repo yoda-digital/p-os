@@ -178,7 +178,11 @@ export const api = {
 
   // Steering
   sendSteering: (caseId: string, moveId: string, data: CreateSteeringInput) =>
-    request<void>('/v1/steering', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId, move_id: moveId }) }),
+    request<SendSteeringResult>('/v1/steering', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId, move_id: moveId }) }),
+  getSteeringHistory: (params: { attemptId?: string; moveId?: string }) => {
+    const qs = params.attemptId ? `attemptId=${params.attemptId}` : `moveId=${params.moveId}`;
+    return request<SteeringCommand[]>(`/v1/steering?${qs}`);
+  },
 
   // Time Travel — API uses /v1/time-travel?caseId=xxx
   getCaseAtEvent: (caseId: string, eventId: string) =>
@@ -389,6 +393,26 @@ export interface Attempt { id: string; case_id: string; move_id: string; executo
 export interface Resource { id: string; case_id: string; type: string; name: string; capacity?: unknown; available?: unknown; reserved?: unknown; cost_per_unit?: unknown; consumable: boolean; created_at: string; revision: number; }
 
 export interface CreateSteeringInput { class: string; instruction: string; attempt_id?: string; }
+
+export type SteeringClass = 'advisory' | 'constraint' | 'redirect' | 'pause' | 'hard_stop' | 'fork' | 'reassign';
+export type SteeringState = 'issued' | 'delivered_to_edge' | 'delivered_to_executor' | 'acknowledged' | 'applied';
+
+export interface SteeringCommand {
+  id: string;
+  case_id: string;
+  move_id: string;
+  attempt_id: string | null;
+  class: SteeringClass;
+  instruction: string;
+  state: SteeringState;
+  issued_by: string | null;
+  issued_at: string;
+  delivered_at: string | null;
+  acknowledged_at: string | null;
+  applied_at: string | null;
+}
+
+export interface SendSteeringResult { status: string; steering_id: string; state: SteeringState; }
 
 // ===== Admin =====
 export interface AdminOrganization {

@@ -23,6 +23,18 @@
     "acknowledged": "confirmată",
     "applied": "aplicată"
   },
+  "composer": {
+    "title": "Ghidează execuția",
+    "constraint_warning": "Această constrângere trebuie respectată — Claude nu o poate ignora.",
+    "hard_stop_warning": "Oprirea totală termină încercarea imediat. O sesiune interactivă nu poate fi oprită total — utilizatorul controlează terminalul.",
+    "error": "Trimiterea ghidării a eșuat. Încearcă din nou.",
+    "latest_delivery": "Stare livrare"
+  },
+  "history": {
+    "title": "Istoric ghidare",
+    "empty": "Nicio ghidare trimisă încă",
+    "issued_at": "Emis {{value}}"
+  },
   "drawer": {
     "title": "Detalii mutare",
     "not_found": "Mutare negăsită",
