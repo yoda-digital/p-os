@@ -197,7 +197,14 @@ export const api = {
   getCaseAtEvent: (caseId: string, eventId: string) =>
     request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&eventId=${eventId}`),
   getCaseAtTime: (caseId: string, timestamp: string) =>
-    request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&timestamp=${timestamp}`),
+    request<CaseSnapshot>(`/v1/time-travel/at-time?caseId=${caseId}&timestamp=${timestamp}`),
+  getTimeTravelDiff: (caseId: string, fromSeq: number, toSeq: number) =>
+    request<TimeTravelDiff>(`/v1/time-travel/diff?caseId=${caseId}&from=${fromSeq}&to=${toSeq}`),
+  historicalWhy: (caseId: string, question: string, atSequence: number, moveId?: string) =>
+    request<HistoricalWhyResult>('/v1/time-travel/historical-why', {
+      method: 'POST',
+      body: JSON.stringify({ caseId, question, atSequence, moveId }),
+    }),
 
   // Simulation — API uses /v1/simulation?caseId=xxx
   createSimulation: (caseId: string, data: CreateSimulationInput) =>
@@ -415,6 +422,10 @@ export interface TimelineEntry { event_id: string; case_id: string; occurred_at:
 export interface WhyExplanation { question: string; question_type?: string; causal_chain: { id: string; type: string; description: string; timestamp: string; actor_id?: string; caused_by?: string; data?: Record<string, unknown>; }[]; explanation: string; deterministic?: boolean; }
 
 export interface CaseSnapshot { case: Case; moves: Move[]; timestamp: string; event_id: string; }
+
+export interface TimeTravelDiffChange { type: 'added' | 'removed' | 'modified'; entity_type: string; entity_id: string; field?: string; before: unknown; after: unknown; }
+export interface TimeTravelDiff { case_id: string; from_sequence: number; to_sequence: number; events_between: number; changes: TimeTravelDiffChange[]; events: Array<{ id: string; type: string; sequence: number; occurred_at: string; actor_id?: string; summary: string }>; }
+export interface HistoricalWhyResult { historical: boolean; at_sequence?: number; at_time?: string; event_count: number; why_result: { question: string; question_type?: string; explanation: string; causal_chain: Array<{ id: string; type: string; description: string; timestamp: string }>; deterministic: boolean }; }
 
 export interface SimulationFork { id: string; source_case_id: string; fork_event_id?: string; title: string; description?: string; hypothetical_changes: unknown[]; created_at: string; }
 export interface CreateSimulationInput { title: string; description?: string; hypothetical_changes: unknown[]; fork_event_id?: string; }

@@ -16,5 +16,18 @@
     "case": "Case",
     "moves": "Moves ({{count}})",
     "select_prompt": "Select an event to view the snapshot"
+  },
+  "diff": {
+    "toggle": "Compare",
+    "select_from": "Click an event to set the FROM point",
+    "select_to": "Click another event to set the TO point (from: #{{from}})",
+    "comparing": "Comparing events #{{from}} to #{{to}}",
+    "title": "Changes from #{{from}} to #{{to}} ({{count}} changes)",
+    "no_changes": "No changes between selected events"
+  },
+  "historical_why": {
+    "title": "Ask WHY at this point in time",
+    "placeholder": "WHY was this move blocked at this point?",
+    "ask": "Ask Historical WHY"
   }
 }
