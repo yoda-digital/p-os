@@ -21,7 +21,7 @@ import type {
   ProgressReport,
   SteeringCommand,
   Evidence,
-} from '@pos/process-sdk/src/executor-contract.js';
+} from './executor-types.js';
 
 // ── Configuration ───────────────────────────────────────────────────
 

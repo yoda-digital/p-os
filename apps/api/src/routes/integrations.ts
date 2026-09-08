@@ -52,10 +52,12 @@ export function integrationRoutes(sql: Sql) {
     const [integration] = await sql`
       INSERT INTO integrations (organization_id, type, name, settings, event_mappings, created_by)
       VALUES (${user.organization_id}, ${type}, ${name},
-              ${sql.json(settings ?? {})}, ${sql.json(event_mappings ?? [])},
+              ${sql.json((settings ?? {}) as any)}, ${sql.json((event_mappings ?? []) as any)},
               ${user.user_id})
       RETURNING *
     `;
+
+    if (!integration) return c.json({ error: 'Failed to create integration' }, 500);
 
     // Auto-create a webhook endpoint for webhook-type integrations
     if (type === 'webhook' || type === 'github' || type === 'slack') {
@@ -65,14 +67,16 @@ export function integrationRoutes(sql: Sql) {
         VALUES (${integration.id}, ${secret})
         RETURNING id, secret
       `;
-      return c.json({
-        ...integration,
-        webhook_endpoint: {
-          id: endpoint.id,
-          secret: endpoint.secret,
-          url: `/api/v1/webhooks/${endpoint.id}`,
-        },
-      }, 201);
+      if (endpoint) {
+        return c.json({
+          ...integration,
+          webhook_endpoint: {
+            id: endpoint.id,
+            secret: endpoint.secret,
+            url: `/api/v1/webhooks/${endpoint.id}`,
+          },
+        }, 201);
+      }
     }
 
     return c.json(integration, 201);
@@ -115,8 +119,8 @@ export function integrationRoutes(sql: Sql) {
 
     const updates: Record<string, unknown> = {};
     if (body.name !== undefined) updates.name = body.name;
-    if (body.settings !== undefined) updates.settings = sql.json(body.settings);
-    if (body.event_mappings !== undefined) updates.event_mappings = sql.json(body.event_mappings);
+    if (body.settings !== undefined) updates.settings = sql.json(body.settings as any);
+    if (body.event_mappings !== undefined) updates.event_mappings = sql.json(body.event_mappings as any);
     if (body.active !== undefined) updates.active = body.active;
 
     if (Object.keys(updates).length === 0) {

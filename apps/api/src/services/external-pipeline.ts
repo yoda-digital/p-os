@@ -75,9 +75,10 @@ export class ExternalPipeline {
     // 1. Record the raw event
     const [externalEvent] = await this.sql`
       INSERT INTO external_events (integration_id, raw_payload, status)
-      VALUES (${raw.integration_id}, ${this.sql.json(raw.payload)}, 'pending')
+      VALUES (${raw.integration_id}, ${this.sql.json(raw.payload as any)}, 'pending')
       RETURNING id
     `;
+    if (!externalEvent) throw new Error('Failed to insert external event');
     const eventId = externalEvent.id as string;
 
     try {
@@ -89,7 +90,7 @@ export class ExternalPipeline {
         await this.sql`
           UPDATE external_events
           SET status = 'rejected',
-              interpreted_as = ${this.sql.json({ reason: 'unrecognized_event_type' })}
+              interpreted_as = ${this.sql.json({ reason: 'unrecognized_event_type' } as any)}
           WHERE id = ${eventId}
         `;
         return {
@@ -106,7 +107,7 @@ export class ExternalPipeline {
       await this.sql`
         UPDATE external_events
         SET status = ${gateResult.status},
-            interpreted_as = ${this.sql.json(interpretation)},
+            interpreted_as = ${this.sql.json(interpretation as any)},
             confidence = ${interpretation.confidence}
         WHERE id = ${eventId}
       `;
@@ -139,7 +140,7 @@ export class ExternalPipeline {
       await this.sql`
         UPDATE external_events
         SET status = 'review',
-            interpreted_as = ${this.sql.json({ error: String(err) })}
+            interpreted_as = ${this.sql.json({ error: String(err) } as any)}
         WHERE id = ${eventId}
       `;
 
@@ -210,9 +211,9 @@ export class ExternalPipeline {
   /**
    * List external events pending review.
    */
-  async listPendingReview(integrationId?: string, limit = 50): Promise<unknown[]> {
+  async listPendingReview(integrationId?: string, limit = 50): Promise<Record<string, unknown>[]> {
     if (integrationId) {
-      return this.sql`
+      const rows = await this.sql`
         SELECT e.*, i.name AS integration_name, i.type AS integration_type
         FROM external_events e
         JOIN integrations i ON i.id = e.integration_id
@@ -221,8 +222,9 @@ export class ExternalPipeline {
         ORDER BY e.created_at DESC
         LIMIT ${limit}
       `;
+      return rows as unknown as Record<string, unknown>[];
     }
-    return this.sql`
+    const rows = await this.sql`
       SELECT e.*, i.name AS integration_name, i.type AS integration_type
       FROM external_events e
       JOIN integrations i ON i.id = e.integration_id
@@ -230,6 +232,7 @@ export class ExternalPipeline {
       ORDER BY e.created_at DESC
       LIMIT ${limit}
     `;
+    return rows as unknown as Record<string, unknown>[];
   }
 
   // ── Interpretation Logic ──────────────────────────────────────────
@@ -464,7 +467,7 @@ export class ExternalPipeline {
           integration_id: raw.integration_id,
           interpretation: interpretation.proposed_data,
           confidence: interpretation.confidence,
-        })}
+        } as any)}
       )
     `;
 

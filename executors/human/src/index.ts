@@ -22,7 +22,7 @@ import type {
   ProgressReport,
   SteeringCommand,
   Evidence,
-} from '@pos/process-sdk/src/executor-contract.js';
+} from './executor-types.js';
 
 // ── Internal State ──────────────────────────────────────────────────
 
@@ -82,7 +82,7 @@ export class HumanExecutor implements ExecutorContract {
 
     // Check for required capabilities that only humans have
     const humanOnly = ['authority', 'judgment', 'negotiation', 'physical'];
-    const needsHuman = move.required_capabilities?.some((cap) => humanOnly.includes(cap));
+    const needsHuman = move.required_capabilities?.some((cap: string) => humanOnly.includes(cap));
     if (needsHuman) {
       return { accepted: true, reason: 'Move requires human-only capabilities' };
     }
