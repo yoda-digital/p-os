@@ -1,0 +1,35 @@
+{
+  "strategy": {
+    "current_session": "Current Session",
+    "fresh_session": "Fresh Session",
+    "background_session": "Background",
+    "subagent": "Subagent",
+    "agent_team": "Agent Team",
+    "dynamic_workflow": "Workflow",
+    "human": "Human",
+    "wait": "Wait"
+  },
+  "controls": {
+    "title": "Execution",
+    "loading": "Loading...",
+    "execute": "Execute",
+    "executing": "Executing...",
+    "stop": "Stop",
+    "stopping": "Stopping...",
+    "model": "Model: {{value}}",
+    "effort": "Effort: {{value}}",
+    "started": "Started {{value}}",
+    "execute_error": "Failed to trigger execution",
+    "stop_error": "Failed to stop execution",
+    "total_attempts": "{{count}} attempt(s) total"
+  },
+  "status": {
+    "dispatched": "Dispatched",
+    "queued": "Queued",
+    "queued_for_human": "Queued for Human",
+    "running": "Running",
+    "stopped": "Stopped",
+    "finished": "Finished",
+    "failed": "Failed"
+  }
+}

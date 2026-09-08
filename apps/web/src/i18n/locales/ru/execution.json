@@ -1,0 +1,35 @@
+{
+  "strategy": {
+    "current_session": "Текущая сессия",
+    "fresh_session": "Новая сессия",
+    "background_session": "Фоновый",
+    "subagent": "Субагент",
+    "agent_team": "Команда агентов",
+    "dynamic_workflow": "Динамический поток",
+    "human": "Человек",
+    "wait": "Ожидание"
+  },
+  "controls": {
+    "title": "Выполнение",
+    "loading": "Загрузка...",
+    "execute": "Выполнить",
+    "executing": "Выполняется...",
+    "stop": "Остановить",
+    "stopping": "Останавливается...",
+    "model": "Модель: {{value}}",
+    "effort": "Усилие: {{value}}",
+    "started": "Начато {{value}}",
+    "execute_error": "Не удалось запустить выполнение",
+    "stop_error": "Не удалось остановить выполнение",
+    "total_attempts": "{{count}} попыток(-ки) всего"
+  },
+  "status": {
+    "dispatched": "Отправлено",
+    "queued": "В очереди",
+    "queued_for_human": "Ожидание человека",
+    "running": "Выполняется",
+    "stopped": "Остановлено",
+    "finished": "Завершено",
+    "failed": "Ошибка"
+  }
+}

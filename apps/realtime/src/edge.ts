@@ -208,6 +208,67 @@ async function handleMessage(client: EdgeClient, raw: unknown): Promise<void> {
       break;
     }
 
+    // Session lifecycle events from the dispatcher
+    case 'session_started':
+    case 'session_ended':
+    case 'session_stopped':
+    case 'session_start_failed': {
+      const moveId = msg['moveId'] as string | undefined;
+      const caseId = msg['caseId'] as string | undefined;
+      const claudeJobId = msg['claudeJobId'] ?? msg['sessionId'];
+
+      if (moveId && caseId) {
+        // Update attempt record with claude_job_id and working directory
+        if (type === 'session_started' && claudeJobId) {
+          await sql`
+            UPDATE attempts SET
+              claude_job_id = ${claudeJobId as string},
+              working_directory = ${(msg['workingDirectory'] ?? null) as string | null},
+              worktree_path = ${(msg['worktreePath'] ?? null) as string | null},
+              model_used = ${(msg['model'] ?? null) as string | null},
+              state = 'running',
+              started_at = COALESCE(started_at, NOW())
+            WHERE move_id = ${moveId} AND state IN ('queued', 'starting')
+          `.catch((err) => console.error('[Edge] Failed to update attempt for session_started:', err));
+        }
+
+        if (type === 'session_ended' || type === 'session_stopped') {
+          await sql`
+            UPDATE attempts SET state = 'finished', ended_at = NOW()
+            WHERE move_id = ${moveId} AND state IN ('running', 'starting')
+          `.catch((err) => console.error('[Edge] Failed to update attempt for session end:', err));
+        }
+
+        if (type === 'session_start_failed') {
+          await sql`
+            UPDATE attempts SET state = 'failed', ended_at = NOW(),
+              failure_reason = ${(msg['error'] ?? 'Session launch failed') as string}
+            WHERE move_id = ${moveId} AND state IN ('queued', 'starting')
+          `.catch((err) => console.error('[Edge] Failed to update attempt for session failure:', err));
+        }
+      }
+      break;
+    }
+
+    // Session reconciliation report from dispatcher restart
+    case 'session_reconciliation':
+    case 'active_sessions_report': {
+      // Update edge_connections with active sessions
+      const sessions = msg['sessions'] ?? msg['activeSessions'];
+      if (Array.isArray(sessions)) {
+        client.activeSessions = sessions.map((s: any) => ({
+          id: s.sessionId ?? s.jobId,
+          case_id: s.caseId ?? s.case_id,
+          move_id: s.moveId ?? s.move_id,
+        }));
+        await sql`
+          UPDATE edge_connections SET active_sessions = ${sql.json(client.activeSessions as any)}, last_heartbeat_at = NOW()
+          WHERE device_id = ${client.deviceId}
+        `.catch(() => {});
+      }
+      break;
+    }
+
     default:
       // Unknown message type — ignore
       break;
@@ -302,6 +363,53 @@ async function transitionSteeringState(
   });
 
   return true;
+}
+
+// ── Execution dispatch — push StartMove / Stop commands to bound devices ──
+
+export async function dispatchPendingCommands(): Promise<void> {
+  if (edgeClients.size === 0) return;
+  const sql = getDb();
+
+  try {
+    const pending = await sql`
+      SELECT * FROM edge_commands
+      WHERE status = 'pending'
+      ORDER BY created_at ASC
+      LIMIT 50
+    `.catch(() => [] as any[]);
+
+    if (pending.length === 0) return;
+
+    for (const cmd of pending) {
+      const payload = cmd.payload as Record<string, unknown>;
+      const deviceId = cmd.device_id as string;
+      const cmdType = cmd.type as string;
+      let delivered = false;
+
+      for (const [, client] of edgeClients) {
+        if (client.ws.readyState !== WebSocket.OPEN) continue;
+        if (client.deviceId !== deviceId) continue;
+
+        client.ws.send(JSON.stringify({
+          type: cmdType,
+          id: cmd.id,
+          ...payload,
+        }));
+        delivered = true;
+        break;
+      }
+
+      if (delivered) {
+        await sql`
+          UPDATE edge_commands SET status = 'delivered', delivered_at = NOW()
+          WHERE id = ${cmd.id as string}
+        `.catch((err: unknown) => console.error('[Edge] Failed to mark command delivered:', err));
+      }
+    }
+  } catch (err) {
+    console.error('[Edge] Command dispatch error:', err);
+  }
 }
 
 // ── Steering dispatch — push pending steering commands to bound devices ──

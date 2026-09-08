@@ -33,6 +33,7 @@ import { caseAccessRoutes } from './routes/case-access.js';
 import { auditRoutes } from './routes/audit.js';
 import { adminRoutes } from './routes/admin.js';
 import { edgeRoutes } from './routes/edge.js';
+import { executionRoutes } from './routes/execution.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -111,6 +112,9 @@ async function main() {
   app.route('/api/v1/cases/:id/access', caseAccessRoutes(sql));
   app.route('/api/v1/cases/:caseId/teams', caseTeamRoutes(sql));
   app.route('/api/v1/audit', auditRoutes(sql));
+
+  // Execution routes (SP3 — managed execution)
+  app.route('/api/v1', executionRoutes(sql));
 
   // Admin routes (system org only)
   app.route('/api/v1/admin', adminRoutes(sql));
