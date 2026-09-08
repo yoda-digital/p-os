@@ -109,8 +109,8 @@ export function executionRoutes(sql: Sql) {
             device_id: device.device_id,
             strategy: plan.strategy,
             model: plan.model_hint,
-            plan,
-          })}
+            plan: plan as any,
+          } as any)}
         )
       `;
 
@@ -125,9 +125,9 @@ export function executionRoutes(sql: Sql) {
           ${sql.json({
             caseId,
             moveId,
-            executionPlan: plan,
+            executionPlan: plan as any,
             contextCapsule,
-          })},
+          } as any)},
           'pending',
           NOW()
         )

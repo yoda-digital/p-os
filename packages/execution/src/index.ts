@@ -11,9 +11,14 @@ export type ExecutionStrategy =
   | 'agent_team'
   | 'dynamic_workflow'
   | 'human'
-  | 'wait';
+  | 'wait'
+  // Aliases / extended strategies used by executor adapters
+  | 'same_session'
+  | 'worktree_session'
+  | 'api'
+  | 'webhook';
 
-export type ExecutorType = 'claude_code' | 'human' | 'webhook';
+export type ExecutorType = 'claude_code' | 'claude-code' | 'human' | 'webhook';
 
 export type SessionPolicy = 'fresh' | 'resume' | 'fork';
 

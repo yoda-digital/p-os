@@ -95,6 +95,21 @@ export async function handlePostToolUse(input: HookInput): Promise<HookResult> {
     }
   }
 
+  // ── Cross-session messaging (SP3 §4) ────────────────────────────────────
+  // Detect SendMessage tool usage to mirror into Process Events
+  if (toolName === 'SendMessage') {
+    const targetId = toolInput['agent_id'] ?? toolInput['session_id'] ?? toolInput['id'];
+    const messageText = toolInput['message'] ?? toolInput['text'] ?? toolInput['content'];
+    if (targetId && messageText) {
+      outbox.enqueue('CrossSessionMessage', {
+        ...base,
+        targetSessionId: String(targetId),
+        content: String(messageText),
+        messageType: 'handoff',
+      });
+    }
+  }
+
   // ── File write / edit evidence ──────────────────────────────────────────
   if (toolName === 'Write' || toolName === 'Edit') {
     const filePath = toolInput['file_path'] ?? toolInput['path'];
