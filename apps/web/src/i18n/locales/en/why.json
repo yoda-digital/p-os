@@ -1,18 +1,29 @@
 {
   "title": "WHY Explorer",
-  "intro": "Ask why any state exists. The system traces the causal chain through process history.",
+  "intro": "Ask why any state exists. The system traces the deterministic causal chain through process history — every answer is evidence-backed.",
+  "question_types": "Question Types",
   "presets": {
-    "blocked": "WHY is this move blocked?",
-    "not_ready": "WHY is this move not ready?",
-    "attention": "WHY does this require my attention?",
-    "stale_evidence": "WHY is evidence stale?",
-    "deferred": "WHY was this decision deferred?"
+    "blocked": "WHY is this blocked?",
+    "not_ready": "WHY is this not ready?",
+    "active": "WHY is this active?",
+    "done": "WHY is this done?",
+    "failed": "WHY did this fail?",
+    "this_agent": "WHY this agent?",
+    "this_model": "WHY this model?",
+    "this_task": "WHY this task?",
+    "changed": "WHY did this change?",
+    "requires_me": "WHY does this require me?"
   },
+  "move_id_label": "Target Move ID (optional)",
+  "move_id_placeholder": "Paste a move UUID to target a specific move...",
   "input_placeholder": "WHY is [move/state/decision] in [condition]?",
   "ask": "Ask",
   "error_fallback": "Failed to get explanation",
   "result": {
     "causal_chain": "Causal Chain",
-    "explanation": "Explanation"
+    "explanation": "Explanation",
+    "deterministic": "Deterministic",
+    "heuristic": "Heuristic",
+    "caused_by": "caused by"
   }
 }

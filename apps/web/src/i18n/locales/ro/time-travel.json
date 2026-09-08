@@ -1,11 +1,11 @@
 {
-  "title": "Călătorie în timp",
+  "title": "Calatorie in timp",
   "empty": {
     "title": "Niciun istoric",
-    "description": "Evenimentele vor apărea aici pe măsură ce cazul evoluează"
+    "description": "Evenimentele vor aparea aici pe masura ce cazul evolueaza"
   },
   "slider": {
-    "label": "Selectează eveniment ({{count}} total)"
+    "label": "Selecteaza eveniment ({{count}} total)"
   },
   "events": {
     "title": "Evenimente"
@@ -14,7 +14,20 @@
     "title": "Instantaneu de stare",
     "at_event": "Instantaneu la evenimentul {{id}}...",
     "case": "Caz",
-    "moves": "Mutări ({{count}})",
-    "select_prompt": "Selectează un eveniment pentru a vedea instantaneul"
+    "moves": "Mutari ({{count}})",
+    "select_prompt": "Selecteaza un eveniment pentru a vedea instantaneul"
+  },
+  "diff": {
+    "toggle": "Compara",
+    "select_from": "Click pe un eveniment pentru a seta punctul DE LA",
+    "select_to": "Click pe alt eveniment pentru a seta punctul PANA LA (de la: #{{from}})",
+    "comparing": "Comparatie intre evenimentele #{{from}} si #{{to}}",
+    "title": "Modificari de la #{{from}} la #{{to}} ({{count}} modificari)",
+    "no_changes": "Nicio modificare intre evenimentele selectate"
+  },
+  "historical_why": {
+    "title": "Intreaba DE CE la acest moment in timp",
+    "placeholder": "DE CE era blocata aceasta mutare la acest moment?",
+    "ask": "Intreaba DE CE Istoric"
   }
 }

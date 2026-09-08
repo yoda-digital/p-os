@@ -35,6 +35,7 @@ import { adminRoutes } from './routes/admin.js';
 import { edgeRoutes } from './routes/edge.js';
 import { executionRoutes } from './routes/execution.js';
 import { governanceRoutes } from './routes/governance.js';
+import { searchRoutes } from './routes/search.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -101,6 +102,7 @@ async function main() {
   app.route('/api/v1/time-travel', timeTravelRoutes(sql));
   app.route('/api/v1/simulation', simulationRoutes(sql));
   app.route('/api/v1/intelligence', intelligenceRoutes(sql));
+  app.route('/api/v1/search', searchRoutes(sql));
   app.route('/api/v1/packs', packRoutes(sql));
   app.route('/api/v1/commands', commandRoutes(sql));
 

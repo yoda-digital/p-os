@@ -1,31 +1,41 @@
 {
   "title": "Simulare",
-  "new_simulation": "Simulare nouă",
-  "intro": "Bifurcă starea cazului pentru a explora scenarii ipotetice fără a afecta adevărul canonic.",
+  "new_simulation": "Simulare noua",
+  "intro": "Bifurca starea cazului pentru a explora scenarii ipotetice fara a afecta adevarul canonic. Aplica evenimente, compara rezultatele si adopta modificarile explicit.",
   "presets": {
-    "deadline": "Ce se întâmplă dacă termenul limită se mută la săptămâna viitoare?",
-    "unavailable": "Ce se întâmplă dacă o persoană cheie devine indisponibilă?",
-    "strategy_b": "Ce se întâmplă dacă alegem strategia B în loc?",
-    "budget": "Ce se întâmplă dacă bugetul se reduce cu 30%?"
+    "deadline": "Ce se intampla daca termenul se muta la saptamana viitoare?",
+    "unavailable": "Ce se intampla daca o persoana cheie devine indisponibila?",
+    "strategy_b": "Ce se intampla daca alegem strategia B?",
+    "budget": "Ce se intampla daca bugetul se reduce cu 30%?"
   },
   "empty": {
     "title": "Nicio simulare",
-    "description": "Creează o simulare pentru a explora scenarii ipotetice",
-    "action": "Creează simulare"
+    "description": "Creeaza o simulare pentru a explora scenarii ipotetice",
+    "action": "Creeaza simulare"
   },
   "card": {
     "badge": "Simulare",
-    "changes_title": "Modificări ipotetice:",
-    "adopt": "Adoptă modificările"
+    "adopted": "Adoptata",
+    "changes_title": "Evenimente ipotetice:",
+    "adopt": "Adopta",
+    "compare": "Compara",
+    "add_event": "Adauga eveniment"
+  },
+  "apply": {
+    "type_label": "Tip eveniment",
+    "data_label": "Date eveniment (JSON)",
+    "submit": "Aplica eveniment"
+  },
+  "compare": {
+    "title": "Diferente ({{count}} modificari)",
+    "no_diff": "Nicio diferenta intre starea canonica si cea simulata"
   },
   "create": {
-    "title": "Creează simulare",
+    "title": "Creeaza simulare",
     "title_label": "Titlu",
-    "title_placeholder": "Ce se întâmplă dacă...?",
+    "title_placeholder": "Ce se intampla daca...?",
     "description_label": "Descriere",
     "description_placeholder": "Descrie scenariul...",
-    "changes_label": "Modificări ipotetice (una pe linie)",
-    "changes_placeholder": "Termenul extins cu 2 săptămâni\nDezvoltatorul principal indisponibil",
-    "submit": "Creează"
+    "submit": "Creeaza"
   }
 }

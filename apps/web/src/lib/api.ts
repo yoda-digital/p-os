@@ -197,16 +197,43 @@ export const api = {
   getCaseAtEvent: (caseId: string, eventId: string) =>
     request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&eventId=${eventId}`),
   getCaseAtTime: (caseId: string, timestamp: string) =>
-    request<CaseSnapshot>(`/v1/time-travel?caseId=${caseId}&timestamp=${timestamp}`),
+    request<CaseSnapshot>(`/v1/time-travel/at-time?caseId=${caseId}&timestamp=${timestamp}`),
+  getTimeTravelDiff: (caseId: string, fromSeq: number, toSeq: number) =>
+    request<TimeTravelDiff>(`/v1/time-travel/diff?caseId=${caseId}&from=${fromSeq}&to=${toSeq}`),
+  historicalWhy: (caseId: string, question: string, atSequence: number, moveId?: string) =>
+    request<HistoricalWhyResult>('/v1/time-travel/historical-why', {
+      method: 'POST',
+      body: JSON.stringify({ caseId, question, atSequence, moveId }),
+    }),
 
   // Simulation — API uses /v1/simulation?caseId=xxx
   createSimulation: (caseId: string, data: CreateSimulationInput) =>
     request<SimulationFork>('/v1/simulation', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
   listSimulations: (caseId: string) => request<SimulationFork[]>(`/v1/simulation?caseId=${caseId}`),
+  getSimulation: (simId: string) => request<SimulationFork>(`/v1/simulation/${simId}`),
+  applySimulationEvents: (simId: string, events: Array<{ type: string; data: Record<string, unknown> }>) =>
+    request<{ applied_count: number; events: unknown[] }>(`/v1/simulation/${simId}/apply`, { method: 'POST', body: JSON.stringify({ events }) }),
+  compareSimulation: (simId: string) =>
+    request<SimulationComparison>(`/v1/simulation/${simId}/compare`),
+  adoptSimulation: (simId: string, confirm: boolean, selectedEventIds?: string[]) =>
+    request<SimulationAdoptResult>(`/v1/simulation/${simId}/adopt`, { method: 'POST', body: JSON.stringify({ confirm, selected_event_ids: selectedEventIds }) }),
+
+  // Search — API uses /v1/search?q=...&type=...
+  search: (queryString: string) => request<SearchResponse>(`/v1/search?${queryString}`),
+  graphSearch: (sourceId: string, maxDepth?: number) =>
+    request<{ source_id: string; max_depth: number; results: SearchResultItem[] }>(`/v1/search/graph?sourceId=${sourceId}${maxDepth ? `&maxDepth=${maxDepth}` : ''}`),
 
   // Process Intelligence — API uses /v1/intelligence?caseId=xxx
   getMetrics: (caseId: string) => request<ProcessMetrics>(`/v1/intelligence/metrics?caseId=${caseId}`),
   getDriftReport: (caseId: string) => request<DriftReport>(`/v1/intelligence/drift?caseId=${caseId}`),
+  analyzeProcess: (caseId: string) =>
+    request<ArchitectAnalysis>('/v1/intelligence/analyze', { method: 'POST', body: JSON.stringify({ caseId }) }),
+  runGuardianCheck: (caseId: string) =>
+    request<GuardianReport>('/v1/intelligence/guardian', { method: 'POST', body: JSON.stringify({ caseId }) }),
+  getInsights: (caseId: string, status?: string) =>
+    request<ProcessInsightRecord[]>(`/v1/intelligence/insights?caseId=${caseId}${status ? `&status=${status}` : ''}`),
+  updateInsight: (id: string, status: string) =>
+    request<ProcessInsightRecord>(`/v1/intelligence/insights/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
   // Process Packs
   listPacks: () => request<ProcessPack[]>('/v1/packs'),
@@ -407,16 +434,29 @@ export interface AttentionItem { id: string; case_id: string; move_id?: string; 
 
 export interface TimelineEntry { event_id: string; case_id: string; occurred_at: string; type: string; actor_id?: string; summary: string; details: Record<string, unknown>; move_id?: string; attempt_id?: string; }
 
-export interface WhyExplanation { question: string; causal_chain: { id: string; type: string; description: string; timestamp: string; }[]; explanation: string; }
+export interface WhyExplanation { question: string; question_type?: string; causal_chain: { id: string; type: string; description: string; timestamp: string; actor_id?: string; caused_by?: string; data?: Record<string, unknown>; }[]; explanation: string; deterministic?: boolean; }
 
 export interface CaseSnapshot { case: Case; moves: Move[]; timestamp: string; event_id: string; }
 
+export interface TimeTravelDiffChange { type: 'added' | 'removed' | 'modified'; entity_type: string; entity_id: string; field?: string; before: unknown; after: unknown; }
+export interface TimeTravelDiff { case_id: string; from_sequence: number; to_sequence: number; events_between: number; changes: TimeTravelDiffChange[]; events: Array<{ id: string; type: string; sequence: number; occurred_at: string; actor_id?: string; summary: string }>; }
+export interface HistoricalWhyResult { historical: boolean; at_sequence?: number; at_time?: string; event_count: number; why_result: { question: string; question_type?: string; explanation: string; causal_chain: Array<{ id: string; type: string; description: string; timestamp: string }>; deterministic: boolean }; }
+
 export interface SimulationFork { id: string; source_case_id: string; fork_event_id?: string; title: string; description?: string; hypothetical_changes: unknown[]; created_at: string; }
 export interface CreateSimulationInput { title: string; description?: string; hypothetical_changes: unknown[]; fork_event_id?: string; }
+export interface SimulationComparison { simulation_id: string; differences: Array<{ type: 'added' | 'removed' | 'modified'; entity_type: string; entity_id: string; field?: string; canonical: unknown; simulated: unknown }>; }
+export interface SimulationAdoptResult { status: string; fork_id: string; adopted_count?: number; commands_created?: string[]; events_to_adopt?: number; events?: unknown[]; message?: string; }
 
-export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; rework_count: number; failed_attempts: number; human_attention_time?: string; evidence_gaps: number; completion_reliability?: number; cost?: unknown; executor_performance: Record<string, unknown>; context_rotations: number; steering_frequency: number; }
+export interface SearchResultItem { id: string; type: string; title: string; description: string | null; case_id: string | null; relevance: number; created_at: string; metadata: Record<string, unknown>; }
+export interface SearchResponse { query: Record<string, unknown>; results: SearchResultItem[]; total: number; limit: number; offset: number; }
 
-export interface DriftReport { expected_process: unknown; observed_process: unknown; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
+export interface ProcessMetrics { case_id: string; computed_at: string; cycle_time_seconds?: number | null; waiting_time_seconds?: number | null; rework_count: number; failed_attempts: number; human_attention_time_seconds?: number | null; evidence_gaps: number; completion_reliability?: number | null; cost_usd?: number | null; executor_performance: Record<string, { total: number; succeeded: number; failed: number; avg_duration_seconds: number | null }>; context_rotations: number; steering_frequency: number; total_moves: number; completed_moves: number; active_moves: number; failed_moves: number; total_attempts: number; succeeded_attempts: number; }
+
+export interface DriftReport { case_id: string; computed_at: string; anomaly_count: number; anomalies: { type: string; description: string; severity: string; affected_move_ids: string[]; recommendation: string; evidence?: unknown }[]; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
+
+export interface ArchitectAnalysis { case_id: string; analyzed_at: string; insights: { type: string; recommendation: string; confidence: number; affected_move_ids: string[]; estimated_impact: string }[]; }
+export interface GuardianReport { case_id: string; checked_at: string; alert_count: number; alerts: { type: string; severity: string; description: string; affected_move_ids: string[]; recommended_action: string }[]; }
+export interface ProcessInsightRecord { id: string; case_id: string; type: string; source: string; recommendation: string; confidence: number; affected_move_ids: string[]; estimated_impact: string; status: string; created_at: string; }
 
 export interface ProcessPack { id: string; name: string; version: string; domain: string; created_at: string; }
 

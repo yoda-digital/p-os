@@ -1,7 +1,7 @@
 {
   "title": "Simulation",
   "new_simulation": "New Simulation",
-  "intro": "Fork the case state to explore hypothetical scenarios without affecting canonical truth.",
+  "intro": "Fork the case state to explore hypothetical scenarios without affecting canonical truth. Apply events, compare outcomes, and adopt changes explicitly.",
   "presets": {
     "deadline": "What if the deadline moves to next week?",
     "unavailable": "What if a key person becomes unavailable?",
@@ -15,8 +15,20 @@
   },
   "card": {
     "badge": "Simulation",
-    "changes_title": "Hypothetical Changes:",
-    "adopt": "Adopt Changes"
+    "adopted": "Adopted",
+    "changes_title": "Hypothetical Events:",
+    "adopt": "Adopt",
+    "compare": "Compare",
+    "add_event": "Add Event"
+  },
+  "apply": {
+    "type_label": "Event Type",
+    "data_label": "Event Data (JSON)",
+    "submit": "Apply Event"
+  },
+  "compare": {
+    "title": "Differences ({{count}} changes)",
+    "no_diff": "No differences between canonical and simulated state"
   },
   "create": {
     "title": "Create Simulation",
@@ -24,8 +36,6 @@
     "title_placeholder": "What if...?",
     "description_label": "Description",
     "description_placeholder": "Describe the scenario...",
-    "changes_label": "Hypothetical Changes (one per line)",
-    "changes_placeholder": "Deadline extended by 2 weeks\nLead developer unavailable",
     "submit": "Create"
   }
 }
