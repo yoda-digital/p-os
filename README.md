@@ -17,6 +17,7 @@
   <a href="#what-this-is">What this is</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#features">Features</a> •
+  <a href="#configuring-integrations">Integrations</a> •
   <a href="#for-developers">For developers</a>
 </p>
 
@@ -216,6 +217,222 @@ Service worker with offline caching, mobile-optimized Attention and Decision vie
 
 ---
 
+## Configuring integrations
+
+All integrations are managed per-organization from the web UI at **Settings → Integrations** (`/settings/integrations`). External events flow through a single interpretation pipeline: raw event → semantic proposal → confidence/policy gate → accepted automatically or routed to human review.
+
+### GitHub
+
+Connect GitHub to sync PRs, commits, code reviews, and issues as process evidence and attention items.
+
+**Setup:**
+
+1. [Create a GitHub OAuth App](https://github.com/settings/developers) with the callback URL `<your-app-url>/api/v1/integrations/:id/github/callback`
+2. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in your environment
+3. In the web UI, go to Settings → Integrations → Add Integration → GitHub
+4. Click **Connect GitHub** — you'll be redirected to authorize with scope `repo,read:org`
+5. Copy the generated webhook URL and add it to your GitHub repository (Settings → Webhooks)
+
+**Webhook events to enable:** `pull_request`, `push`, `pull_request_review`, `issues`
+
+**Event mapping:**
+
+| GitHub event | Process interpretation | Confidence | Auto-accept |
+|---|---|---|---|
+| PR opened / merged / closed | `PRStateChanged` → Move evidence | 0.9 | ✅ Yes (low risk) |
+| Push (commits) | `CommitCreated` → Evidence | 0.95 | ✅ Yes (low risk) |
+| Code review submitted | `ReviewSubmitted` → Decision input | 0.85 | ❌ Always human review (decision) |
+| Issue opened / closed | `IssueStateChanged` → Attention | 0.85 | ✅ Yes (low risk) |
+
+**Priority escalation:** Issues with labels `urgent`, `critical`, `p0`, or `p1` get critical priority. Issues with a `bug` label get high priority.
+
+### Slack
+
+Connect Slack for notifications, interactive approval requests, and slash commands.
+
+**Setup:**
+
+1. [Create a Slack App](https://api.slack.com/apps) with these features:
+   - **Bot Token Scopes:** `chat:write`, `commands`
+   - **Slash Commands:** `/pos` pointed at `<your-app-url>/api/v1/webhooks/:hookId`
+   - **Event Subscriptions:** (optional) enable `message.channels` for message monitoring
+2. Install the app to your workspace and copy the **Bot User OAuth Token** (`xoxb-...`)
+3. In the web UI, go to Settings → Integrations → Add Integration → Slack
+4. Store the bot token in the integration credentials
+5. Copy the generated webhook URL for Slack's Event Subscriptions and Slash Commands request URL
+
+**Slash commands:**
+
+```
+/pos approve <move-id>   Submit approval for a move
+/pos status              Check current process status
+/pos attention           View your attention queue
+/pos help                Show available commands
+```
+
+**Outbound notifications:**
+
+| Notification type | Format |
+|---|---|
+| Status updates | Emoji-tagged messages (ℹ️ info, ⚠️ warning, ❌ error, ✅ success) |
+| Approval requests | Block Kit buttons: Approve, Reject, View in Process OS |
+| Process events | Semantic messages ("Release blocked" not "Task #417 changed") |
+
+### Email
+
+Connect email for inbound event parsing and outbound notifications.
+
+**Setup:**
+
+1. Configure an inbound email webhook via your provider (SendGrid Inbound Parse, Mailgun Routes, etc.)
+2. Point the provider's webhook at `<your-app-url>/api/v1/webhooks/:hookId`
+3. In the web UI, go to Settings → Integrations → Add Integration → Email
+4. Store your SMTP/API credentials in the integration config
+
+**Behavior:** Inbound emails are always routed to human review (confidence 0.4, high risk) — they are never auto-accepted. Email body is truncated to 2000 characters for storage.
+
+**Outbound capabilities:**
+
+- **Notification emails** — semantic event summaries
+- **Approval request emails** — HTML-formatted with a "Review & Decide" button
+- **Digest emails** — periodic summary of pending attention items, grouped by priority
+
+> **Note:** Outbound email sending requires an SMTP or email service provider in production. The current implementation logs to console.
+
+### Calendar
+
+Connect a calendar for deadline sync and availability checking.
+
+**Setup:**
+
+1. In the web UI, go to Settings → Integrations → Add Integration → Calendar
+2. Configure Google Calendar OAuth or CalDAV credentials
+3. Enable calendar push notifications pointed at `<your-app-url>/api/v1/webhooks/:hookId`
+
+**Capabilities:**
+
+| Feature | Description |
+|---|---|
+| Deadline sync | Creates calendar events for move deadlines with attendees and reminders |
+| Availability check | Queries free/busy API to find scheduling windows |
+| Slot finder | Finds the next available slot for all specified users within 7 days |
+| Change detection | Calendar updates feed through the interpretation pipeline (confidence 0.75, auto-accepted) |
+
+> **Note:** Calendar API integration requires a provider connection in production. The current implementation uses placeholder data.
+
+### Generic webhooks
+
+Accept events from any external system via HTTP webhook.
+
+**Setup:**
+
+1. In the web UI, go to Settings → Integrations → Add Integration → Webhook
+2. A webhook endpoint with a random secret is auto-generated
+3. Copy the URL and secret, configure them in the sending system
+
+**Authentication** (any one of these):
+
+| Method | How |
+|---|---|
+| Query parameter | `POST /api/v1/webhooks/:hookId?secret=YOUR_SECRET` |
+| Header | `x-webhook-secret: YOUR_SECRET` |
+| GitHub HMAC | `x-hub-signature-256` (HMAC-SHA256 of the request body) |
+
+**Behavior:** Generic webhook events get confidence 0.3 and medium risk, so they always go to human review. The payload is stored as-is in `external_events` for inspection.
+
+### External event pipeline
+
+All external events — regardless of source — pass through the same interpretation pipeline before affecting the process state.
+
+```
+External system → POST /webhooks/:hookId
+  → Record raw event in external_events table
+  → Interpret: map source + event_type → process event + confidence + risk
+  → Policy gate: check confidence against threshold
+  → Auto-accepted → creates process event (actor: system:external-pipeline)
+  → Below threshold → routed to human review queue
+```
+
+**Confidence thresholds by risk level:**
+
+| Risk | Threshold | Meaning |
+|---|---|---|
+| Low | 0.7 | Events with clear intent (commits, PR state changes) |
+| Medium | 0.85 | Events needing some interpretation (slash commands) |
+| High | 0.95 | Ambiguous events (emails, generic messages) |
+| Critical | 1.1 | Never auto-accepted — always requires human review |
+
+**Actions that always require human review** regardless of confidence: `decision`, `move_complete`, `budget_change`, `access_change`.
+
+**Human review API:**
+
+```bash
+# List events pending review
+GET /api/v1/integrations/review/pending
+
+# Accept or reject an event (with optional data override)
+POST /api/v1/integrations/review/:eventId
+  { "decision": "accepted" | "rejected", "override_data": { ... } }
+```
+
+### Device pairing (Edge connection)
+
+The Process Edge is a WSS connection between local Claude Code sessions and the control plane. Devices must pair before they can receive steering commands.
+
+**Pairing flow:**
+
+1. Run `/process:connect` in Claude Code (or the plugin auto-detects an unpaired device)
+2. A 6-character pairing code is generated (valid for 5 minutes)
+3. Open `<control-plane-url>/pair` in a browser, log in, enter the code
+4. A device JWT (30-day TTL) is issued and stored locally
+5. The device connects to the edge WebSocket at `/edge?token=<device_jwt>`
+
+**Edge message flow:**
+
+| Direction | Message types |
+|---|---|
+| Server → Device | `steering`, `start_move`, `stop`, `policy_update`, `pong` |
+| Device → Server | `handshake`, `heartbeat`, `session_update`, `ack`, `session_started/ended/stopped` |
+
+Reconnection uses exponential backoff (1s → 60s with jitter) and a 30-second heartbeat interval.
+
+### Push notifications (PWA)
+
+Semantic push notifications that tell you what happened, not what changed.
+
+**Setup:**
+
+1. Generate a VAPID key pair (`npx web-push generate-vapid-keys`)
+2. Set `VITE_VAPID_PUBLIC_KEY` in your environment
+3. Users opt-in via the browser notification prompt
+
+**Notification format:** "Release blocked. Security approval is now critical." — not "Task #417 changed status." Notifications are formatted per event type with computed severity.
+
+---
+
+## Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `4000` | API server port |
+| `REALTIME_PORT` | `4001` | WebSocket server port |
+| `JWT_SECRET` | dev secret | Shared secret for user + device JWTs. **Change in production.** |
+| `SUPERADMIN_EMAIL` | — | Auto-grant superadmin when this email registers |
+| `DATABASE_URL` | embedded | PostgreSQL connection string |
+| `CLAUDE_PLUGIN_DATA` | — | Plugin persistent data directory |
+| `APP_URL` | `http://localhost:3000` | Base URL for links in Slack messages and emails |
+| `GITHUB_CLIENT_ID` | — | GitHub OAuth App client ID |
+| `GITHUB_CLIENT_SECRET` | — | GitHub OAuth App client secret |
+| `VITE_VAPID_PUBLIC_KEY` | — | VAPID public key for Web Push API (client-side) |
+| `CONTROL_PLANE_URL` | `wss://control.pos.digital` | WSS URL for edge device connections |
+| `DEVICE_ID` | — | Unique device identifier (edge/dispatcher) |
+| `DEVICE_TOKEN` | — | Device auth JWT (edge/dispatcher) |
+| `POS_HEALTH_PORT` | `4002` | Dispatcher health endpoint port |
+| `POS_DATA_DIR` | `~/.pos` | Data directory for edge/dispatcher |
+| `START_DISPATCHER` | enabled | Set to `0` to skip dispatcher in dev |
+
+---
+
 ## For developers
 
 ### Project structure
@@ -291,16 +508,6 @@ npx tsx edge/dispatcher/src/cli/index.ts status     # Check daemon status
 npx tsx edge/dispatcher/src/cli/index.ts logs       # Tail daemon logs
 npx tsx edge/dispatcher/src/cli/index.ts uninstall  # Remove daemon
 ```
-
-### Environment variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `4000` | API server port |
-| `JWT_SECRET` | dev secret | Change in production |
-| `SUPERADMIN_EMAIL` | — | Auto-grant superadmin on register |
-| `DATABASE_URL` | embedded | PostgreSQL connection string |
-| `CLAUDE_PLUGIN_DATA` | — | Plugin persistent data directory |
 
 ### Design documents
 
