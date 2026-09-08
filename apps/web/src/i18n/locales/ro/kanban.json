@@ -49,7 +49,8 @@
     "assigned": "atribuit(e)",
     "evidence": "dovezi",
     "dependency": "dependență",
-    "dependencies": "dependențe"
+    "dependencies": "dependențe",
+    "verification_stale": "expirat"
   },
   "create_move": {
     "title": "Creează mutare",

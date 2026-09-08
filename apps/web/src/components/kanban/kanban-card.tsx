@@ -121,8 +121,16 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
 
         {/* Verification */}
         {card.verification !== 'not_required' && (
-          <Badge variant={card.verification === 'passed' ? 'success' : card.verification === 'failed' ? 'danger' : 'neutral'}>
-            <Shield className="w-3 h-3" /> {card.verification}
+          <Badge variant={
+            card.verification === 'passed' ? 'success'
+            : card.verification === 'failed' ? 'danger'
+            : card.verification === 'stale' ? 'warning'
+            : 'neutral'
+          }>
+            <Shield className="w-3 h-3" />
+            {card.verification === 'stale'
+              ? t('card.verification_stale', { defaultValue: 'stale' })
+              : card.verification}
           </Badge>
         )}
 

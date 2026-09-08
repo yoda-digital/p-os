@@ -9,6 +9,18 @@
     "disputed": "contestat",
     "unknown": "necunoscut"
   },
+  "validity": {
+    "valid": "valid",
+    "stale": "expirat",
+    "invalid": "invalid",
+    "disputed": "contestat",
+    "unknown": "necunoscut"
+  },
+  "staleness": {
+    "reason": "Dovada a expirat — poate fi necesară re-verificarea",
+    "expired": "Expirat",
+    "expires_in": "Expiră în {{value}}"
+  },
   "empty": {
     "title": "Nicio dovadă",
     "description": "Atașează dovezi pentru a susține sau verifica starea procesului",

@@ -237,6 +237,105 @@ async function periodicMaintenance(): Promise<void> {
   }
 }
 
+// ── Evidence staleness controller (spec §2.6) ───────────────────
+// Runs every 30 seconds: checks fresh_until timestamps on evidence,
+// marks expired ones stale, and propagates to dependent moves.
+
+async function evidenceStalenessLoop(): Promise<void> {
+  const sql = getDb();
+  try {
+    // 1. Find all open cases with evidence that might be stale
+    const cases = await sql`
+      SELECT DISTINCT e.case_id
+      FROM evidence e
+      JOIN cases c ON c.id = e.case_id
+      WHERE c.lifecycle = 'open'
+        AND e.fresh_until IS NOT NULL
+        AND e.fresh_until < NOW()
+        AND e.validity = 'valid'
+    `;
+
+    for (const row of cases) {
+      const caseId = row.case_id as string;
+      await sql.begin(async (tx) => {
+        // Mark expired evidence as stale
+        const expired = await tx`
+          SELECT e.id, e.case_id, c.organization_id AS tenant_id
+          FROM evidence e
+          JOIN cases c ON c.id = e.case_id
+          WHERE e.case_id = ${caseId}
+            AND e.fresh_until IS NOT NULL
+            AND e.fresh_until < NOW()
+            AND e.validity = 'valid'
+        `;
+
+        for (const ev of expired) {
+          await tx`
+            UPDATE evidence SET validity = 'stale', revision = revision + 1
+            WHERE id = ${ev.id} AND validity = 'valid'
+          `;
+
+          const eventId = crypto.randomUUID();
+          await tx`
+            INSERT INTO events (id, tenant_id, case_id, type, actor_id, occurred_at, causation_id, correlation_id, data)
+            VALUES (${eventId}, ${ev.tenant_id}, ${ev.case_id}, 'EvidenceStale', NULL, NOW(),
+                    ${eventId}, ${eventId},
+                    ${tx.json({ evidence_id: ev.id, reason: 'fresh_until expired' })})
+          `;
+          await tx`INSERT INTO event_outbox (event_id) VALUES (${eventId})`;
+        }
+
+        // Propagate: if evidence supporting a move's verification is now stale,
+        // set move verification to 'stale' and move to VERIFY column
+        const affectedMoves = await tx`
+          SELECT DISTINCT m.id AS move_id, c.organization_id AS tenant_id
+          FROM moves m
+          JOIN evidence e ON e.case_id = m.case_id
+            AND e.subject_refs @> jsonb_build_array(jsonb_build_object('id', m.id))
+          JOIN cases c ON c.id = m.case_id
+          WHERE m.case_id = ${caseId}
+            AND m.verification = 'passed'
+            AND e.validity = 'stale'
+        `;
+
+        for (const m of affectedMoves) {
+          await tx`
+            UPDATE moves SET verification = 'stale', revision = revision + 1
+            WHERE id = ${m.move_id} AND verification = 'passed'
+          `;
+          await tx`
+            UPDATE projection_kanban SET column_id = 'VERIFY', updated_at = NOW()
+            WHERE move_id = ${m.move_id} AND column_id != 'VERIFY'
+          `;
+
+          const eventId = crypto.randomUUID();
+          await tx`
+            INSERT INTO events (id, tenant_id, case_id, type, actor_id, occurred_at, causation_id, correlation_id, data)
+            VALUES (${eventId}, ${m.tenant_id}, ${caseId}, 'MoveVerificationInvalidated', NULL, NOW(),
+                    ${eventId}, ${eventId},
+                    ${tx.json({ move_id: m.move_id, reason: 'Supporting evidence became stale' })})
+          `;
+          await tx`INSERT INTO event_outbox (event_id) VALUES (${eventId})`;
+
+          // Raise attention
+          const attId = crypto.randomUUID();
+          await tx`
+            INSERT INTO projection_attention
+              (id, case_id, move_id, priority, reason, action_required,
+               actor_ids, blocking_impact, resolved, created_at, updated_at)
+            VALUES (${attId}, ${caseId}, ${m.move_id}, 'high',
+                    'Evidence staleness — re-verification needed',
+                    'Review and re-verify move evidence',
+                    '{}', 0, false, NOW(), NOW())
+          `;
+        }
+      });
+    }
+  } catch (err) {
+    console.error('[Worker] Evidence staleness check error:', err);
+  }
+}
+
 // ── Boot ─────────────────────────────────────────────────────────
 
 async function seedLastProcessedId(): Promise<void> {
@@ -268,12 +367,16 @@ async function main(): Promise<void> {
   // Slow maintenance (deadlines, cleanup) every 60s
   const maintenanceTimer = setInterval(periodicMaintenance, 60_000);
 
+  // Evidence staleness check every 30s (spec §2.6)
+  const stalenessTimer = setInterval(evidenceStalenessLoop, 30_000);
+
   console.log(`[Worker] Polling every ${POLL_INTERVAL}ms for events...`);
 
   const shutdown = () => {
     console.log('[Worker] Shutting down...');
     clearInterval(pollTimer);
     clearInterval(maintenanceTimer);
+    clearInterval(stalenessTimer);
     process.exit(0);
   };
 

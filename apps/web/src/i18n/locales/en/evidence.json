@@ -9,6 +9,18 @@
     "disputed": "disputed",
     "unknown": "unknown"
   },
+  "validity": {
+    "valid": "valid",
+    "stale": "stale",
+    "invalid": "invalid",
+    "disputed": "disputed",
+    "unknown": "unknown"
+  },
+  "staleness": {
+    "reason": "Evidence has become stale — re-verification may be needed",
+    "expired": "Expired",
+    "expires_in": "Expires in {{value}}"
+  },
   "empty": {
     "title": "No evidence",
     "description": "Attach evidence to support or verify process state",

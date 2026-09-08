@@ -23,6 +23,18 @@
     "acknowledged": "acknowledged",
     "applied": "applied"
   },
+  "composer": {
+    "title": "Steer Execution",
+    "constraint_warning": "This constraint must be followed — Claude cannot ignore it.",
+    "hard_stop_warning": "Hard stop terminates the attempt immediately. Cannot hard-stop an interactive session — the user controls the terminal.",
+    "error": "Failed to send steering. Please try again.",
+    "latest_delivery": "Delivery status"
+  },
+  "history": {
+    "title": "Steering History",
+    "empty": "No steering sent yet",
+    "issued_at": "Issued {{value}}"
+  },
   "drawer": {
     "title": "Move Detail",
     "not_found": "Move not found",
@@ -46,6 +58,8 @@
     "model": "Model: {{value}}",
     "id": "ID: {{value}}",
     "created": "Created: {{value}}",
-    "revision": "Revision: {{value}}"
+    "revision": "Revision: {{value}}",
+    "instruction_versions": "Instruction Versions ({{count}})",
+    "version_label": "v{{version}}"
   }
 }
