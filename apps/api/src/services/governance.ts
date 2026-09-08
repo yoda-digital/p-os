@@ -368,7 +368,7 @@ export async function recordGovernanceOverride(
       ${id}, ${params.case_id}, ${params.organization_id}, ${params.actor_id},
       ${params.action}, ${params.original_recommendation}, ${params.actual_decision},
       ${params.justification}, ${params.override_type ?? 'policy'},
-      ${sql.json(params.metadata ?? {})}
+      ${sql.json(params.metadata ?? {} as any)}
     )
   `;
 
@@ -397,7 +397,7 @@ export async function recordGovernanceOverride(
 export async function getGovernanceOverrides(
   sql: Sql,
   params: { case_id?: string; organization_id?: string; limit?: number; offset?: number }
-): Promise<unknown[]> {
+): Promise<readonly unknown[]> {
   const limit = params.limit ?? 50;
   const offset = params.offset ?? 0;
 

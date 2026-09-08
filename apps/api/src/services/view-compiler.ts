@@ -104,7 +104,7 @@ export async function compileViews(
     if (packId || packDomain) {
       const [pack] = packId
         ? await sql`SELECT views FROM process_packs WHERE id = ${packId}`
-        : await sql`SELECT views FROM process_packs WHERE domain = ${packDomain} LIMIT 1`;
+        : await sql`SELECT views FROM process_packs WHERE domain = ${packDomain!} LIMIT 1`;
 
       if (pack?.views && Array.isArray(pack.views)) {
         packViewOrder = pack.views as string[];

@@ -25,7 +25,7 @@ export function decisionRoutes(sql: Sql) {
 
     // Fetch linked evidence for each option
     const evidenceRefs = (decision.evidence_refs as string[]) ?? [];
-    let evidence: unknown[] = [];
+    let evidence: readonly unknown[] = [];
     if (evidenceRefs.length > 0) {
       evidence = await sql`SELECT id, relation, confidence, validity, observed_at FROM evidence WHERE id = ANY(${evidenceRefs})`;
     }
