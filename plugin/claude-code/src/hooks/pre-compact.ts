@@ -36,9 +36,9 @@ export async function handlePreCompact(input: HookInput): Promise<HookResult> {
 
   // Build and save checkpoint from current cached state
   const checkpoint = buildCheckpointFromCache(sessionId, {
-    case_id: binding.case_id,
-    move_id: binding.move_id,
-    attempt_id: binding.attempt_id,
+    case_id: binding.case_id!,
+    move_id: binding.move_id ?? undefined,
+    attempt_id: binding.attempt_id ?? undefined,
   });
 
   saveCheckpoint(sessionId, checkpoint);

@@ -61,7 +61,11 @@ export async function handleTaskCompleted(input: HookInput): Promise<HookResult>
   const contract = loadCompletionContract(binding.move_id ?? '');
 
   if (contract) {
-    const result = evaluateLocalContract(contract, binding);
+    const result = evaluateLocalContract(contract, {
+      case_id: binding.case_id!,
+      move_id: binding.move_id ?? undefined,
+      attempt_id: binding.attempt_id ?? undefined,
+    });
     if (!result.satisfied) {
       return {
         decision: 'block',

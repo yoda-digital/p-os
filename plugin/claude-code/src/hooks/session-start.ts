@@ -13,8 +13,7 @@
 import type { HookInput, HookResult } from './handler.js';
 import { extractSessionId } from './handler.js';
 import { DeviceStore } from '../storage/device.js';
-import { SessionStore } from '../storage/sessions.js';
-import type { SessionBinding } from '../storage/sessions.js';
+import { SessionStore, type SessionBinding } from '../storage/sessions.js';
 import { getLocalDb } from '../storage/db.js';
 import { loadCheckpoint, loadCheckpointByCase } from '../context/checkpoint.js';
 import { decideResumeStrategy } from '../context/resume-intelligence.js';
@@ -73,28 +72,36 @@ export async function handleSessionStart(input: HookInput): Promise<HookResult> 
   }
 
   // ── Route by initiation_source ──────────────────────────────────────────
+  // Narrow to non-null for downstream — we checked binding.case_id above
+  const safeBinding = {
+    ...binding,
+    case_id: binding.case_id!,
+    move_id: binding.move_id ?? undefined,
+    attempt_id: binding.attempt_id ?? undefined,
+  };
+
   let sections: string[];
   switch (initiationSource) {
     case 'resume':
-      sections = buildResumeContext(sessionId, binding);
+      sections = buildResumeContext(sessionId, safeBinding);
       break;
 
     case 'clear':
       // CRITICAL: clear MUST restore all constraints — this is a safety gate
-      sections = buildFullContext(binding, { forceFull: true, label: 'CLEAR RECOVERY' });
+      sections = buildFullContext(safeBinding, { forceFull: true, label: 'CLEAR RECOVERY' });
       break;
 
     case 'compact':
-      sections = buildCompactRecoveryContext(sessionId, binding);
+      sections = buildCompactRecoveryContext(sessionId, safeBinding);
       break;
 
     case 'fork':
-      sections = buildForkContext(input, binding);
+      sections = buildForkContext(input, safeBinding);
       break;
 
     case 'new':
     default:
-      sections = buildFullContext(binding);
+      sections = buildFullContext(safeBinding);
       break;
   }
 
@@ -114,11 +121,22 @@ export async function handleSessionStart(input: HookInput): Promise<HookResult> 
     });
   }
 
-  const caseData = loadCaseFromCache(binding.case_id);
+  const caseData = loadCaseFromCache(safeBinding.case_id);
   return {
     additionalContext: sections.join('\n'),
-    sessionTitle: `Case: ${caseData?.title ?? binding.case_id}`,
+    sessionTitle: `Case: ${caseData?.title ?? safeBinding.case_id}`,
   };
+}
+
+/** Narrowed binding type after null-check on case_id. */
+interface SafeBinding {
+  case_id: string;
+  move_id?: string;
+  attempt_id?: string;
+  workspace_path?: string | null;
+  session_id?: string;
+  bound_at?: string | null;
+  status?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -126,7 +144,7 @@ export async function handleSessionStart(input: HookInput): Promise<HookResult> 
 // ---------------------------------------------------------------------------
 
 function buildFullContext(
-  binding: SessionBinding,
+  binding: SafeBinding,
   opts?: { forceFull?: boolean; label?: string },
 ): string[] {
   const caseData = loadCaseFromCache(binding.case_id);
@@ -188,7 +206,7 @@ function buildFullContext(
 
 function buildResumeContext(
   sessionId: string,
-  binding: SessionBinding,
+  binding: SafeBinding,
 ): string[] {
   // Assess how long we've been away and how much happened
   const checkpoint = sessionId ? loadCheckpoint(sessionId) : null;
@@ -241,7 +259,7 @@ function buildResumeContext(
 
 function buildCompactRecoveryContext(
   sessionId: string,
-  binding: SessionBinding,
+  binding: SafeBinding,
 ): string[] {
   // Load checkpoint saved by PreCompact
   const checkpoint = sessionId ? loadCheckpoint(sessionId) : null;
@@ -310,7 +328,7 @@ function buildCompactRecoveryContext(
 
 function buildForkContext(
   input: HookInput,
-  binding: SessionBinding,
+  binding: SafeBinding,
 ): string[] {
   // Fork includes parent attempt context + divergence point
   const parentAttemptId = (input['parent_attempt_id'] as string) ??
