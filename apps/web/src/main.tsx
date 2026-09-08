@@ -25,3 +25,17 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+
+// ── PWA Service Worker Registration (SP6 §3.3) ─────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('[PWA] Service worker registered:', registration.scope);
+      })
+      .catch((err) => {
+        console.log('[PWA] Service worker registration skipped:', err.message);
+      });
+  });
+}

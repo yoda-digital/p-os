@@ -36,6 +36,8 @@ import { edgeRoutes } from './routes/edge.js';
 import { executionRoutes } from './routes/execution.js';
 import { governanceRoutes } from './routes/governance.js';
 import { searchRoutes } from './routes/search.js';
+import { integrationRoutes } from './routes/integrations.js';
+import { webhookRoutes } from './routes/webhooks.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -121,6 +123,10 @@ async function main() {
 
   // Governance routes (SP4 — autonomy, budget, authority)
   app.route('/api/v1/governance', governanceRoutes(sql));
+
+  // Integrations routes (SP6 — external integrations)
+  app.route('/api/v1/integrations', integrationRoutes(sql));
+  app.route('/api/v1/webhooks', webhookRoutes(sql));
 
   // Admin routes (system org only)
   app.route('/api/v1/admin', adminRoutes(sql));

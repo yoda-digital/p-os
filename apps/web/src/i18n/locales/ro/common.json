@@ -53,7 +53,16 @@
     "ask": "Întreabă",
     "send": "Trimite",
     "attach": "Atașează",
-    "resolve": "Rezolvă"
+    "resolve": "Rezolvă",
+    "copy": "Copiază",
+    "copied": "Copiat"
+  },
+  "filters": {
+    "all": "Toate",
+    "critical": "Critice",
+    "high": "Înaltă",
+    "medium": "Medie",
+    "low": "Scăzută"
   },
   "status": {
     "open": "deschis",

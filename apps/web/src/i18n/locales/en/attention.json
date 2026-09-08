@@ -15,5 +15,7 @@
     "blocking_impact": "Blocking {{count}} move",
     "blocking_impact_plural": "Blocking {{count}} moves",
     "view": "View"
-  }
+  },
+  "empty_mobile": "Nothing needs your attention",
+  "empty_mobile_description": "All caught up. Check back later."
 }

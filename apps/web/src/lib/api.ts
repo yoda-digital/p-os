@@ -323,6 +323,33 @@ export const api = {
     request<Policy>(`/v1/policies/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deletePolicy: (id: string) => request<void>(`/v1/policies/${id}`, { method: 'DELETE' }),
 
+  // ===== Integrations (SP6) =====
+  listIntegrations: () => request<any[]>('/v1/integrations'),
+  getIntegration: (id: string) => request<any>(`/v1/integrations/${id}`),
+  createIntegration: (data: { type: string; name: string; settings?: Record<string, unknown> }) =>
+    request<any>('/v1/integrations', { method: 'POST', body: JSON.stringify(data) }),
+  updateIntegration: (id: string, data: Record<string, unknown>) =>
+    request<any>(`/v1/integrations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteIntegration: (id: string) =>
+    request<void>(`/v1/integrations/${id}`, { method: 'DELETE' }),
+  testIntegration: (id: string) =>
+    request<{ success: boolean; message: string; latency_ms?: number }>(`/v1/integrations/${id}/test`, { method: 'POST' }),
+  getIntegrationEvents: (id: string, limit?: number) =>
+    request<any[]>(`/v1/integrations/${id}/events${limit ? `?limit=${limit}` : ''}`),
+  listPendingReviews: () => request<any[]>('/v1/integrations/review/pending'),
+  reviewExternalEvent: (eventId: string, decision: 'accepted' | 'rejected', overrideData?: Record<string, unknown>) =>
+    request<any>(`/v1/integrations/review/${eventId}`, { method: 'POST', body: JSON.stringify({ decision, override_data: overrideData }) }),
+
+  // ===== Notifications (SP6) =====
+  subscribePush: (subscription: { endpoint: string; keys: Record<string, string> }) =>
+    request<{ id: string }>('/v1/notifications/subscribe', { method: 'POST', body: JSON.stringify(subscription) }),
+  unsubscribePush: (subscriptionId: string) =>
+    request<void>(`/v1/notifications/unsubscribe`, { method: 'POST', body: JSON.stringify({ id: subscriptionId }) }),
+  getNotificationPreferences: () =>
+    request<any>('/v1/notifications/preferences'),
+  updateNotificationPreferences: (prefs: Record<string, unknown>) =>
+    request<any>('/v1/notifications/preferences', { method: 'PATCH', body: JSON.stringify(prefs) }),
+
   // ===== Organizational Units =====
   listOrgUnits: () => request<OrgUnit[]>('/v1/org-units'),
   createOrgUnit: (data: CreateOrgUnitInput) =>

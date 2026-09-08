@@ -18,7 +18,7 @@ export type ExecutionStrategy =
   | 'api'
   | 'webhook';
 
-export type ExecutorType = 'claude_code' | 'claude-code' | 'human' | 'webhook';
+export type ExecutorType = 'claude_code' | 'claude-code' | 'human' | 'webhook' | 'api';
 
 export type SessionPolicy = 'fresh' | 'resume' | 'fork';
 
@@ -131,7 +131,7 @@ export class ExecutionCompiler {
     const strategy = this.selectStrategy(move, capabilities, reasons);
 
     // 2. Executor type
-    const executor = this.selectExecutor(strategy);
+    const executor = this.selectExecutor(strategy, move);
 
     // 3. Session policy
     const session_policy = this.selectSessionPolicy(strategy, move);
@@ -284,9 +284,21 @@ export class ExecutionCompiler {
 
   // ── Executor type ───────────────────────────────────────────────
 
-  private selectExecutor(strategy: ExecutionStrategy): ExecutorType {
+  private selectExecutor(strategy: ExecutionStrategy, move?: MoveInput): ExecutorType {
     if (strategy === 'human') return 'human';
     if (strategy === 'wait') return 'webhook'; // wait for external event
+    if (strategy === 'webhook') return 'webhook';
+    if (strategy === 'api') return 'api';
+
+    // Check execution policy for explicit executor routing
+    if (move?.execution_policy) {
+      if (move.execution_policy['executor'] === 'webhook') return 'webhook';
+      if (move.execution_policy['executor'] === 'api') return 'api';
+      if (move.execution_policy['executor'] === 'human') return 'human';
+      if (move.execution_policy['webhook']) return 'webhook';
+      if (move.execution_policy['api_url']) return 'api';
+    }
+
     return 'claude_code';
   }
 

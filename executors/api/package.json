@@ -1,5 +1,5 @@
 {
-  "name": "@pos/executor-human",
+  "name": "@pos/executor-api",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",

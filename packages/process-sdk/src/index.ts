@@ -134,3 +134,16 @@ export interface DomainPack {
 export function definePack(pack: DomainPack): DomainPack {
   return pack;
 }
+
+// ── Re-export Executor Contract (SP6 §2.1) ────────────────────────
+export type {
+  ExecutorContract as UniversalExecutorContract,
+  ExecutorCapabilities as UniversalExecutorCapabilities,
+  ExecutorHealth as UniversalExecutorHealth,
+  MoveRef,
+  ContextCapsule,
+  AttemptBinding,
+  ProgressReport,
+  SteeringCommand as ExecutorSteeringCommand,
+  Evidence as ExecutorEvidence,
+} from './executor-contract.js';
