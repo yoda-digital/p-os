@@ -1,178 +1,102 @@
 import { Hono } from 'hono';
 import type postgres from 'postgres';
 import { authMiddleware } from '../middleware/auth.js';
+import { WhyEngine, type WhyQuestionType } from '@pos/why';
 
 type Sql = ReturnType<typeof postgres>;
+
+const VALID_QUESTION_TYPES: WhyQuestionType[] = [
+  'blocked', 'not_ready', 'active', 'done', 'failed',
+  'this_agent', 'this_model', 'this_task', 'changed', 'requires_me',
+];
 
 export function whyRoutes(sql: Sql) {
   const app = new Hono();
   app.use('*', authMiddleware);
+  const engine = new WhyEngine(sql);
 
-  // POST / — WHY query
+  // POST / — WHY query (10 question types + general)
   app.post('/', async (c) => {
-    const body = await c.req.json<{ caseId: string; question: string; moveId?: string }>();
-    const { caseId, question, moveId } = body;
+    const body = await c.req.json<{
+      caseId: string;
+      question: string;
+      questionType?: string;
+      moveId?: string;
+      targetId?: string;
+      atTime?: string;
+    }>();
+
+    const { caseId, question, questionType, moveId, targetId, atTime } = body;
 
     if (!caseId || !question) {
       return c.json({ error: 'caseId and question are required' }, 400);
     }
 
-    // Deterministic causal traversal
-    const causalChain: Array<{
-      event_id: string;
-      type: string;
-      occurred_at: string;
-      actor_id: string | null;
-      summary: string;
-      caused_by: string | null;
-    }> = [];
-
-    // Detect question type and target
-    const lowerQ = question.toLowerCase();
-    let targetMoveId = moveId;
-
-    // Try to extract move reference from question
-    if (!targetMoveId && lowerQ.includes('move')) {
-      const idMatch = question.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-      if (idMatch) targetMoveId = idMatch[0];
+    // Validate questionType if provided
+    if (questionType && !VALID_QUESTION_TYPES.includes(questionType as WhyQuestionType)) {
+      return c.json({
+        error: `Invalid questionType. Valid types: ${VALID_QUESTION_TYPES.join(', ')}`,
+        valid_types: VALID_QUESTION_TYPES,
+      }, 400);
     }
 
-    let explanation = '';
+    try {
+      const result = await engine.explain({
+        caseId,
+        question,
+        questionType: questionType as WhyQuestionType | undefined,
+        targetMoveId: moveId,
+        targetId,
+        atTime,
+      });
 
-    if (targetMoveId) {
-      // Get move state
-      const [move] = await sql`SELECT * FROM moves WHERE id = ${targetMoveId}`;
-      if (!move) return c.json({ error: 'Move not found' }, 404);
-
-      if (lowerQ.includes('blocked') || lowerQ.includes('not ready')) {
-        // WHY is move blocked?
-        // Check dependencies
-        const deps = (move.dependencies as string[]) ?? [];
-        if (deps.length > 0) {
-          const blockers = await sql`
-            SELECT id, title, outcome, execution FROM moves WHERE id = ANY(${deps})
-          `;
-          for (const b of blockers) {
-            if (b.outcome !== 'satisfied') {
-              // Find the events for this blocker
-              const [lastEvent] = await sql`
-                SELECT * FROM events WHERE case_id = ${caseId} AND data->>'id' = ${b.id as string}
-                ORDER BY case_sequence DESC LIMIT 1
-              `;
-              causalChain.push({
-                event_id: lastEvent?.id as string ?? 'unknown',
-                type: 'dependency_unsatisfied',
-                occurred_at: (lastEvent?.occurred_at as Date)?.toISOString() ?? new Date().toISOString(),
-                actor_id: lastEvent?.actor_id as string ?? null,
-                summary: `Dependency "${b.title}" is ${b.outcome} (execution: ${b.execution})`,
-                caused_by: null,
-              });
-            }
-          }
-          explanation = `Move "${move.title}" is blocked because ${blockers.filter((b: Record<string, unknown>) => b.outcome !== 'satisfied').length} dependencies are not yet satisfied.`;
-        }
-
-        // Check if there are decisions blocking it
-        const blockingDecisions = await sql`
-          SELECT * FROM decisions WHERE case_id = ${caseId} AND ${targetMoveId} = ANY(blocking_move_ids) AND state != 'decided'
-        `;
-        for (const d of blockingDecisions) {
-          causalChain.push({
-            event_id: d.id as string,
-            type: 'decision_pending',
-            occurred_at: (d.created_at as Date).toISOString(),
-            actor_id: d.created_by as string,
-            summary: `Pending decision: "${d.question}"`,
-            caused_by: null,
-          });
-        }
-        if (blockingDecisions.length > 0) {
-          explanation += ` Additionally, ${blockingDecisions.length} decision(s) must be resolved.`;
-        }
-
-        if (!explanation) {
-          explanation = `Move "${move.title}" readiness is "${move.readiness}". No specific blocking dependencies found.`;
-        }
-      } else if (lowerQ.includes('active') || lowerQ.includes('running')) {
-        // WHY is move active?
-        const activationEvent = await sql`
-          SELECT * FROM events WHERE case_id = ${caseId} AND type = 'MoveActivated' AND data->>'id' = ${targetMoveId}
-          ORDER BY case_sequence DESC LIMIT 1
-        `;
-        if (activationEvent.length > 0) {
-          const evt = activationEvent[0]!;
-          causalChain.push({
-            event_id: evt.id as string,
-            type: 'MoveActivated',
-            occurred_at: (evt.occurred_at as Date).toISOString(),
-            actor_id: evt.actor_id as string,
-            summary: `Move was activated`,
-            caused_by: evt.causation_id as string,
-          });
-          explanation = `Move "${move.title}" is active because it was activated at ${(evt.occurred_at as Date).toISOString()}.`;
-        }
-      } else if (lowerQ.includes('done') || lowerQ.includes('satisfied') || lowerQ.includes('complete')) {
-        // WHY is move done?
-        const satisfiedEvents = await sql`
-          SELECT * FROM events WHERE case_id = ${caseId}
-          AND type IN ('MoveSatisfied', 'MoveUpdated')
-          AND data->>'id' = ${targetMoveId}
-          ORDER BY case_sequence DESC
-        `;
-        for (const evt of satisfiedEvents) {
-          causalChain.push({
-            event_id: evt.id as string,
-            type: evt.type as string,
-            occurred_at: (evt.occurred_at as Date).toISOString(),
-            actor_id: evt.actor_id as string,
-            summary: `${evt.type}: ${JSON.stringify(evt.data)}`,
-            caused_by: evt.causation_id as string,
-          });
-        }
-        explanation = `Move "${move.title}" outcome is "${move.outcome}".`;
-      } else {
-        // Generic WHY for a move — show its full event history
-        const moveEvents = await sql`
-          SELECT * FROM events WHERE case_id = ${caseId} AND data->>'id' = ${targetMoveId}
-          ORDER BY case_sequence ASC
-        `;
-        for (const evt of moveEvents) {
-          causalChain.push({
-            event_id: evt.id as string,
-            type: evt.type as string,
-            occurred_at: (evt.occurred_at as Date).toISOString(),
-            actor_id: evt.actor_id as string,
-            summary: `${evt.type}`,
-            caused_by: evt.causation_id as string,
-          });
-        }
-        explanation = `Move "${move.title}" is in state: readiness=${move.readiness}, execution=${move.execution}, verification=${move.verification}, outcome=${move.outcome}. ${moveEvents.length} events in history.`;
+      return c.json({
+        question: result.question,
+        question_type: result.questionType,
+        explanation: result.answer,
+        causal_chain: result.causalChain.map(node => ({
+          id: node.eventId,
+          type: node.eventType,
+          description: node.summary,
+          timestamp: node.occurredAt,
+          actor_id: node.actorId,
+          caused_by: node.causedBy,
+          data: node.data,
+        })),
+        deterministic: result.deterministic,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to explain';
+      if (message.includes('not found')) {
+        return c.json({ error: message }, 404);
       }
-    } else {
-      // Generic case-level WHY
-      const recentEvents = await sql`
-        SELECT * FROM events WHERE case_id = ${caseId}
-        ORDER BY case_sequence DESC LIMIT 20
-      `;
-      for (const evt of recentEvents) {
-        causalChain.push({
-          event_id: evt.id as string,
-          type: evt.type as string,
-          occurred_at: (evt.occurred_at as Date).toISOString(),
-          actor_id: evt.actor_id as string,
-          summary: `${evt.type}`,
-          caused_by: evt.causation_id as string,
-        });
-      }
-      explanation = `Case has ${recentEvents.length} recent events. Ask about a specific move for detailed causal analysis.`;
+      return c.json({ error: message }, 500);
     }
+  });
 
+  // GET /types — list available question types
+  app.get('/types', (c) => {
     return c.json({
-      question,
-      explanation,
-      causal_chain: causalChain,
+      types: VALID_QUESTION_TYPES.map(t => ({
+        type: t,
+        requires_move: !['general'].includes(t),
+        description: WHY_TYPE_DESCRIPTIONS[t],
+      })),
     });
   });
 
   return app;
 }
+
+const WHY_TYPE_DESCRIPTIONS: Record<WhyQuestionType, string> = {
+  blocked: 'Why is this move blocked? Shows unsatisfied dependencies and pending decisions.',
+  not_ready: 'Why is this move not ready? Shows preconditions and dependency state.',
+  active: 'Why is this move active? Shows activation event and current attempt.',
+  done: 'Why is this move done? Shows satisfaction evidence and completion chain.',
+  failed: 'Why did this move fail? Shows failed attempts and failure patterns.',
+  this_agent: 'Why is this agent assigned? Shows capability matching and assignment history.',
+  this_model: 'Why was this model chosen? Shows model routing and attempt history.',
+  this_task: 'Why does this task exist? Shows intent decomposition and creation chain.',
+  changed: 'Why did this change? Shows event diffs and steering history.',
+  requires_me: 'Why does this require me? Shows attention items, decisions, and authority requirements.',
+};

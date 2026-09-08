@@ -1,18 +1,29 @@
 {
   "title": "Explorator DE CE",
-  "intro": "Întreabă de ce există o anumită stare. Sistemul urmărește lanțul cauzal prin istoricul procesului.",
+  "intro": "Intreaba de ce exista orice stare. Sistemul traseaza lantul cauzal determinist prin istoricul procesului — fiecare raspuns e bazat pe dovezi.",
+  "question_types": "Tipuri de Intrebari",
   "presets": {
-    "blocked": "DE CE este blocată această mutare?",
-    "not_ready": "DE CE nu este pregătită această mutare?",
-    "attention": "DE CE necesită aceasta atenția mea?",
-    "stale_evidence": "DE CE este dovada expirată?",
-    "deferred": "DE CE a fost amânată această decizie?"
+    "blocked": "DE CE e blocat?",
+    "not_ready": "DE CE nu e gata?",
+    "active": "DE CE e activ?",
+    "done": "DE CE e finalizat?",
+    "failed": "DE CE a esuat?",
+    "this_agent": "DE CE acest agent?",
+    "this_model": "DE CE acest model?",
+    "this_task": "DE CE aceasta sarcina?",
+    "changed": "DE CE s-a schimbat?",
+    "requires_me": "DE CE necesita implicarea mea?"
   },
-  "input_placeholder": "DE CE este [mutare/stare/decizie] în [condiție]?",
-  "ask": "Întreabă",
-  "error_fallback": "Nu s-a putut obține explicația",
+  "move_id_label": "ID Mutare tinta (optional)",
+  "move_id_placeholder": "Lipeste UUID-ul mutarii pentru a tinti o mutare specifica...",
+  "input_placeholder": "DE CE este [mutare/stare/decizie] in [conditie]?",
+  "ask": "Intreaba",
+  "error_fallback": "Nu s-a putut obtine explicatia",
   "result": {
-    "causal_chain": "Lanț cauzal",
-    "explanation": "Explicație"
+    "causal_chain": "Lant Cauzal",
+    "explanation": "Explicatie",
+    "deterministic": "Deterministic",
+    "heuristic": "Euristic",
+    "caused_by": "cauzat de"
   }
 }

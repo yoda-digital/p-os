@@ -412,7 +412,7 @@ export interface AttentionItem { id: string; case_id: string; move_id?: string; 
 
 export interface TimelineEntry { event_id: string; case_id: string; occurred_at: string; type: string; actor_id?: string; summary: string; details: Record<string, unknown>; move_id?: string; attempt_id?: string; }
 
-export interface WhyExplanation { question: string; causal_chain: { id: string; type: string; description: string; timestamp: string; }[]; explanation: string; }
+export interface WhyExplanation { question: string; question_type?: string; causal_chain: { id: string; type: string; description: string; timestamp: string; actor_id?: string; caused_by?: string; data?: Record<string, unknown>; }[]; explanation: string; deterministic?: boolean; }
 
 export interface CaseSnapshot { case: Case; moves: Move[]; timestamp: string; event_id: string; }
 
