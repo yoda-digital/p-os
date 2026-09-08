@@ -102,6 +102,8 @@ export const api = {
     request<Case>(`/v1/cases/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   closeCase: (id: string) =>
     request<void>(`/v1/cases/${id}/close`, { method: 'POST' }),
+  getCaseViews: (id: string) =>
+    request<{ views: CompiledView[] }>(`/v1/cases/${id}/views`),
 
   // Moves — API uses /v1/moves?caseId=xxx for list, /v1/moves/:id for single
   listMoves: (caseId: string) => request<Move[]>(`/v1/moves?caseId=${caseId}`),
@@ -429,6 +431,9 @@ export interface GovernanceCheckResult { allowed: boolean; reason: string; requi
 export interface BudgetStatusResult { case_id?: string; organization_id?: string; monetary_cost_usd?: number; budget_limit_usd?: number | null; usage_pct?: number | null; alert_level: string; message?: string; }
 export interface GovernanceOverrideInput { case_id?: string; organization_id?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type?: string; metadata?: Record<string, unknown>; }
 export interface GovernanceOverride { id: string; case_id?: string; actor_id: string; actor_name?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type: string; created_at: string; }
+
+// ===== Adaptive Views (SP4) =====
+export interface CompiledView { id: string; label: string; priority: number; reason: string; }
 
 export interface Attempt { id: string; case_id: string; move_id: string; executor_id?: string; strategy: string; state: string; model?: string; effort?: string; started_at?: string; ended_at?: string; cost?: unknown; usage?: unknown; failure_reason?: string; steering_history: unknown[]; created_at: string; revision: number; }
 

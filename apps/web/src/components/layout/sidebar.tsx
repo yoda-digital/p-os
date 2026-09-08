@@ -1,39 +1,85 @@
 import { NavLink, useParams } from 'react-router-dom';
 import { useCases } from '../../hooks/use-case';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../lib/api';
 import {
   LayoutGrid, Bell, Clock, GitBranch, Shield, FileCheck,
   Users, Package, AlertTriangle, HelpCircle, History,
   FlaskConical, BarChart3, Plus, FolderOpen, Settings,
-  Kanban, Scale, ShieldCheck,
+  Kanban, Scale, ShieldCheck, ArrowUpDown,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreateCaseDialog } from '../case/create-case-dialog';
 import { useAuthStore } from '../../stores/auth-store';
 
-const viewTabs = [
-  { path: 'kanban', key: 'kanban', icon: Kanban },
-  { path: 'attention', key: 'attention', icon: Bell },
-  { path: 'timeline', key: 'timeline', icon: Clock },
-  { path: 'dependencies', key: 'dependencies', icon: GitBranch },
-  { path: 'evidence', key: 'evidence', icon: FileCheck },
-  { path: 'decisions', key: 'decisions', icon: Scale },
-  { path: 'compliance', key: 'compliance', icon: Shield },
-  { path: 'actors', key: 'actors', icon: Users },
-  { path: 'resources', key: 'resources', icon: Package },
-  { path: 'risk', key: 'risk', icon: AlertTriangle },
-  { path: 'why', key: 'why', icon: HelpCircle },
-  { path: 'time-travel', key: 'time_travel', icon: History },
-  { path: 'simulation', key: 'simulation', icon: FlaskConical },
-  { path: 'intelligence', key: 'intelligence', icon: BarChart3 },
-] as const;
+const viewConfig: Record<string, { icon: typeof Bell }> = {
+  kanban: { icon: Kanban },
+  attention: { icon: Bell },
+  timeline: { icon: Clock },
+  dependencies: { icon: GitBranch },
+  evidence: { icon: FileCheck },
+  decisions: { icon: Scale },
+  compliance: { icon: Shield },
+  actors: { icon: Users },
+  resources: { icon: Package },
+  risk: { icon: AlertTriangle },
+  why: { icon: HelpCircle },
+  'time-travel': { icon: History },
+  simulation: { icon: FlaskConical },
+  intelligence: { icon: BarChart3 },
+};
+
+const defaultViewTabs = [
+  'kanban', 'attention', 'timeline', 'dependencies', 'evidence',
+  'decisions', 'compliance', 'actors', 'resources', 'risk',
+  'why', 'time-travel', 'simulation', 'intelligence',
+];
+
+const viewKeyMap: Record<string, string> = {
+  kanban: 'kanban',
+  attention: 'attention',
+  timeline: 'timeline',
+  dependencies: 'dependencies',
+  evidence: 'evidence',
+  decisions: 'decisions',
+  compliance: 'compliance',
+  actors: 'actors',
+  resources: 'resources',
+  risk: 'risk',
+  why: 'why',
+  'time-travel': 'time_travel',
+  simulation: 'simulation',
+  intelligence: 'intelligence',
+};
 
 export function Sidebar() {
   const { t } = useTranslation('common');
   const { caseId } = useParams();
   const { data: cases } = useCases();
   const [createOpen, setCreateOpen] = useState(false);
+  const [useAdaptiveOrder, setUseAdaptiveOrder] = useState(true);
   const isSystem = useAuthStore((s) => s.user?.is_system);
+
+  // Fetch compiled view order when a case is selected
+  const { data: compiledViews } = useQuery({
+    queryKey: ['case-views', caseId],
+    queryFn: () => api.getCaseViews(caseId!),
+    enabled: !!caseId && useAdaptiveOrder,
+    staleTime: 30_000, // recompute every 30s
+  });
+
+  // Determine view order
+  const orderedViews = useMemo(() => {
+    if (!useAdaptiveOrder || !compiledViews?.views) {
+      return defaultViewTabs;
+    }
+
+    // Use compiled order, falling back to default for any missing views
+    const compiledIds = compiledViews.views.map(v => v.id);
+    const remaining = defaultViewTabs.filter(v => !compiledIds.includes(v));
+    return [...compiledIds.filter(id => defaultViewTabs.includes(id)), ...remaining];
+  }, [compiledViews, useAdaptiveOrder]);
 
   return (
     <>
@@ -75,23 +121,42 @@ export function Sidebar() {
         {/* View Tabs (when a case is selected) */}
         {caseId && (
           <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-thin">
-            <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider px-2 mb-2 block">{t('nav.views')}</span>
-            {viewTabs.map(({ path, key, icon: Icon }) => (
-              <NavLink
-                key={path}
-                to={`/cases/${caseId}/${path}`}
-                className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`
-                }
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">{t('nav.views')}</span>
+              <button
+                onClick={() => setUseAdaptiveOrder(!useAdaptiveOrder)}
+                className={`p-0.5 rounded transition-colors ${
+                  useAdaptiveOrder
+                    ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                    : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+                title={useAdaptiveOrder ? 'Adaptive order (click for default)' : 'Default order (click for adaptive)'}
               >
-                <Icon className="w-4 h-4 shrink-0" />
-                {t(`nav_tabs.${key}`)}
-              </NavLink>
-            ))}
+                <ArrowUpDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {orderedViews.map((path) => {
+              const config = viewConfig[path];
+              const key = viewKeyMap[path] ?? path;
+              const Icon = config?.icon ?? LayoutGrid;
+
+              return (
+                <NavLink
+                  key={path}
+                  to={`/cases/${caseId}/${path}`}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md transition-colors ${
+                      isActive
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`
+                  }
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {t(`nav_tabs.${key}`)}
+                </NavLink>
+              );
+            })}
           </nav>
         )}
 

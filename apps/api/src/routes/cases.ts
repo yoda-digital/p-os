@@ -3,6 +3,7 @@ import type postgres from 'postgres';
 import { authMiddleware, getUser } from '../middleware/auth.js';
 import { CommandProcessor } from '../services/command-processor.js';
 import { getCaseSummary } from '../services/projection-service.js';
+import { compileViews } from '../services/view-compiler.js';
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -140,6 +141,16 @@ export function caseRoutes(sql: Sql) {
       return c.json({ error: result.reason }, 400);
     }
     return c.json({ status: 'closed' });
+  });
+
+  // GET /:id/views — adaptive view priority ordering
+  app.get('/:id/views', async (c) => {
+    const id = c.req.param('id');
+    const [caseRow] = await sql`SELECT id FROM cases WHERE id = ${id}`;
+    if (!caseRow) return c.json({ error: 'Case not found' }, 404);
+
+    const views = await compileViews(sql, id);
+    return c.json({ views });
   });
 
   // POST /:id/reopen
