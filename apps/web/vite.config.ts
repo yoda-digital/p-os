@@ -2,7 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // PWA support: In production, use vite-plugin-pwa for full
+    // service worker registration, manifest injection, and workbox.
+    // For now, the service worker is registered manually in main.tsx
+    // and the manifest.json is served from /public.
+  ],
   server: {
     port: 3000,
     allowedHosts: true,
@@ -21,6 +27,14 @@ export default defineConfig({
       '/ws': {
         target: 'ws://localhost:4001',
         ws: true,
+      },
+    },
+  },
+  build: {
+    // Generate service worker as a separate entry
+    rollupOptions: {
+      input: {
+        main: 'index.html',
       },
     },
   },

@@ -34,5 +34,14 @@
     "rationale_label": "Rationale",
     "rationale_placeholder": "Why this option?",
     "submit": "Resolve"
-  }
+  },
+  "recommended": "Recommended",
+  "rationale": "Rationale",
+  "rationale_placeholder": "Why this decision?",
+  "approve": "Approve",
+  "reject": "Reject",
+  "confirm_approve": "Confirm",
+  "confirm_reject": "Confirm Reject",
+  "no_pending_mobile": "No pending decisions",
+  "no_pending_mobile_description": "All decisions are resolved."
 }

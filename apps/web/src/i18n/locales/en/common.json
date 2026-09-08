@@ -53,7 +53,16 @@
     "ask": "Ask",
     "send": "Send",
     "attach": "Attach",
-    "resolve": "Resolve"
+    "resolve": "Resolve",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "filters": {
+    "all": "All",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
   },
   "status": {
     "open": "open",

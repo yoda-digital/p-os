@@ -1,0 +1,34 @@
+{
+  "name": "Universal Process OS",
+  "short_name": "Process OS",
+  "description": "Universal process management — observe, steer, decide, verify.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Attention",
+      "short_name": "Attention",
+      "url": "/cases",
+      "description": "View your attention queue"
+    }
+  ]
+}
