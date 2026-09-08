@@ -204,6 +204,11 @@ export const api = {
     request<SimulationFork>('/v1/simulation', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
   listSimulations: (caseId: string) => request<SimulationFork[]>(`/v1/simulation?caseId=${caseId}`),
 
+  // Search — API uses /v1/search?q=...&type=...
+  search: (queryString: string) => request<SearchResponse>(`/v1/search?${queryString}`),
+  graphSearch: (sourceId: string, maxDepth?: number) =>
+    request<{ source_id: string; max_depth: number; results: SearchResultItem[] }>(`/v1/search/graph?sourceId=${sourceId}${maxDepth ? `&maxDepth=${maxDepth}` : ''}`),
+
   // Process Intelligence — API uses /v1/intelligence?caseId=xxx
   getMetrics: (caseId: string) => request<ProcessMetrics>(`/v1/intelligence/metrics?caseId=${caseId}`),
   getDriftReport: (caseId: string) => request<DriftReport>(`/v1/intelligence/drift?caseId=${caseId}`),
@@ -413,6 +418,9 @@ export interface CaseSnapshot { case: Case; moves: Move[]; timestamp: string; ev
 
 export interface SimulationFork { id: string; source_case_id: string; fork_event_id?: string; title: string; description?: string; hypothetical_changes: unknown[]; created_at: string; }
 export interface CreateSimulationInput { title: string; description?: string; hypothetical_changes: unknown[]; fork_event_id?: string; }
+
+export interface SearchResultItem { id: string; type: string; title: string; description: string | null; case_id: string | null; relevance: number; created_at: string; metadata: Record<string, unknown>; }
+export interface SearchResponse { query: Record<string, unknown>; results: SearchResultItem[]; total: number; limit: number; offset: number; }
 
 export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; rework_count: number; failed_attempts: number; human_attention_time?: string; evidence_gaps: number; completion_reliability?: number; cost?: unknown; executor_performance: Record<string, unknown>; context_rotations: number; steering_frequency: number; }
 

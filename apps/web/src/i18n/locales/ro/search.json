@@ -1,0 +1,15 @@
+{
+  "placeholder": "Cauta cazuri, mutari, decizii...",
+  "searching": "Se cauta...",
+  "no_results": "Niciun rezultat gasit",
+  "types": {
+    "case": "Caz",
+    "move": "Mutare",
+    "decision": "Decizie",
+    "evidence": "Dovada",
+    "entity": "Entitate",
+    "assertion": "Asertiune",
+    "intent": "Intent",
+    "rule": "Regula"
+  }
+}

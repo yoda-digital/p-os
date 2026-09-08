@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../common/language-switcher';
 import { OrgSwitcher } from '../common/org-switcher';
+import { SearchBar } from '../search/search-bar';
 
 export function AppLayout() {
   const { t } = useTranslation('common');
@@ -36,6 +37,7 @@ export function AppLayout() {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <SearchBar />
             <OrgSwitcher />
             <LanguageSwitcher />
             <Dropdown

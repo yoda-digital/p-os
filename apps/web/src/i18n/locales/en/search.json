@@ -1,0 +1,15 @@
+{
+  "placeholder": "Search cases, moves, decisions...",
+  "searching": "Searching...",
+  "no_results": "No results found",
+  "types": {
+    "case": "Case",
+    "move": "Move",
+    "decision": "Decision",
+    "evidence": "Evidence",
+    "entity": "Entity",
+    "assertion": "Assertion",
+    "intent": "Intent",
+    "rule": "Rule"
+  }
+}
