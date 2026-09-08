@@ -41,6 +41,7 @@ import { TeamManagement } from './components/settings/team-management';
 import { MemberManagement } from './components/settings/member-management';
 import { InvitationManagement } from './components/settings/invitation-management';
 import { PolicyEditor } from './components/settings/policy-editor';
+import { IntegrationsHub } from './components/settings/integrations-hub';
 
 function AuthGuard() {
   const isAuthenticated = useAuthStore((s) => !!s.token);
@@ -48,7 +49,7 @@ function AuthGuard() {
   return <Outlet />;
 }
 
-const settingsTabs = ['profile', 'organization', 'teams', 'members', 'invitations', 'policies'] as const;
+const settingsTabs = ['profile', 'organization', 'teams', 'members', 'invitations', 'policies', 'integrations'] as const;
 
 function SettingsLayout() {
   const { t } = useTranslation('settings');
@@ -117,6 +118,7 @@ export function App() {
             <Route path="members" element={<MemberManagement />} />
             <Route path="invitations" element={<InvitationManagement />} />
             <Route path="policies" element={<PolicyEditor />} />
+            <Route path="integrations" element={<IntegrationsHub />} />
           </Route>
         </Route>
 

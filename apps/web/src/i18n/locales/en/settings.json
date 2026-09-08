@@ -5,7 +5,8 @@
     "teams": "Teams",
     "members": "Members",
     "invitations": "Invitations",
-    "policies": "Policies"
+    "policies": "Policies",
+    "integrations": "Integrations"
   },
   "profile": {
     "title": "Profile",

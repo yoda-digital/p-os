@@ -570,6 +570,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -583,6 +586,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -596,6 +602,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -609,6 +618,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -622,6 +634,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -635,6 +650,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -648,6 +666,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -661,6 +682,9 @@ importers:
       '@pos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0

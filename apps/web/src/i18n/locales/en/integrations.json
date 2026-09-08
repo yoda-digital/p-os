@@ -1,0 +1,93 @@
+{
+  "hub": {
+    "title": "Integrations",
+    "subtitle": "Connect external tools and services to your process",
+    "add_integration": "Add Integration",
+    "empty": {
+      "title": "No integrations configured",
+      "description": "Connect GitHub, Slack, email, and other tools to sync data with your processes."
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "never_synced": "Never synced",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "confirm_delete": "Are you sure you want to delete this integration? This cannot be undone.",
+    "available_types": "Available Integrations",
+    "configured": "Configured",
+    "type": "Type",
+    "name": "Name",
+    "name_placeholder": "Integration name"
+  },
+  "github": {
+    "title": "GitHub",
+    "subtitle": "Sync pull requests, issues, commits, and reviews",
+    "connect": "Connect GitHub",
+    "empty": {
+      "title": "GitHub not connected",
+      "description": "Connect your GitHub repositories to automatically sync PRs, issues, and commits as process evidence."
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    },
+    "connection": {
+      "title": "Connection",
+      "instructions": "Click below to authorize Process OS to access your GitHub repositories.",
+      "oauth_active": "OAuth Active",
+      "test": "Test Connection"
+    },
+    "webhook": {
+      "title": "Webhook URL",
+      "instructions": "Add this URL to your GitHub repository webhooks to receive events automatically.",
+      "last_received": "Last event received"
+    },
+    "sync": {
+      "title": "Sync Status",
+      "prs": "Pull Requests",
+      "commits": "Commits",
+      "reviews": "Reviews",
+      "issues": "Issues",
+      "last_sync": "Last synced"
+    }
+  },
+  "slack": {
+    "title": "Slack",
+    "subtitle": "Send notifications and handle approvals via Slack"
+  },
+  "email": {
+    "title": "Email",
+    "subtitle": "Receive and send process-related emails"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Sync deadlines and check availability"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Configure how you receive process notifications",
+    "push": {
+      "title": "Push Notifications",
+      "enable": "Enable push notifications",
+      "enabled": "Push notifications enabled",
+      "disabled": "Push notifications disabled",
+      "not_supported": "Push notifications are not supported in this browser"
+    },
+    "preferences": {
+      "title": "Notification Preferences",
+      "attention_critical": "Critical attention items",
+      "attention_high": "High priority attention items",
+      "attention_medium": "Medium priority attention items",
+      "decisions": "Decision requests",
+      "steering_updates": "Steering updates",
+      "digest_frequency": "Digest frequency",
+      "frequencies": {
+        "realtime": "Real-time",
+        "hourly": "Hourly",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "off": "Off"
+      }
+    }
+  }
+}

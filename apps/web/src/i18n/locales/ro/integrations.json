@@ -1,0 +1,93 @@
+{
+  "hub": {
+    "title": "Integrari",
+    "subtitle": "Conecteaza instrumente si servicii externe la procesul tau",
+    "add_integration": "Adauga Integrare",
+    "empty": {
+      "title": "Nicio integrare configurata",
+      "description": "Conecteaza GitHub, Slack, email si alte instrumente pentru a sincroniza datele cu procesele tale."
+    },
+    "active": "Activ",
+    "inactive": "Inactiv",
+    "never_synced": "Niciodata sincronizat",
+    "deactivate": "Dezactiveaza",
+    "activate": "Activeaza",
+    "confirm_delete": "Esti sigur ca vrei sa stergi aceasta integrare? Aceasta actiune nu poate fi anulata.",
+    "available_types": "Integrari Disponibile",
+    "configured": "Configurat",
+    "type": "Tip",
+    "name": "Nume",
+    "name_placeholder": "Numele integrarii"
+  },
+  "github": {
+    "title": "GitHub",
+    "subtitle": "Sincronizeaza pull request-uri, issue-uri, commit-uri si review-uri",
+    "connect": "Conecteaza GitHub",
+    "empty": {
+      "title": "GitHub nu este conectat",
+      "description": "Conecteaza depozitele GitHub pentru a sincroniza automat PR-urile, issue-urile si commit-urile ca probe de proces."
+    },
+    "status": {
+      "connected": "Conectat",
+      "disconnected": "Deconectat"
+    },
+    "connection": {
+      "title": "Conexiune",
+      "instructions": "Apasa mai jos pentru a autoriza Process OS sa acceseze depozitele tale GitHub.",
+      "oauth_active": "OAuth Activ",
+      "test": "Testeaza Conexiunea"
+    },
+    "webhook": {
+      "title": "URL Webhook",
+      "instructions": "Adauga acest URL la webhook-urile depozitului GitHub pentru a primi evenimentele automat.",
+      "last_received": "Ultimul eveniment primit"
+    },
+    "sync": {
+      "title": "Stare Sincronizare",
+      "prs": "Pull Request-uri",
+      "commits": "Commit-uri",
+      "reviews": "Review-uri",
+      "issues": "Issue-uri",
+      "last_sync": "Ultima sincronizare"
+    }
+  },
+  "slack": {
+    "title": "Slack",
+    "subtitle": "Trimite notificari si gestioneaza aprobarile prin Slack"
+  },
+  "email": {
+    "title": "Email",
+    "subtitle": "Primeste si trimite email-uri legate de proces"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "Sincronizeaza termenele limita si verifica disponibilitatea"
+  },
+  "notifications": {
+    "title": "Notificari",
+    "subtitle": "Configureaza cum primesti notificarile de proces",
+    "push": {
+      "title": "Notificari Push",
+      "enable": "Activeaza notificarile push",
+      "enabled": "Notificari push activate",
+      "disabled": "Notificari push dezactivate",
+      "not_supported": "Notificarile push nu sunt suportate in acest browser"
+    },
+    "preferences": {
+      "title": "Preferinte Notificari",
+      "attention_critical": "Elemente de atentie critice",
+      "attention_high": "Elemente de atentie cu prioritate inalta",
+      "attention_medium": "Elemente de atentie cu prioritate medie",
+      "decisions": "Cereri de decizie",
+      "steering_updates": "Actualizari de directie",
+      "digest_frequency": "Frecventa rezumatului",
+      "frequencies": {
+        "realtime": "Timp real",
+        "hourly": "La fiecare ora",
+        "daily": "Zilnic",
+        "weekly": "Saptamanal",
+        "off": "Oprit"
+      }
+    }
+  }
+}
