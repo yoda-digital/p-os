@@ -1,5 +1,6 @@
 import type postgres from 'postgres';
 import { appendEvents, type EventRecord } from './event-store.js';
+import { createSteering, type SteeringClass } from './steering-service.js';
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -945,25 +946,31 @@ export class CommandProcessor {
 
   private async handleAttemptSteer(cmd: Command): Promise<CommandResult> {
     const p = cmd.payload;
-    const attemptId = cmd.target_ref?.id ?? (p['attempt_id'] as string);
-    const steeringId = crypto.randomUUID();
-    const events = [this.makeEvent(cmd, 'AttemptSteered', { attempt_id: attemptId, steering_id: steeringId, ...p })];
+    // attempt_id is optional: a steering command may target a move before any
+    // attempt has started (it is then delivered to whichever attempt starts next).
+    // Read it from the payload only — target_ref.id may fall back to the move id
+    // when no attempt is bound yet, and must never be mistaken for an attempt id.
+    const attemptId = (p['attempt_id'] as string | undefined) || null;
 
+    let created: Awaited<ReturnType<typeof createSteering>> | undefined;
     await this.sql.begin(async (tx) => {
-      await appendEvents(tx as unknown as Sql, events);
-      await tx`
-        INSERT INTO steering_commands (id, case_id, move_id, attempt_id, class, instruction, state, issued_by)
-        VALUES (${steeringId}, ${cmd.case_id!}, ${p['move_id'] as string}, ${attemptId},
-                ${p['class'] as string}, ${p['instruction'] as string}, 'issued', ${cmd.actor_id})
-      `;
-      await tx`
-        UPDATE attempts SET
-          steering_history = steering_history || ${this.sql.json([{ id: steeringId, class: p['class'], instruction: p['instruction'], issued_at: new Date().toISOString() }] as any)},
-          revision = revision + 1
-        WHERE id = ${attemptId}
-      `;
+      created = await createSteering(tx as unknown as Sql, {
+        case_id: cmd.case_id!,
+        move_id: p['move_id'] as string,
+        attempt_id: attemptId,
+        class: p['class'] as SteeringClass,
+        instruction: p['instruction'] as string,
+        tenant_id: cmd.tenant_id,
+        actor_id: cmd.actor_id,
+        causation_id: cmd.command_id,
+      });
     });
-    return { status: 'accepted', events, data: { steering_id: steeringId } };
+
+    return {
+      status: 'accepted',
+      events: [],
+      data: { steering_id: created!.id, state: created!.state },
+    };
   }
 
   private async handleAttemptPause(cmd: Command): Promise<CommandResult> {

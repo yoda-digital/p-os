@@ -201,10 +201,9 @@ async function handleMessage(client: EdgeClient, raw: unknown): Promise<void> {
       }
       const steeringId = msg['steering_id'] as string | undefined;
       if (steeringId) {
-        await sql`
-          UPDATE steering_commands SET state = 'acknowledged', acknowledged_at = NOW()
-          WHERE id = ${steeringId}
-        `.catch((err) => console.error('[Edge] steering ack failed:', err));
+        await transitionSteeringState(sql, steeringId, 'acknowledged', 'SteeringAcknowledged').catch((err) =>
+          console.error('[Edge] steering ack failed:', err)
+        );
       }
       break;
     }
@@ -213,6 +212,96 @@ async function handleMessage(client: EdgeClient, raw: unknown): Promise<void> {
       // Unknown message type — ignore
       break;
   }
+}
+
+// ── Steering state machine (mirrors apps/api/src/services/steering-service.ts) ──
+//
+// apps/realtime cannot depend on apps/api (they are separate deployable services —
+// see each package's package.json), so the transition + event-emission contract is
+// duplicated here in miniature rather than imported.
+
+const STEERING_STATE_ORDER = [
+  'issued',
+  'delivered_to_edge',
+  'delivered_to_executor',
+  'acknowledged',
+  'applied',
+] as const;
+type SteeringState = (typeof STEERING_STATE_ORDER)[number];
+
+async function appendCaseEvent(
+  sql: ReturnType<typeof getDb>,
+  params: { tenantId: string; caseId: string; type: string; data: Record<string, unknown> }
+): Promise<void> {
+  const eventId = crypto.randomUUID();
+  const [seqRow] = await sql`
+    INSERT INTO case_sequences (case_id, next_sequence)
+    VALUES (${params.caseId}, 2)
+    ON CONFLICT (case_id) DO UPDATE SET next_sequence = case_sequences.next_sequence + 1
+    RETURNING next_sequence - 1 AS seq
+  `;
+  const [inserted] = await sql`
+    INSERT INTO events (id, tenant_id, case_id, type, actor_id, occurred_at, recorded_at, causation_id, correlation_id, case_sequence, data)
+    VALUES (${eventId}, ${params.tenantId}, ${params.caseId}, ${params.type}, NULL, NOW(), NOW(), ${eventId}, ${eventId}, ${seqRow?.seq ?? 1}, ${sql.json(params.data as any)})
+    RETURNING id
+  `;
+  if (inserted) {
+    await sql`INSERT INTO event_outbox (event_id) VALUES (${eventId})`;
+  }
+}
+
+/**
+ * Advance a `steering_commands` row to `newState`, rejecting regressions and no-ops, and emit
+ * the matching `Steering*` lifecycle event (spec §1.3 — every transition is observable, so the
+ * Composer UI's real-time state feed is always honest). Returns `false` if the row does not
+ * exist or the transition would not move the state forward.
+ */
+async function transitionSteeringState(
+  sql: ReturnType<typeof getDb>,
+  steeringId: string,
+  newState: SteeringState,
+  eventType: string,
+  extraData: Record<string, unknown> = {}
+): Promise<boolean> {
+  const [current] = await sql`
+    SELECT sc.*, c.organization_id AS tenant_id
+    FROM steering_commands sc
+    JOIN cases c ON c.id = sc.case_id
+    WHERE sc.id = ${steeringId}
+  `;
+  if (!current) return false;
+
+  const currentIdx = STEERING_STATE_ORDER.indexOf(current['state'] as SteeringState);
+  const nextIdx = STEERING_STATE_ORDER.indexOf(newState);
+  if (nextIdx <= currentIdx) return false; // no-op or regression — never overwrite forward progress
+
+  const isDeliveryState = newState === 'delivered_to_edge' || newState === 'delivered_to_executor';
+  const isAcknowledged = newState === 'acknowledged';
+  const isApplied = newState === 'applied';
+
+  await sql`
+    UPDATE steering_commands SET
+      state = ${newState},
+      delivered_at = CASE WHEN ${isDeliveryState} AND delivered_at IS NULL THEN NOW() ELSE delivered_at END,
+      acknowledged_at = CASE WHEN ${isAcknowledged} AND acknowledged_at IS NULL THEN NOW() ELSE acknowledged_at END,
+      applied_at = CASE WHEN ${isApplied} AND applied_at IS NULL THEN NOW() ELSE applied_at END
+    WHERE id = ${steeringId}
+  `;
+
+  await appendCaseEvent(sql, {
+    tenantId: current['tenant_id'] as string,
+    caseId: current['case_id'] as string,
+    type: eventType,
+    data: {
+      steering_id: steeringId,
+      move_id: current['move_id'],
+      attempt_id: current['attempt_id'],
+      state: newState,
+      ...extraData,
+    },
+  });
+
+  return true;
 }
 
 // ── Steering dispatch — push pending steering commands to bound devices ──
@@ -257,9 +346,9 @@ export async function dispatchPendingSteering(): Promise<void> {
       }
 
       if (delivered) {
-        await sql`
-          UPDATE steering_commands SET state = 'delivered', delivered_at = NOW() WHERE id = ${cmd.id}
-        `.catch((err) => console.error('[Edge] Failed to mark steering delivered:', err));
+        await transitionSteeringState(sql, cmd.id as string, 'delivered_to_edge', 'SteeringDelivered', {
+          target: 'edge',
+        }).catch((err) => console.error('[Edge] Failed to mark steering delivered:', err));
       }
     }
   } catch (err) {
