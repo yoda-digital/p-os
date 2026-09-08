@@ -51,6 +51,11 @@ export async function runControllers(
   if (t === 'AttemptFailed') {
     await riskController(sql, event);
   }
+
+  // CommitCreated events (from plugin outbox) mark test/build evidence stale
+  if (t === 'CommitCreated') {
+    await commitStalenessController(sql, event);
+  }
 }
 
 // ── Dependency Controller ────────────────────────────────────────
@@ -437,6 +442,75 @@ async function riskController(
         sql, event, moveId,
         `Move has ${failCount} failed attempts — risk elevated to ${newRisk}`,
         failCount >= 3 ? 'critical' : 'high'
+      );
+    }
+  }
+}
+
+// ── Commit Staleness Controller ─────────────────────────────────
+// When a git commit happens, test/build evidence observed before the
+// commit is now potentially stale (the code has changed).
+
+async function commitStalenessController(
+  sql: Sql,
+  event: EventRow
+): Promise<void> {
+  if (!event.case_id) return;
+
+  const data = event.data ?? {};
+  const moveId = (data['move_id'] as string) ?? (data['moveId'] as string) ?? null;
+  if (!moveId) return;
+
+  // Find test_run evidence for this move that was observed before this commit
+  const staleEvidence = await sql`
+    SELECT e.id
+    FROM evidence e
+    WHERE e.case_id = ${event.case_id}
+      AND e.validity = 'valid'
+      AND e.subject_refs @> ${sql.json([{ id: moveId }])}
+      AND (
+        e.provenance->>'type' IN ('test_run', 'build_result')
+        OR e.relation IN ('verifies')
+      )
+      AND e.observed_at < ${event.occurred_at}
+  `;
+
+  for (const ev of staleEvidence) {
+    await sql`
+      UPDATE evidence SET validity = 'stale', revision = revision + 1
+      WHERE id = ${ev.id} AND validity = 'valid'
+    `;
+
+    const eventId = crypto.randomUUID();
+    await sql`
+      INSERT INTO events (id, tenant_id, case_id, type, actor_id, occurred_at, causation_id, correlation_id, data)
+      VALUES (
+        ${eventId}, ${event.tenant_id}, ${event.case_id}, 'EvidenceStale',
+        ${event.actor_id}, NOW(), ${event.id}, ${event.correlation_id},
+        ${sql.json({ evidence_id: ev.id, reason: 'Code changed after evidence was observed (git commit)' })}
+      )
+    `;
+    await sql`INSERT INTO event_outbox (event_id) VALUES (${eventId})`;
+  }
+
+  // If any evidence was invalidated, check if verification should be set to stale
+  if (staleEvidence.length > 0) {
+    const [move] = await sql`
+      SELECT id, verification FROM moves WHERE id = ${moveId}
+    `;
+    if (move && move.verification === 'passed') {
+      await sql`
+        UPDATE moves SET verification = 'stale', revision = revision + 1
+        WHERE id = ${moveId}
+      `;
+      await sql`
+        UPDATE projection_kanban SET column_id = 'VERIFY', updated_at = NOW()
+        WHERE move_id = ${moveId}
+      `;
+
+      await raiseAttention(
+        sql, event, moveId,
+        'Evidence invalidated by code change — re-verification needed', 'high'
       );
     }
   }
