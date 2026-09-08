@@ -53,6 +53,7 @@ export function IntegrationsHub() {
   const [newType, setNewType] = useState('github');
   const [newName, setNewName] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const createMutation = useMutation({
     mutationFn: () => api.createIntegration({ type: newType, name: newName || INTEGRATION_TYPES.find((t) => t.value === newType)?.label || newType }),
@@ -60,7 +61,9 @@ export function IntegrationsHub() {
       qc.invalidateQueries({ queryKey: ['integrations'] });
       setCreateOpen(false);
       setNewName('');
+      setError(null);
     },
+    onError: (err: Error) => setError(err.message),
   });
 
   const deleteMutation = useMutation({
@@ -68,13 +71,19 @@ export function IntegrationsHub() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['integrations'] });
       setSelectedId(null);
+      setError(null);
     },
+    onError: (err: Error) => setError(err.message),
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
       api.updateIntegration(id, { active }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['integrations'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['integrations'] });
+      setError(null);
+    },
+    onError: (err: Error) => setError(err.message),
   });
 
   if (isLoading) return <FullPageSpinner />;
@@ -109,6 +118,14 @@ export function IntegrationsHub() {
           <Plus className="w-4 h-4" /> {t('hub.add_integration')}
         </Button>
       </div>
+
+      {/* Error display */}
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-sm flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-2 text-red-500 hover:text-red-700">✕</button>
+        </div>
+      )}
 
       {/* Active integrations */}
       {(!integrations || integrations.length === 0) ? (

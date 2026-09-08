@@ -55,12 +55,13 @@ const CONFIDENCE_THRESHOLDS: Record<string, number> = {
   critical: 1.1, // Never auto-accept critical — always human review
 };
 
+/** Sentinel UUID for system-generated events (external pipeline actor) */
+const SYSTEM_PIPELINE_ACTOR_ID = '00000000-0000-0000-0000-000000000001';
+
 /** Actions that always require human review regardless of confidence */
 const ALWAYS_REVIEW_ACTIONS = new Set([
-  'decision',       // Never auto-close decisions
-  'move_complete',  // Never auto-complete moves
-  'budget_change',  // Never auto-modify budgets
-  'access_change',  // Never auto-modify access
+  'decision',     // Never auto-close decisions
+  'move_update',  // Never auto-update moves without review
 ]);
 
 // ── Pipeline Service ────────────────────────────────────────────────
@@ -154,16 +155,25 @@ export class ExternalPipeline {
 
   /**
    * Review a pending external event — accept or reject it with human authority.
+   * Scoped to the reviewer's organization for cross-org isolation.
    */
   async review(
     eventId: string,
     decision: 'accepted' | 'rejected',
     reviewerId: string,
     overrideData?: Record<string, unknown>,
+    organizationId?: string,
   ): Promise<PipelineResult> {
-    const [event] = await this.sql`
-      SELECT * FROM external_events WHERE id = ${eventId} AND status IN ('pending', 'review')
-    `;
+    const [event] = organizationId
+      ? await this.sql`
+          SELECT e.* FROM external_events e
+          JOIN integrations i ON i.id = e.integration_id
+          WHERE e.id = ${eventId} AND e.status IN ('pending', 'review')
+            AND i.organization_id = ${organizationId}
+        `
+      : await this.sql`
+          SELECT * FROM external_events WHERE id = ${eventId} AND status IN ('pending', 'review')
+        `;
     if (!event) {
       return { external_event_id: eventId, status: 'rejected', reason: 'Event not found or already processed' };
     }
@@ -177,7 +187,7 @@ export class ExternalPipeline {
     if (decision === 'accepted') {
       const interpretation = (event.interpreted_as ?? {}) as InterpretationProposal;
       if (overrideData) {
-        Object.assign(interpretation.proposed_data ?? {}, overrideData);
+        interpretation.proposed_data = { ...(interpretation.proposed_data ?? {}), ...overrideData };
       }
 
       const raw: RawExternalEvent = {
@@ -210,8 +220,9 @@ export class ExternalPipeline {
 
   /**
    * List external events pending review.
+   * Scoped to organization for cross-org isolation.
    */
-  async listPendingReview(integrationId?: string, limit = 50): Promise<Record<string, unknown>[]> {
+  async listPendingReview(integrationId?: string, limit = 50, organizationId?: string): Promise<Record<string, unknown>[]> {
     if (integrationId) {
       const rows = await this.sql`
         SELECT e.*, i.name AS integration_name, i.type AS integration_type
@@ -219,6 +230,7 @@ export class ExternalPipeline {
         JOIN integrations i ON i.id = e.integration_id
         WHERE e.status IN ('pending', 'review')
           AND e.integration_id = ${integrationId}
+          ${organizationId ? this.sql`AND i.organization_id = ${organizationId}` : this.sql``}
         ORDER BY e.created_at DESC
         LIMIT ${limit}
       `;
@@ -229,6 +241,7 @@ export class ExternalPipeline {
       FROM external_events e
       JOIN integrations i ON i.id = e.integration_id
       WHERE e.status IN ('pending', 'review')
+        ${organizationId ? this.sql`AND i.organization_id = ${organizationId}` : this.sql``}
       ORDER BY e.created_at DESC
       LIMIT ${limit}
     `;
@@ -267,22 +280,31 @@ export class ExternalPipeline {
     switch (raw.event_type) {
       case 'pull_request.opened':
       case 'pull_request.merged':
-      case 'pull_request.closed':
+      case 'pull_request.closed': {
+        // GitHub nests PR data under pull_request, not at root level
+        const pr = (p.pull_request ?? p) as Record<string, unknown>;
+        const prNumber = pr.number ?? p.number;
+        const prTitle = pr.title ?? p.title;
+        const prUrl = pr.html_url ?? p.html_url ?? p.url;
+        const prAuthor = (pr.user as Record<string, unknown>)?.login
+          ?? (p.sender as Record<string, unknown>)?.login;
+
         return {
           process_event_type: 'PRStateChanged',
           target_type: 'evidence',
           proposed_data: {
-            pr_number: p.number,
-            pr_title: p.title,
+            pr_number: prNumber,
+            pr_title: prTitle,
             pr_state: raw.event_type.split('.')[1],
-            pr_url: p.html_url ?? p.url,
-            author: (p.user as Record<string, unknown>)?.login,
+            pr_url: prUrl,
+            author: prAuthor,
             repository: (p.repository as Record<string, unknown>)?.full_name,
           },
           confidence: 0.9,
           risk_level: 'low',
-          explanation: `GitHub PR #${p.number} ${raw.event_type.split('.')[1]}: ${p.title}`,
+          explanation: `GitHub PR #${prNumber} ${raw.event_type.split('.')[1]}: ${prTitle}`,
         };
+      }
 
       case 'push':
         return {
@@ -448,7 +470,21 @@ export class ExternalPipeline {
     `;
     const orgId = integration?.organization_id as string ?? '00000000-0000-0000-0000-000000000000';
 
+    const caseId = (interpretation.proposed_data.case_id as string) ?? null;
     const eventId = crypto.randomUUID();
+
+    // Get proper case_sequence if we have a case_id
+    let caseSequence = 0;
+    if (caseId) {
+      const [seq] = await this.sql`
+        INSERT INTO case_sequences (case_id, last_sequence)
+        VALUES (${caseId}, 1)
+        ON CONFLICT (case_id) DO UPDATE SET last_sequence = case_sequences.last_sequence + 1
+        RETURNING last_sequence
+      `;
+      caseSequence = seq?.last_sequence as number ?? 1;
+    }
+
     await this.sql`
       INSERT INTO events (
         id, tenant_id, case_id, type, actor_id, occurred_at, recorded_at,
@@ -456,11 +492,11 @@ export class ExternalPipeline {
       ) VALUES (
         ${eventId},
         ${orgId},
-        ${(interpretation.proposed_data.case_id as string) ?? null},
+        ${caseId},
         ${interpretation.process_event_type},
-        ${'system:external-pipeline'},
+        ${SYSTEM_PIPELINE_ACTOR_ID},
         NOW(), NOW(),
-        ${eventId}, ${eventId}, 0,
+        ${eventId}, ${eventId}, ${caseSequence},
         ${this.sql.json({
           source: raw.source_type,
           event_type: raw.event_type,
@@ -469,6 +505,11 @@ export class ExternalPipeline {
           confidence: interpretation.confidence,
         } as any)}
       )
+    `;
+
+    // Write to event_outbox for downstream consumers
+    await this.sql`
+      INSERT INTO event_outbox (event_id) VALUES (${eventId})
     `;
 
     return eventId;

@@ -4,15 +4,20 @@
  * POST /webhooks/:hookId — receive external events and feed into interpretation pipeline
  */
 
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Hono } from 'hono';
 import type postgres from 'postgres';
 import { ExternalPipeline, type RawExternalEvent } from '../services/external-pipeline.js';
+import { GitHubIntegration } from '../integrations/github.js';
+import { SlackIntegration } from '../integrations/slack.js';
 
 type Sql = ReturnType<typeof postgres>;
 
 export function webhookRoutes(sql: Sql) {
   const app = new Hono();
   const pipeline = new ExternalPipeline(sql);
+  const github = new GitHubIntegration(sql);
+  const slack = new SlackIntegration(sql);
 
   // ── POST /webhooks/:hookId — Inbound webhook receiver ─────────
   // No auth middleware — webhooks are authenticated via hookId + secret
@@ -35,34 +40,58 @@ export function webhookRoutes(sql: Sql) {
       return c.json({ error: 'Integration is inactive' }, 403);
     }
 
-    // 2. Verify webhook secret (via query param or header)
-    const providedSecret = c.req.query('secret')
-      ?? c.req.header('x-webhook-secret')
-      ?? c.req.header('x-hub-signature-256'); // GitHub style
-
-    if (providedSecret !== endpoint.secret && !verifyGitHubSignature(c, endpoint.secret as string)) {
-      // For GitHub webhooks, we verify the HMAC signature
-      // For other webhooks, we check the secret directly
-      return c.json({ error: 'Invalid webhook secret' }, 401);
-    }
-
-    // 3. Parse the payload
+    // 2. Parse the payload (need raw body for HMAC verification)
     let payload: Record<string, unknown>;
+    let rawBody: string;
     try {
-      payload = await c.req.json();
+      rawBody = await c.req.text();
+      payload = JSON.parse(rawBody);
     } catch {
       return c.json({ error: 'Invalid JSON payload' }, 400);
     }
 
-    // 4. Determine event type from headers or payload
+    // 3. Handle Slack url_verification BEFORE secret check
+    // Slack sends url_verification without the webhook secret
+    if (endpoint.integration_type === 'slack' && payload.type === 'url_verification') {
+      return c.json({ challenge: payload.challenge });
+    }
+
+    // 4. Verify webhook secret (via query param, header, or GitHub HMAC)
+    const querySecret = c.req.query('secret');
+    const headerSecret = c.req.header('x-webhook-secret');
+    const githubSignature = c.req.header('x-hub-signature-256');
+
+    let authenticated = false;
+    if (querySecret === endpoint.secret || headerSecret === endpoint.secret) {
+      authenticated = true;
+    } else if (githubSignature && endpoint.integration_type === 'github') {
+      authenticated = verifyGitHubSignature(rawBody, endpoint.secret as string, githubSignature);
+    }
+
+    if (!authenticated) {
+      return c.json({ error: 'Invalid webhook secret' }, 401);
+    }
+
+    // 5. Determine event type from headers or payload
     const eventType = detectEventType(c, endpoint.integration_type as string, payload);
 
-    // 5. Update last received timestamp
+    // 6. Update last received timestamp
     await sql`
       UPDATE webhook_endpoints SET last_received_at = NOW() WHERE id = ${hookId}
     `;
 
-    // 6. Feed into the external interpretation pipeline
+    // 7. Handle Slack slash commands directly (they need an immediate response)
+    if (endpoint.integration_type === 'slack' && eventType === 'slash_command') {
+      // Slack sends slash commands as form-encoded but we've already parsed as JSON
+      // In production, Slack slash commands come as application/x-www-form-urlencoded
+      const response = await slack.handleSlashCommand(
+        endpoint.integration_id as string,
+        payload as unknown as Parameters<typeof slack.handleSlashCommand>[1],
+      );
+      return c.json(response);
+    }
+
+    // 8. Feed into the external interpretation pipeline
     const rawEvent: RawExternalEvent = {
       integration_id: endpoint.integration_id as string,
       source_type: endpoint.integration_type as string,
@@ -111,6 +140,8 @@ function detectEventType(
   // Slack uses a type field in the payload
   if (integrationType === 'slack') {
     if (payload.type === 'url_verification') return 'url_verification';
+    // Check if it's a slash command (has 'command' field)
+    if (payload.command) return 'slash_command';
     const eventType = (payload.event as Record<string, unknown>)?.type;
     return eventType ? String(eventType) : 'unknown';
   }
@@ -119,21 +150,20 @@ function detectEventType(
   return (payload.type as string) ?? (payload.event_type as string) ?? 'unknown';
 }
 
+/**
+ * Verify GitHub webhook HMAC-SHA256 signature.
+ * GitHub sends X-Hub-Signature-256: sha256=<hex_digest>
+ */
 function verifyGitHubSignature(
-  c: { req: { header: (name: string) => string | undefined } },
-  _secret: string,
+  rawBody: string,
+  secret: string,
+  signatureHeader: string,
 ): boolean {
-  // GitHub sends X-Hub-Signature-256 header with HMAC-SHA256
-  // In production, verify using crypto.timingSafeEqual
-  // For now, return false to fall through to direct secret comparison
-  const signature = c.req.header('x-hub-signature-256');
-  if (!signature) return false;
+  if (!signatureHeader.startsWith('sha256=')) return false;
 
-  // TODO: Implement proper HMAC verification
-  // const hmac = crypto.createHmac('sha256', secret);
-  // hmac.update(rawBody);
-  // const expected = 'sha256=' + hmac.digest('hex');
-  // return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  const expected = 'sha256=' + createHmac('sha256', secret).update(rawBody).digest('hex');
 
-  return false;
+  // Constant-time comparison to prevent timing attacks
+  if (expected.length !== signatureHeader.length) return false;
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signatureHeader));
 }

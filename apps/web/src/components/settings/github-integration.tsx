@@ -24,26 +24,44 @@ export function GitHubIntegration() {
   const { t: tCommon } = useTranslation('common');
   const qc = useQueryClient();
 
-  const { data: integrations, isLoading } = useQuery({
+  const [error, setError] = useState<string | null>(null);
+
+  // First find the GitHub integration from the list
+  const { data: integrations, isLoading: isListLoading } = useQuery({
     queryKey: ['integrations'],
     queryFn: () => api.listIntegrations(),
   });
 
-  const githubIntegration = integrations?.find((i: Integration) => i.type === 'github');
+  const githubEntry = integrations?.find((i: Integration) => i.type === 'github');
+
+  // Then fetch the full integration with webhook_endpoints
+  const { data: githubIntegration, isLoading: isDetailLoading } = useQuery({
+    queryKey: ['integration', githubEntry?.id],
+    queryFn: () => api.getIntegration(githubEntry!.id),
+    enabled: !!githubEntry?.id,
+  });
+
+  const isLoading = isListLoading || (!!githubEntry && isDetailLoading);
 
   const createGithub = useMutation({
     mutationFn: () => api.createIntegration({ type: 'github', name: 'GitHub' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['integrations'] }),
+    onError: (err: Error) => setError(err.message),
   });
 
   const testConnection = useMutation({
     mutationFn: (id: string) => api.testIntegration(id),
+    onError: (err: Error) => setError(err.message),
   });
 
   const toggleActive = useMutation({
     mutationFn: ({ id, active }: { id: string; active: boolean }) =>
       api.updateIntegration(id, { active }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['integrations'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['integrations'] });
+      qc.invalidateQueries({ queryKey: ['integration', githubEntry?.id] });
+    },
+    onError: (err: Error) => setError(err.message),
   });
 
   const [copiedWebhook, setCopiedWebhook] = useState(false);
@@ -121,6 +139,14 @@ export function GitHubIntegration() {
           </Button>
         </div>
       </div>
+
+      {/* Error display */}
+      {error && (
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-sm flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-2 text-red-500 hover:text-red-700">✕</button>
+        </div>
+      )}
 
       {/* Connection section */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-4">

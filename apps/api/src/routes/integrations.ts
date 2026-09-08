@@ -9,6 +9,7 @@ import { Hono } from 'hono';
 import type postgres from 'postgres';
 import { authMiddleware, getUser } from '../middleware/auth.js';
 import { ExternalPipeline } from '../services/external-pipeline.js';
+import { GitHubIntegration } from '../integrations/github.js';
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -17,6 +18,30 @@ export function integrationRoutes(sql: Sql) {
   app.use('*', authMiddleware);
 
   const pipeline = new ExternalPipeline(sql);
+
+  // ── Review routes MUST be registered before /:id to avoid shadowing ──
+
+  // ── GET /integrations/review/pending — Pending review items ───────
+  app.get('/review/pending', async (c) => {
+    const user = getUser(c);
+    const items = await pipeline.listPendingReview(undefined, 50, user.organization_id);
+    return c.json(items);
+  });
+
+  // ── POST /integrations/review/:eventId — Review an event ──────
+  app.post('/review/:eventId', async (c) => {
+    const user = getUser(c);
+    const eventId = c.req.param('eventId');
+    const body = await c.req.json();
+
+    const { decision, override_data } = body;
+    if (!decision || !['accepted', 'rejected'].includes(decision)) {
+      return c.json({ error: 'decision must be "accepted" or "rejected"' }, 400);
+    }
+
+    const result = await pipeline.review(eventId, decision, user.user_id, override_data, user.organization_id);
+    return c.json(result);
+  });
 
   // ── GET /integrations — List org integrations ─────────────────
   app.get('/', async (c) => {
@@ -193,25 +218,45 @@ export function integrationRoutes(sql: Sql) {
     return c.json(events);
   });
 
-  // ── GET /integrations/review — Pending review items ───────────
-  app.get('/review/pending', async (c) => {
-    const items = await pipeline.listPendingReview();
-    return c.json(items);
+  // ── GitHub OAuth Routes ────────────────────────────────────────
+
+  const github = new GitHubIntegration(sql);
+
+  // ── GET /integrations/:id/github/authorize — Start OAuth flow ──
+  app.get('/:id/github/authorize', async (c) => {
+    const user = getUser(c);
+    const id = c.req.param('id');
+
+    const [integration] = await sql`
+      SELECT id, type FROM integrations
+      WHERE id = ${id} AND organization_id = ${user.organization_id} AND type = 'github'
+    `;
+    if (!integration) return c.json({ error: 'GitHub integration not found' }, 404);
+
+    const appUrl = process.env['APP_URL'] ?? 'http://localhost:3000';
+    const redirectUri = `${appUrl}/api/v1/integrations/${id}/github/callback`;
+    const authUrl = github.getAuthorizationUrl(id, redirectUri);
+
+    return c.redirect(authUrl);
   });
 
-  // ── POST /integrations/review/:eventId — Review an event ──────
-  app.post('/review/:eventId', async (c) => {
-    const user = getUser(c);
-    const eventId = c.req.param('eventId');
-    const body = await c.req.json();
+  // ── GET /integrations/:id/github/callback — OAuth callback ─────
+  app.get('/:id/github/callback', async (c) => {
+    const id = c.req.param('id');
+    const code = c.req.query('code');
+    const state = c.req.query('state');
 
-    const { decision, override_data } = body;
-    if (!decision || !['accepted', 'rejected'].includes(decision)) {
-      return c.json({ error: 'decision must be "accepted" or "rejected"' }, 400);
+    if (!code) return c.json({ error: 'Missing authorization code' }, 400);
+
+    const result = await github.handleOAuthCallback(id, code);
+    const appUrl = process.env['APP_URL'] ?? 'http://localhost:3000';
+
+    if (result.success) {
+      // Redirect back to the integration settings page
+      return c.redirect(`${appUrl}/settings/integrations?github=connected`);
     }
 
-    const result = await pipeline.review(eventId, decision, user.user_id, override_data);
-    return c.json(result);
+    return c.redirect(`${appUrl}/settings/integrations?github=error&message=${encodeURIComponent(result.message)}`);
   });
 
   return app;
