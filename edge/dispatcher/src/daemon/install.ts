@@ -8,6 +8,8 @@ import { installSystemdService, uninstallSystemdService, systemdStatus, startSys
 import { installLaunchdAgent, uninstallLaunchdAgent, launchdStatus, startLaunchd, stopLaunchd } from './macos.js';
 import { installWindowsTask, uninstallWindowsTask, windowsTaskStatus, startWindowsTask, stopWindowsTask } from './windows.js';
 import { installWslDaemon, uninstallWslDaemon, wslDaemonStatus, startWslDaemon, stopWslDaemon } from './wsl.js';
+import { installTermuxService, uninstallTermuxService, termuxStatus, startTermux, stopTermux } from './termux.js';
+import { installUniversalDaemon, uninstallUniversalDaemon, universalStatus, startUniversal, stopUniversal } from './universal.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -69,6 +71,10 @@ export async function installDaemon(options: InstallOptions = {}): Promise<void>
       return installWindowsTask(entryPath, logPath, options);
     case 'wsl':
       return installWslDaemon(entryPath, logPath, options);
+    case 'termux':
+      return installTermuxService(entryPath, logPath, options);
+    case 'universal':
+      return installUniversalDaemon(entryPath, logPath, options);
   }
 }
 
@@ -89,6 +95,10 @@ export async function uninstallDaemon(): Promise<void> {
       return uninstallWindowsTask();
     case 'wsl':
       return uninstallWslDaemon();
+    case 'termux':
+      return uninstallTermuxService();
+    case 'universal':
+      return uninstallUniversalDaemon();
   }
 }
 
@@ -106,6 +116,10 @@ export async function daemonStatus(): Promise<DaemonStatus> {
       return windowsTaskStatus();
     case 'wsl':
       return wslDaemonStatus();
+    case 'termux':
+      return termuxStatus();
+    case 'universal':
+      return universalStatus();
   }
 }
 
@@ -123,6 +137,10 @@ export async function startDaemon(): Promise<void> {
       return startWindowsTask();
     case 'wsl':
       return startWslDaemon();
+    case 'termux':
+      return startTermux();
+    case 'universal':
+      return startUniversal();
   }
 }
 
@@ -138,5 +156,9 @@ export async function stopDaemon(): Promise<void> {
       return stopWindowsTask();
     case 'wsl':
       return stopWslDaemon();
+    case 'termux':
+      return stopTermux();
+    case 'universal':
+      return stopUniversal();
   }
 }

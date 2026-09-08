@@ -172,10 +172,15 @@ This auto-detects the platform and installs the right service:
 
 | Platform | Mechanism |
 |----------|-----------|
-| Linux | systemd user service (`~/.config/systemd/user/`) |
+| Linux (systemd) | systemd user service (`~/.config/systemd/user/`) |
 | macOS | launchd agent (`~/Library/LaunchAgents/`) |
 | Windows | Task Scheduler (runs at login) |
 | WSL2 | Windows Task Scheduler keeps WSL alive + systemd inside WSL |
+| Termux (Android) | termux-services (runit), falls back to nohup + PID |
+| proot-distro | Self-supervised nohup wrapper with shell profile auto-start |
+| Any other Linux | Universal fallback — nohup + PID + crash respawn |
+
+The universal fallback means the dispatcher works on **any system with `/bin/sh` and Node.js** — Alpine, Void, Artix, containers, Chromebooks, and anything else. No init system required.
 
 Other commands: `uninstall`, `status`, `start`, `stop`, `logs`, `health`. Health endpoint on `:4002`.
 
