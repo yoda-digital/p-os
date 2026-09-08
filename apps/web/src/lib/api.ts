@@ -128,8 +128,13 @@ export const api = {
 
   // Decisions — API uses /v1/decisions?caseId=xxx
   listDecisions: (caseId: string) => request<Decision[]>(`/v1/decisions?caseId=${caseId}`),
+  getDecision: (id: string) => request<Decision & { linked_evidence?: unknown[] }>(`/v1/decisions/${id}`),
   createDecision: (caseId: string, data: CreateDecisionInput) =>
     request<Decision>('/v1/decisions', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  updateDecision: (id: string, data: Partial<UpdateDecisionInput>) =>
+    request<Decision>(`/v1/decisions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  recommendDecision: (id: string) =>
+    request<Decision>(`/v1/decisions/${id}/recommend`, { method: 'POST' }),
   resolveDecision: (id: string, selected_option: unknown, rationale: string) =>
     request<void>(`/v1/decisions/${id}/resolve`, { method: 'POST', body: JSON.stringify({ selected_option, rationale }) }),
 
@@ -352,6 +357,7 @@ export interface Decision {
   created_at: string; created_by?: string; revision: number;
 }
 export interface CreateDecisionInput { question: string; context?: string; options?: { label: string; description?: string }[]; blocking_move_ids?: string[]; }
+export interface UpdateDecisionInput { question?: string; context?: string; options?: Decision['options']; evidence_refs?: string[]; state?: string; required_authority?: unknown; }
 
 export interface Evidence {
   id: string; case_id: string; subject_refs: { id: string; type: string }[];
