@@ -34,6 +34,7 @@ import { auditRoutes } from './routes/audit.js';
 import { adminRoutes } from './routes/admin.js';
 import { edgeRoutes } from './routes/edge.js';
 import { executionRoutes } from './routes/execution.js';
+import { governanceRoutes } from './routes/governance.js';
 
 const PORT = parseInt(process.env['PORT'] ?? '4000', 10);
 
@@ -115,6 +116,9 @@ async function main() {
 
   // Execution routes (SP3 — managed execution)
   app.route('/api/v1', executionRoutes(sql));
+
+  // Governance routes (SP4 — autonomy, budget, authority)
+  app.route('/api/v1/governance', governanceRoutes(sql));
 
   // Admin routes (system org only)
   app.route('/api/v1/admin', adminRoutes(sql));

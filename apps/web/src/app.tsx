@@ -32,6 +32,7 @@ import { AdminAudit } from './components/admin/admin-audit';
 import { AdminPacks } from './components/admin/admin-packs';
 import { AdminPolicies } from './components/admin/admin-policies';
 import { AdminHealth } from './components/admin/admin-health';
+import { AdminGovernance } from './components/admin/admin-governance';
 
 // Settings
 import { ProfileSettings } from './components/settings/profile-settings';
@@ -133,6 +134,7 @@ export function App() {
           <Route path="audit" element={<AdminAudit />} />
           <Route path="packs" element={<AdminPacks />} />
           <Route path="policies" element={<AdminPolicies />} />
+          <Route path="governance" element={<AdminGovernance />} />
           <Route path="health" element={<AdminHealth />} />
         </Route>
       </Route>

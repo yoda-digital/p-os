@@ -209,6 +209,18 @@ export const api = {
   // Process Packs
   listPacks: () => request<ProcessPack[]>('/v1/packs'),
 
+  // Governance (SP4)
+  getAutonomyProfile: (caseId: string) => request<AutonomyProfile>(`/v1/governance/autonomy?caseId=${caseId}`),
+  updateAutonomyProfile: (caseId: string, data: Partial<AutonomyProfile>) =>
+    request<AutonomyProfile>('/v1/governance/autonomy', { method: 'PATCH', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  checkGovernance: (caseId: string, action: string, actorRoles?: string[]) =>
+    request<GovernanceCheckResult>('/v1/governance/check', { method: 'POST', body: JSON.stringify({ case_id: caseId, action, actor_roles: actorRoles }) }),
+  getBudgetStatus: (caseId: string) => request<BudgetStatusResult>(`/v1/governance/budget?caseId=${caseId}`),
+  recordGovernanceOverride: (data: GovernanceOverrideInput) =>
+    request<{ id: string; status: string }>('/v1/governance/override', { method: 'POST', body: JSON.stringify(data) }),
+  listGovernanceOverrides: (params: { caseId?: string; organizationId?: string; limit?: number }) =>
+    request<GovernanceOverride[]>(`/v1/governance/overrides${toQueryString(params)}`),
+
   // Execution (SP3)
   executeMove: (moveId: string) =>
     request<ExecutionTriggerResult>(`/v1/moves/${moveId}/execute`, { method: 'POST' }),
@@ -405,6 +417,18 @@ export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; re
 export interface DriftReport { expected_process: unknown; observed_process: unknown; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
 
 export interface ProcessPack { id: string; name: string; version: string; domain: string; created_at: string; }
+
+// ===== Governance (SP4) =====
+export type AutonomyLevel = 'supervised' | 'guided' | 'autonomous' | 'full_autonomous';
+export interface AutonomyProfile {
+  level: AutonomyLevel; auto_create_moves: boolean; auto_activate_moves: boolean;
+  auto_approve_evidence: boolean; max_cost_per_attempt_usd: number;
+  max_concurrent_attempts: number; require_human_approval_for: string[];
+}
+export interface GovernanceCheckResult { allowed: boolean; reason: string; requires_approval: boolean; required_roles?: string[]; autonomy_level?: AutonomyLevel; budget_alert?: string; }
+export interface BudgetStatusResult { case_id?: string; organization_id?: string; monetary_cost_usd?: number; budget_limit_usd?: number | null; usage_pct?: number | null; alert_level: string; message?: string; }
+export interface GovernanceOverrideInput { case_id?: string; organization_id?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type?: string; metadata?: Record<string, unknown>; }
+export interface GovernanceOverride { id: string; case_id?: string; actor_id: string; actor_name?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type: string; created_at: string; }
 
 export interface Attempt { id: string; case_id: string; move_id: string; executor_id?: string; strategy: string; state: string; model?: string; effort?: string; started_at?: string; ended_at?: string; cost?: unknown; usage?: unknown; failure_reason?: string; steering_history: unknown[]; created_at: string; revision: number; }
 
