@@ -162,6 +162,23 @@ The execution compiler selects a strategy (single session, subagent, agent team,
 
 The dispatcher launches `claude --bg`, queries `claude agents --json`, and handles crash recovery. You can click Execute on a Move from the browser without opening a terminal.
 
+The dispatcher runs as a persistent system daemon. Install it with one command:
+
+```bash
+npx tsx edge/dispatcher/src/cli/index.ts install
+```
+
+This auto-detects the platform and installs the right service:
+
+| Platform | Mechanism |
+|----------|-----------|
+| Linux | systemd user service (`~/.config/systemd/user/`) |
+| macOS | launchd agent (`~/Library/LaunchAgents/`) |
+| Windows | Task Scheduler (runs at login) |
+| WSL2 | Windows Task Scheduler keeps WSL alive + systemd inside WSL |
+
+Other commands: `uninstall`, `status`, `start`, `stop`, `logs`, `health`. Health endpoint on `:4002`.
+
 ### Authorization
 
 ABAC policy engine evaluating subject × action × resource × environment conditions with priority-based ordering. Hierarchical roles: system → organization → workspace → team → case. Superadmin via a system organization with an 8-page admin panel. Token-based invitations, audit logging on every mutation with IP and impersonation tracking.
@@ -251,7 +268,7 @@ p-os/
 
 ```bash
 pnpm install          # Install dependencies
-npx tsx dev.ts        # Start everything (PG + API + WS + Worker + Web)
+npx tsx dev.ts        # Start everything (PG + API + WS + Worker + Dispatcher + Web)
 pnpm build            # Build all 32 packages
 pnpm test             # Run tests
 pnpm lint             # Lint
@@ -262,6 +279,12 @@ pnpm db:migrate       # Run migrations
 
 # Superadmin
 npx tsx apps/api/src/cli/create-superadmin.ts <email> <password>
+
+# Dispatcher daemon (persistent background service)
+npx tsx edge/dispatcher/src/cli/index.ts install    # Install as system service
+npx tsx edge/dispatcher/src/cli/index.ts status     # Check daemon status
+npx tsx edge/dispatcher/src/cli/index.ts logs       # Tail daemon logs
+npx tsx edge/dispatcher/src/cli/index.ts uninstall  # Remove daemon
 ```
 
 ### Environment variables
