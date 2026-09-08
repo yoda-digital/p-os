@@ -4,9 +4,17 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "scripts": { "build": "tsc", "dev": "tsc --watch", "test": "vitest run" },
-  "dependencies": {
-    "@pos/contracts": "workspace:*"
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
   },
-  "devDependencies": { "typescript": "^5.8.0", "vitest": "^3.0.0" }
+  "dependencies": {
+    "@pos/contracts": "workspace:*",
+    "@pos/process-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
 }
