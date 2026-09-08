@@ -97,11 +97,11 @@ export class FileLogger {
   private interceptConsole(): void {
     const self = this;
 
-    // Intercept stdout
+    // Intercept stdout — use the same overload signature Node declares
     process.stdout.write = function (
       chunk: string | Uint8Array,
-      encodingOrCallback?: BufferEncoding | ((err?: Error) => void),
-      callback?: (err?: Error) => void,
+      encodingOrCallback?: BufferEncoding | ((err?: Error | null) => void),
+      callback?: (err?: Error | null) => void,
     ): boolean {
       const text = typeof chunk === 'string' ? chunk : chunk.toString();
       self.stream?.write(text);
@@ -118,8 +118,8 @@ export class FileLogger {
     // Intercept stderr
     process.stderr.write = function (
       chunk: string | Uint8Array,
-      encodingOrCallback?: BufferEncoding | ((err?: Error) => void),
-      callback?: (err?: Error) => void,
+      encodingOrCallback?: BufferEncoding | ((err?: Error | null) => void),
+      callback?: (err?: Error | null) => void,
     ): boolean {
       const text = typeof chunk === 'string' ? chunk : chunk.toString();
       self.stream?.write(text);

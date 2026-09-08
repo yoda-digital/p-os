@@ -77,6 +77,13 @@ async function main() {
   startProcess('WORKER', 'npx', ['tsx', 'watch', 'apps/worker/src/index.ts']);
   await setTimeout(1000);
 
+  // Step 4.5: Start dispatcher (optional, for testing execution flow)
+  if (process.env['START_DISPATCHER'] !== '0') {
+    console.log('\x1b[32m→ Starting dispatcher...\x1b[0m');
+    startProcess('DISPATCH', 'npx', ['tsx', 'edge/dispatcher/src/entry.ts']);
+    await setTimeout(1000);
+  }
+
   // Step 5: Start web UI
   console.log('\x1b[32m→ Starting web UI...\x1b[0m');
   startProcess('WEB', 'npx', ['vite', '--port', '3000'], 'apps/web');
@@ -88,6 +95,7 @@ async function main() {
   console.log('║  Web UI:    http://localhost:3000         ║');
   console.log('║  API:       http://localhost:4000         ║');
   console.log('║  WebSocket: ws://localhost:4001           ║');
+  console.log('║  Dispatcher: http://localhost:4002/health ║');
   console.log('║                                          ║');
   console.log('║  Press Ctrl+C to stop all services       ║');
   console.log('╚══════════════════════════════════════════╝');
