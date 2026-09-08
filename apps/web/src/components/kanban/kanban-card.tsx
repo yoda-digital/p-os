@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '../common/badge';
+import { StrategyBadge } from '../execution/execution-controls';
 import {
   Play, Pause, CheckCircle2, AlertTriangle, Clock,
   Eye, MessageSquare, Hand, GitFork, Shield, ArrowUp,
@@ -94,12 +95,15 @@ export function KanbanCard({ card, onClick, isDragging }: KanbanCardProps) {
         {card.title}
       </h4>
 
-      {/* Execution state + activity */}
+      {/* Execution state + activity + strategy badge */}
       <div className="flex items-center gap-1.5 mb-2">
         <ExecIcon className={`w-3.5 h-3.5 ${execution === 'running' ? 'animate-spin text-emerald-500' : 'text-slate-400'}`} />
         <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
           {tCommon(`status.${execution}`, { defaultValue: execution })}
         </span>
+        {(card as any).strategy && execution !== 'not_started' && (
+          <StrategyBadge strategy={(card as any).strategy} compact />
+        )}
       </div>
 
       {/* Bottom row: metadata */}

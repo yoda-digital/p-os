@@ -1,0 +1,35 @@
+{
+  "strategy": {
+    "current_session": "Sesiunea curentă",
+    "fresh_session": "Sesiune nouă",
+    "background_session": "Fundal",
+    "subagent": "Sub-agent",
+    "agent_team": "Echipă de agenți",
+    "dynamic_workflow": "Flux dinamic",
+    "human": "Uman",
+    "wait": "Așteptare"
+  },
+  "controls": {
+    "title": "Execuție",
+    "loading": "Se încarcă...",
+    "execute": "Execută",
+    "executing": "Se execută...",
+    "stop": "Oprește",
+    "stopping": "Se oprește...",
+    "model": "Model: {{value}}",
+    "effort": "Efort: {{value}}",
+    "started": "Început {{value}}",
+    "execute_error": "Nu s-a putut porni execuția",
+    "stop_error": "Nu s-a putut opri execuția",
+    "total_attempts": "{{count}} încercare/încercări total"
+  },
+  "status": {
+    "dispatched": "Dispatșat",
+    "queued": "În coadă",
+    "queued_for_human": "Așteptare uman",
+    "running": "În execuție",
+    "stopped": "Oprit",
+    "finished": "Terminat",
+    "failed": "Eșuat"
+  }
+}

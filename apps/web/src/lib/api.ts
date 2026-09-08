@@ -204,6 +204,16 @@ export const api = {
   // Process Packs
   listPacks: () => request<ProcessPack[]>('/v1/packs'),
 
+  // Execution (SP3)
+  executeMove: (moveId: string) =>
+    request<ExecutionTriggerResult>(`/v1/moves/${moveId}/execute`, { method: 'POST' }),
+  getExecutionStatus: (moveId: string) =>
+    request<ExecutionStatus>(`/v1/moves/${moveId}/execution`),
+  stopExecution: (moveId: string) =>
+    request<{ status: string; attempt_id: string }>(`/v1/moves/${moveId}/stop`, { method: 'POST' }),
+  getAttemptLogs: (attemptId: string) =>
+    request<AttemptLogs>(`/v1/attempts/${attemptId}/logs`),
+
   // Attempts
   listAttempts: (moveId: string) => request<Attempt[]>(`/v1/moves/${moveId}/attempts`),
 
@@ -518,3 +528,68 @@ export interface OrgUnit {
 }
 export interface CreateOrgUnitInput { name: string; parent_id?: string; description?: string; metadata?: Record<string, unknown>; }
 export interface UpdateOrgUnitInput { name?: string; parent_id?: string | null; description?: string; metadata?: Record<string, unknown>; }
+
+// ===== Execution (SP3) =====
+export interface ExecutionTriggerResult {
+  status: string;
+  attempt_id: string;
+  plan: ExecutionPlanSummary;
+  device_id?: string;
+  message?: string;
+}
+
+export interface ExecutionPlanSummary {
+  moveId: string;
+  executor: string;
+  strategy: string;
+  session_policy: string;
+  model_policy: string;
+  effort_policy: string;
+  isolation: string;
+  parallelism: number;
+  verification_strategy: string;
+  budget?: { max_tokens?: number; max_cost_usd?: number; max_duration_seconds?: number };
+  model_hint?: string;
+  why: string;
+}
+
+export interface ExecutionStatus {
+  move_id: string;
+  execution_state: string;
+  current_attempt: {
+    id: string;
+    state: string;
+    strategy: string;
+    model?: string;
+    effort?: string;
+    claude_job_id?: string;
+    started_at?: string;
+    why?: string;
+  } | null;
+  attempts: {
+    id: string;
+    state: string;
+    strategy: string;
+    model?: string;
+    started_at?: string;
+    ended_at?: string;
+    failure_reason?: string;
+  }[];
+  total_attempts: number;
+}
+
+export interface AttemptLogs {
+  attempt_id: string;
+  move_id: string;
+  move_title: string;
+  state: string;
+  strategy: string;
+  model?: string;
+  claude_job_id?: string;
+  started_at?: string;
+  ended_at?: string;
+  failure_reason?: string;
+  execution_plan?: ExecutionPlanSummary;
+  events: { id: string; type: string; occurred_at: string; data: Record<string, unknown> }[];
+  steering: { id: string; class: string; instruction: string; state: string; issued_at: string; delivered_at?: string }[];
+}

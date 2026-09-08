@@ -4,6 +4,7 @@ import { useInstructionVersions } from '../../hooks/use-steering';
 import { Badge } from '../common/badge';
 import { Button } from '../common/button';
 import { SteeringComposer } from './steering-composer';
+import { ExecutionControls } from '../execution/execution-controls';
 import { Spinner } from '../common/spinner';
 import {
   X, Play, Pause, Square, GitFork, UserCheck, AlertTriangle,
@@ -123,6 +124,16 @@ export function MoveDetailDrawer({ open, onClose, moveId, caseId }: MoveDetailDr
                   <CheckCircle2 className="w-3.5 h-3.5" /> {t('drawer.action_satisfy')}
                 </Button>
               </div>
+            </div>
+
+            {/* Execution Controls (SP3) */}
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+              <ExecutionControls
+                moveId={move.id}
+                caseId={caseId}
+                moveClass={move.class}
+                execution={move.execution}
+              />
             </div>
 
             {/* Dependencies */}
