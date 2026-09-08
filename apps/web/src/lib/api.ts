@@ -102,6 +102,8 @@ export const api = {
     request<Case>(`/v1/cases/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   closeCase: (id: string) =>
     request<void>(`/v1/cases/${id}/close`, { method: 'POST' }),
+  getCaseViews: (id: string) =>
+    request<{ views: CompiledView[] }>(`/v1/cases/${id}/views`),
 
   // Moves — API uses /v1/moves?caseId=xxx for list, /v1/moves/:id for single
   listMoves: (caseId: string) => request<Move[]>(`/v1/moves?caseId=${caseId}`),
@@ -128,8 +130,13 @@ export const api = {
 
   // Decisions — API uses /v1/decisions?caseId=xxx
   listDecisions: (caseId: string) => request<Decision[]>(`/v1/decisions?caseId=${caseId}`),
+  getDecision: (id: string) => request<Decision & { linked_evidence?: unknown[] }>(`/v1/decisions/${id}`),
   createDecision: (caseId: string, data: CreateDecisionInput) =>
     request<Decision>('/v1/decisions', { method: 'POST', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  updateDecision: (id: string, data: Partial<UpdateDecisionInput>) =>
+    request<Decision>(`/v1/decisions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  recommendDecision: (id: string) =>
+    request<Decision>(`/v1/decisions/${id}/recommend`, { method: 'POST' }),
   resolveDecision: (id: string, selected_option: unknown, rationale: string) =>
     request<void>(`/v1/decisions/${id}/resolve`, { method: 'POST', body: JSON.stringify({ selected_option, rationale }) }),
 
@@ -203,6 +210,18 @@ export const api = {
 
   // Process Packs
   listPacks: () => request<ProcessPack[]>('/v1/packs'),
+
+  // Governance (SP4)
+  getAutonomyProfile: (caseId: string) => request<AutonomyProfile>(`/v1/governance/autonomy?caseId=${caseId}`),
+  updateAutonomyProfile: (caseId: string, data: Partial<AutonomyProfile>) =>
+    request<AutonomyProfile>('/v1/governance/autonomy', { method: 'PATCH', body: JSON.stringify({ ...data, case_id: caseId }) }),
+  checkGovernance: (caseId: string, action: string, actorRoles?: string[]) =>
+    request<GovernanceCheckResult>('/v1/governance/check', { method: 'POST', body: JSON.stringify({ case_id: caseId, action, actor_roles: actorRoles }) }),
+  getBudgetStatus: (caseId: string) => request<BudgetStatusResult>(`/v1/governance/budget?caseId=${caseId}`),
+  recordGovernanceOverride: (data: GovernanceOverrideInput) =>
+    request<{ id: string; status: string }>('/v1/governance/override', { method: 'POST', body: JSON.stringify(data) }),
+  listGovernanceOverrides: (params: { caseId?: string; organizationId?: string; limit?: number }) =>
+    request<GovernanceOverride[]>(`/v1/governance/overrides${toQueryString(params)}`),
 
   // Execution (SP3)
   executeMove: (moveId: string) =>
@@ -352,6 +371,7 @@ export interface Decision {
   created_at: string; created_by?: string; revision: number;
 }
 export interface CreateDecisionInput { question: string; context?: string; options?: { label: string; description?: string }[]; blocking_move_ids?: string[]; }
+export interface UpdateDecisionInput { question?: string; context?: string; options?: Decision['options']; evidence_refs?: string[]; state?: string; required_authority?: unknown; }
 
 export interface Evidence {
   id: string; case_id: string; subject_refs: { id: string; type: string }[];
@@ -399,6 +419,21 @@ export interface ProcessMetrics { cycle_time?: string; waiting_time?: string; re
 export interface DriftReport { expected_process: unknown; observed_process: unknown; deviations: { type: string; description: string; evidence?: unknown; severity: string }[]; }
 
 export interface ProcessPack { id: string; name: string; version: string; domain: string; created_at: string; }
+
+// ===== Governance (SP4) =====
+export type AutonomyLevel = 'supervised' | 'guided' | 'autonomous' | 'full_autonomous';
+export interface AutonomyProfile {
+  level: AutonomyLevel; auto_create_moves: boolean; auto_activate_moves: boolean;
+  auto_approve_evidence: boolean; max_cost_per_attempt_usd: number;
+  max_concurrent_attempts: number; require_human_approval_for: string[];
+}
+export interface GovernanceCheckResult { allowed: boolean; reason: string; requires_approval: boolean; required_roles?: string[]; autonomy_level?: AutonomyLevel; budget_alert?: string; }
+export interface BudgetStatusResult { case_id?: string; organization_id?: string; monetary_cost_usd?: number; budget_limit_usd?: number | null; usage_pct?: number | null; alert_level: string; message?: string; }
+export interface GovernanceOverrideInput { case_id?: string; organization_id?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type?: string; metadata?: Record<string, unknown>; }
+export interface GovernanceOverride { id: string; case_id?: string; actor_id: string; actor_name?: string; action: string; original_recommendation?: string; actual_decision: string; justification: string; override_type: string; created_at: string; }
+
+// ===== Adaptive Views (SP4) =====
+export interface CompiledView { id: string; label: string; priority: number; reason: string; }
 
 export interface Attempt { id: string; case_id: string; move_id: string; executor_id?: string; strategy: string; state: string; model?: string; effort?: string; started_at?: string; ended_at?: string; cost?: unknown; usage?: unknown; failure_reason?: string; steering_history: unknown[]; created_at: string; revision: number; }
 

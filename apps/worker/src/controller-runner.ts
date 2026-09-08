@@ -56,6 +56,17 @@ export async function runControllers(
   if (t === 'CommitCreated') {
     await commitStalenessController(sql, event);
   }
+
+  // Attention priority recomputation on every event that changes case state
+  if (
+    t === 'MoveCreated' || t === 'MoveActivated' || t === 'MoveSatisfied' ||
+    t === 'MoveCancelled' || t === 'DecisionCreated' || t === 'DecisionResolved' ||
+    t === 'AttemptFailed' || t === 'AttemptSucceeded' ||
+    t === 'EvidenceAttached' || t === 'EvidenceInvalidated' || t === 'EvidenceStale' ||
+    t === 'AttentionRaised'
+  ) {
+    await attentionPriorityController(sql, event);
+  }
 }
 
 // ── Dependency Controller ────────────────────────────────────────
@@ -571,4 +582,83 @@ async function raiseAttention(
     )
   `;
   await sql`INSERT INTO event_outbox (event_id) VALUES (${eventId})`;
+}
+
+// ── Attention Priority Controller ───────────────────────────────
+// Recomputes attention priority scores for the case whenever
+// case state changes in a way that might shift priorities.
+
+async function attentionPriorityController(
+  sql: Sql,
+  event: EventRow
+): Promise<void> {
+  if (!event.case_id) return;
+
+  const caseId = event.case_id;
+
+  // Count downstream dependents per move for blocking impact
+  const downstreamCounts = await sql`
+    SELECT unnest(dependencies) AS dep_id, COUNT(*)::int AS cnt
+    FROM moves
+    WHERE case_id = ${caseId}
+      AND outcome NOT IN ('satisfied', 'cancelled', 'superseded', 'abandoned', 'failed')
+    GROUP BY dep_id
+  `;
+  const downstreamMap = new Map<string, number>();
+  for (const row of downstreamCounts) {
+    downstreamMap.set(row.dep_id as string, row.cnt as number);
+  }
+
+  // Update blocking_impact for all unresolved attention items with a move_id
+  const unresolvedItems = await sql`
+    SELECT id, move_id FROM projection_attention
+    WHERE case_id = ${caseId} AND resolved = false AND move_id IS NOT NULL
+  `;
+
+  for (const item of unresolvedItems) {
+    const moveId = item.move_id as string;
+    const impact = downstreamMap.get(moveId) ?? 0;
+    await sql`
+      UPDATE projection_attention
+      SET blocking_impact = ${impact}, updated_at = NOW()
+      WHERE id = ${item.id}
+    `;
+  }
+
+  // Auto-resolve attention items for decisions that have been resolved
+  await sql`
+    UPDATE projection_attention pa
+    SET resolved = true, resolved_at = NOW(), updated_at = NOW()
+    WHERE pa.case_id = ${caseId}
+      AND pa.resolved = false
+      AND pa.decision_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM decisions d
+        WHERE d.id = pa.decision_id AND d.state = 'decided'
+      )
+  `;
+
+  // Auto-resolve attention items for moves that reached terminal state
+  await sql`
+    UPDATE projection_attention pa
+    SET resolved = true, resolved_at = NOW(), updated_at = NOW()
+    WHERE pa.case_id = ${caseId}
+      AND pa.resolved = false
+      AND pa.move_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM moves m
+        WHERE m.id = pa.move_id
+          AND m.outcome IN ('satisfied', 'cancelled', 'superseded', 'abandoned', 'failed')
+      )
+  `;
+
+  // Escalation: if an item has been unresolved for > 24h, bump priority
+  await sql`
+    UPDATE projection_attention
+    SET priority = 'critical', updated_at = NOW()
+    WHERE case_id = ${caseId}
+      AND resolved = false
+      AND priority != 'critical'
+      AND created_at < NOW() - INTERVAL '24 hours'
+  `;
 }
