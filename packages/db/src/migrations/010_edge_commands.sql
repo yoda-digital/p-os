@@ -3,8 +3,8 @@
 -- realtime server (which polls and pushes them to connected edge devices)
 
 CREATE TABLE IF NOT EXISTS edge_commands (
-  id             TEXT PRIMARY KEY,
-  device_id      TEXT NOT NULL REFERENCES devices(id),
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  device_id      UUID NOT NULL REFERENCES devices(id),
   type           TEXT NOT NULL,                    -- 'start_move', 'stop'
   payload        JSONB NOT NULL DEFAULT '{}',
   status         TEXT NOT NULL DEFAULT 'pending',  -- pending, delivered, acked, failed
