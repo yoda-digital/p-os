@@ -77,18 +77,30 @@ Process OS ships a Claude Code plugin that gives Claude direct access to Cases, 
 
 ### Install the plugin
 
+**From GitHub (recommended):**
+
 ```bash
-# From the repository root
-claude plugin add ./plugin/claude-code
+# Step 1: Add the marketplace
+/plugin marketplace add yoda-digital/p-os
+
+# Step 2: Install the plugin
+/plugin install universal-process-os@pos-plugins
 ```
 
-This registers the plugin with Claude Code and makes its skills, agents, hooks, and MCP tools available in all sessions started from this workspace.
+This installs the plugin directly from the repo — no cloning needed. Skills, agents, hooks, and MCP tools become available immediately.
 
-> **Not using the repo locally?** Publish the plugin to npm and install globally:
-> ```bash
-> cd plugin/claude-code && npm publish
-> claude plugin add @pos/plugin-claude-code
-> ```
+**From a local clone:**
+
+```bash
+# If you already have the repo cloned
+claude --plugin-dir ./plugin/claude-code
+```
+
+**For development (loads for the current session only):**
+
+```bash
+claude --plugin-dir /path/to/p-os/plugin/claude-code
+```
 
 ### Configure the control plane URL
 

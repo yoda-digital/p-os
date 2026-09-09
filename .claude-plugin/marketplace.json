@@ -1,0 +1,14 @@
+{
+  "name": "pos-plugins",
+  "owner": {
+    "name": "YODA Digital",
+    "url": "https://yoda.digital"
+  },
+  "plugins": [
+    {
+      "name": "universal-process-os",
+      "source": "./plugin/claude-code",
+      "description": "Claude Code plugin for Universal Process OS — 12 MCP tools, 7 hooks, 5 skills, 3 agents for semantic process management with Cases, Moves, Evidence, and bidirectional steering"
+    }
+  ]
+}
