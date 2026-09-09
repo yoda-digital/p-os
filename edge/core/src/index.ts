@@ -77,13 +77,16 @@ export class ProcessEdge {
       device: this.config.deviceId,
       plugin: this.config.pluginVersion,
       claude: this.config.claudeVersion,
+      token: this.config.token,
     });
 
     if (this.config.capabilities) {
       params.set('capabilities', this.config.capabilities.join(','));
     }
 
-    const url = `${this.config.serverUrl}/v1/edge?${params}`;
+    // The realtime server listens on /edge (no /v1/ prefix) at the WS port.
+    // Nginx proxies /edge/ws to the realtime server with WebSocket upgrade.
+    const url = `${this.config.serverUrl}/edge/ws?${params}`;
 
     return new Promise<void>((resolve, reject) => {
       this.ws = new WebSocket(url, {

@@ -76,9 +76,9 @@ export function executionRoutes(sql: Sql) {
         id, case_id, move_id, executor_id, strategy, state, model, effort,
         claude_job_id, execution_plan, created_at, revision
       ) VALUES (
-        ${attemptId}, ${caseId}, ${moveId}, ${plan.executor},
+        ${attemptId}, ${caseId}, ${moveId}, NULL,
         ${plan.strategy}, 'queued', ${plan.model_hint ?? null}, ${plan.effort_policy},
-        NULL, ${sql.json(plan as any)}, NOW(), 1
+        NULL, ${sql.json({ ...plan, executor_type: plan.executor } as any)}, NOW(), 1
       )
     `;
 
