@@ -1,8 +1,12 @@
 // Unified Daemon Installer — cross-platform install/uninstall/status
 // Routes to platform-specific implementations based on detectPlatform()
 
-import { resolve, join } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 import { detectPlatform, platformName, type Platform } from './detect.js';
 import { installSystemdService, uninstallSystemdService, systemdStatus, startSystemd, stopSystemd } from './linux.js';
 import { installLaunchdAgent, uninstallLaunchdAgent, launchdStatus, startLaunchd, stopLaunchd } from './macos.js';
