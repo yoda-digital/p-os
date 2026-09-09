@@ -4,6 +4,7 @@ import { getDb } from '@pos/db';
 import { verifyToken, type TokenPayload } from './auth.js';
 import {
   createEdgeWebSocketServer,
+  dispatchPendingCommands,
   dispatchPendingSteering,
   edgeHeartbeatSweep,
   getEdgeClientCount,
@@ -230,6 +231,9 @@ async function main(): Promise<void> {
   const steeringTimer = setInterval(() => {
     void dispatchPendingSteering();
   }, 1000);
+  const commandTimer = setInterval(() => {
+    void dispatchPendingCommands();
+  }, 1000);
 
   server.listen(PORT, () => {
     console.log(`[Realtime] WebSocket server on ws://localhost:${PORT} (browser: /, edge: /edge)`);
@@ -240,6 +244,7 @@ async function main(): Promise<void> {
     clearInterval(heartbeatTimer);
     clearInterval(edgeHeartbeatTimer);
     clearInterval(steeringTimer);
+    clearInterval(commandTimer);
     wss.close();
     edgeWss.close();
     server.close();

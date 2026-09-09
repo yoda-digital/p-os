@@ -131,9 +131,7 @@ export function executionRoutes(sql: Sql) {
           'pending',
           NOW()
         )
-      `.catch(() => {
-        // edge_commands table may not exist yet — fall back to event-only dispatch
-      });
+      `;
 
       // Update attempt to starting
       await sql`UPDATE attempts SET state = 'starting', started_at = NOW() WHERE id = ${attemptId}`;
@@ -264,9 +262,7 @@ export function executionRoutes(sql: Sql) {
           'pending',
           NOW()
         )
-      `.catch(() => {
-        // edge_commands table may not exist yet
-      });
+      `;
     }
 
     // Record event
