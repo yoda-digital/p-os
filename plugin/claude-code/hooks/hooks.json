@@ -1,42 +1,64 @@
 {
-  "SessionStart": [
-    {
-      "type": "command",
-      "command": "node $CLAUDE_PLUGIN_ROOT/hooks/session-start.js",
-      "timeout": 5000
-    }
-  ],
-  "PreToolUse": [
-    {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "node $CLAUDE_PLUGIN_ROOT/hooks/pre-tool-use.js",
-          "timeout": 1000
-        }
-      ]
-    }
-  ],
-  "PostToolUse": [
-    {
-      "type": "command",
-      "command": "node $CLAUDE_PLUGIN_ROOT/hooks/post-tool-use.js",
-      "timeout": 1000
-    }
-  ],
-  "Stop": [
-    {
-      "type": "command",
-      "command": "node $CLAUDE_PLUGIN_ROOT/hooks/stop.js",
-      "timeout": 2000
-    }
-  ],
-  "SessionEnd": [
-    {
-      "type": "command",
-      "command": "node $CLAUDE_PLUGIN_ROOT/hooks/session-end.js",
-      "timeout": 2000
-    }
-  ]
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/session-start.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/pre-tool-use.js",
+            "timeout": 1000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/post-tool-use.js",
+            "timeout": 1000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/stop.js",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PLUGIN_ROOT/hooks/session-end.js",
+            "timeout": 2000
+          }
+        ]
+      }
+    ]
+  }
 }
