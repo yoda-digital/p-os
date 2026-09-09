@@ -175,5 +175,27 @@ export function caseRoutes(sql: Sql) {
     return c.json({ status: 'reopened' });
   });
 
+  // DELETE /:id — void case (soft delete)
+  app.delete('/:id', async (c) => {
+    const user = getUser(c);
+    const id = c.req.param('id');
+
+    const result = await processor.process({
+      command_id: crypto.randomUUID(),
+      type: 'Case.Void',
+      tenant_id: user.organization_id,
+      case_id: id,
+      actor_id: user.user_id,
+      target_ref: { id, type: 'case' },
+      issued_at: new Date().toISOString(),
+      payload: { id },
+    });
+
+    if (result.status !== 'accepted') {
+      return c.json({ error: result.reason }, 400);
+    }
+    return c.json({ status: 'voided' });
+  });
+
   return app;
 }

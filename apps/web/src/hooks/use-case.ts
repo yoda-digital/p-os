@@ -39,3 +39,11 @@ export function useCloseCase() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cases'] }),
   });
 }
+
+export function useDeleteCase() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.deleteCase(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['cases'] }),
+  });
+}
