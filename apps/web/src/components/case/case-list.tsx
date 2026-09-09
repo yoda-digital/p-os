@@ -18,7 +18,7 @@ const lifecycleVariant: Record<string, string> = {
   void: 'danger',
 };
 
-const filters = ['all', 'open', 'dormant', 'closed', 'archived'] as const;
+const filters = ['all', 'open', 'dormant', 'closed', 'archived', 'void'] as const;
 
 export function CaseList() {
   const { t, i18n } = useTranslation('cases');
