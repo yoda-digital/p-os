@@ -150,14 +150,14 @@ async function searchCases(sql: Sql, pattern: string | null, caseId: string | un
 async function searchMoves(sql: Sql, pattern: string | null, caseId: string | undefined, priority: string | undefined, limit: number): Promise<SearchResult[]> {
   const rows = pattern
     ? await sql`
-        SELECT id, case_id, title, description, readiness, execution, outcome, priority, created_at FROM moves
-        WHERE (title ILIKE ${pattern} OR description ILIKE ${pattern})
+        SELECT id, case_id, title, objective, readiness, execution, outcome, priority, created_at FROM moves
+        WHERE (title ILIKE ${pattern} OR objective ILIKE ${pattern})
         ${caseId ? sql`AND case_id = ${caseId}` : sql``}
         ${priority ? sql`AND priority = ${priority}` : sql``}
         ORDER BY created_at DESC LIMIT ${limit}
       `
     : await sql`
-        SELECT id, case_id, title, description, readiness, execution, outcome, priority, created_at FROM moves
+        SELECT id, case_id, title, objective, readiness, execution, outcome, priority, created_at FROM moves
         WHERE 1=1
         ${caseId ? sql`AND case_id = ${caseId}` : sql``}
         ${priority ? sql`AND priority = ${priority}` : sql``}
@@ -168,9 +168,9 @@ async function searchMoves(sql: Sql, pattern: string | null, caseId: string | un
     id: r.id as string,
     type: 'move',
     title: r.title as string,
-    description: r.description as string | null,
+    description: r.objective as string | null,
     case_id: r.case_id as string,
-    relevance: computeRelevance(pattern, r.title as string, r.description as string | null),
+    relevance: computeRelevance(pattern, r.title as string, r.objective as string | null),
     created_at: (r.created_at as Date).toISOString(),
     metadata: { readiness: r.readiness, execution: r.execution, outcome: r.outcome, priority: r.priority },
   }));
@@ -206,13 +206,13 @@ async function searchDecisions(sql: Sql, pattern: string | null, caseId: string 
 async function searchEvidence(sql: Sql, pattern: string | null, caseId: string | undefined, limit: number): Promise<SearchResult[]> {
   const rows = pattern
     ? await sql`
-        SELECT id, case_id, type, description, validity, created_at FROM evidence
-        WHERE (type ILIKE ${pattern} OR description ILIKE ${pattern})
+        SELECT id, case_id, relation, validity, source_ref, created_at FROM evidence
+        WHERE (relation ILIKE ${pattern} OR source_ref::text ILIKE ${pattern})
         ${caseId ? sql`AND case_id = ${caseId}` : sql``}
         ORDER BY created_at DESC LIMIT ${limit}
       `
     : await sql`
-        SELECT id, case_id, type, description, validity, created_at FROM evidence
+        SELECT id, case_id, relation, validity, source_ref, created_at FROM evidence
         WHERE 1=1
         ${caseId ? sql`AND case_id = ${caseId}` : sql``}
         ORDER BY created_at DESC LIMIT ${limit}
@@ -221,12 +221,12 @@ async function searchEvidence(sql: Sql, pattern: string | null, caseId: string |
   return rows.map((r) => ({
     id: r.id as string,
     type: 'evidence',
-    title: `${r.type}: ${(r.description as string || '').slice(0, 80)}`,
-    description: r.description as string | null,
+    title: `${r.relation}: ${((r.source_ref as Record<string, unknown>)?.label as string || r.relation as string).slice(0, 80)}`,
+    description: null,
     case_id: r.case_id as string,
-    relevance: computeRelevance(pattern, r.type as string, r.description as string | null),
+    relevance: computeRelevance(pattern, r.relation as string, null),
     created_at: (r.created_at as Date).toISOString(),
-    metadata: { validity: r.validity, evidence_type: r.type },
+    metadata: { validity: r.validity, evidence_type: r.relation },
   }));
 }
 

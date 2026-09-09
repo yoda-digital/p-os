@@ -5,7 +5,7 @@
       "args": ["--import", "tsx/esm", "$CLAUDE_PLUGIN_ROOT/src/mcp/server.ts"],
       "env": {
         "PLUGIN_DATA": "${CLAUDE_PLUGIN_DATA}",
-        "CONTROL_PLANE_URL": "http://localhost:4000"
+        "CONTROL_PLANE_URL": "https://pos.yoda.digital"
       }
     }
   }

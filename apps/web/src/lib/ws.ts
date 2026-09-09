@@ -6,6 +6,12 @@ type WSMessage = {
   case_id?: string;
   move_id?: string;
   data?: unknown;
+  event?: {
+    id?: string;
+    caseId?: string;
+    type?: string;
+    [key: string]: unknown;
+  };
 };
 
 let wsInstance: WebSocket | null = null;
@@ -13,6 +19,7 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_DELAY = 30000;
 const listeners = new Set<(msg: WSMessage) => void>();
+let subscribedCaseId: string | null = null;
 
 function getWsUrl(): string {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -34,6 +41,10 @@ function connect(): void {
   wsInstance.onopen = () => {
     console.log('[WS] Connected');
     reconnectAttempts = 0;
+    // Re-subscribe to the active case after (re)connect
+    if (subscribedCaseId && wsInstance?.readyState === WebSocket.OPEN) {
+      wsInstance.send(JSON.stringify({ type: 'subscribe', caseId: subscribedCaseId }));
+    }
   };
 
   wsInstance.onmessage = (event) => {
@@ -75,13 +86,33 @@ export function subscribe(fn: (msg: WSMessage) => void): () => void {
   };
 }
 
+export function subscribeToCase(caseId: string | null): void {
+  // Unsubscribe from previous case
+  if (subscribedCaseId && wsInstance?.readyState === WebSocket.OPEN) {
+    wsInstance.send(JSON.stringify({ type: 'unsubscribe', caseId: subscribedCaseId }));
+  }
+  subscribedCaseId = caseId;
+  // Subscribe to new case
+  if (caseId && wsInstance?.readyState === WebSocket.OPEN) {
+    wsInstance.send(JSON.stringify({ type: 'subscribe', caseId }));
+  }
+}
+
 export function disconnect(): void {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
   }
+  subscribedCaseId = null;
   wsInstance?.close();
   wsInstance = null;
+}
+
+// Map server domain event types (e.g. "MoveCreated") to query invalidation keys
+function mapEventType(serverType: string): string {
+  const normalized = serverType.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '');
+  // MoveCreated -> move_created, MoveActivated -> move_activated, etc.
+  return normalized;
 }
 
 export function useRealtimeUpdates(caseId?: string): void {
@@ -89,42 +120,82 @@ export function useRealtimeUpdates(caseId?: string): void {
   const caseIdRef = useRef(caseId);
   caseIdRef.current = caseId;
 
+  // Subscribe/unsubscribe to case when caseId changes
+  useEffect(() => {
+    subscribeToCase(caseId || null);
+    return () => { subscribeToCase(null); };
+  }, [caseId]);
+
   useEffect(() => {
     const unsub = subscribe((msg) => {
       const currentCaseId = caseIdRef.current;
 
-      if (msg.case_id && currentCaseId && msg.case_id !== currentCaseId) return;
+      // Unwrap the 'event' envelope from the realtime server
+      let eventType = msg.type;
+      let eventCaseId = msg.case_id;
+      if (msg.type === 'event' && msg.event) {
+        eventType = mapEventType(msg.event.type || '');
+        eventCaseId = eventCaseId || msg.event.caseId as string;
+      }
 
-      switch (msg.type) {
+      if (eventCaseId && currentCaseId && eventCaseId !== currentCaseId) return;
+
+      switch (eventType) {
+        case 'case_created':
         case 'case_updated':
+        case 'case_closed':
+        case 'case_reopened':
           queryClient.invalidateQueries({ queryKey: ['cases'] });
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['case', msg.case_id] });
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['case', eventCaseId] });
           break;
-        case 'move_updated':
         case 'move_created':
-          if (msg.case_id) {
-            queryClient.invalidateQueries({ queryKey: ['moves', msg.case_id] });
-            queryClient.invalidateQueries({ queryKey: ['kanban', msg.case_id] });
+        case 'move_edited':
+        case 'move_activated':
+        case 'move_paused':
+        case 'move_resumed':
+        case 'move_cancelled':
+        case 'move_superseded':
+        case 'move_updated':
+          if (eventCaseId) {
+            queryClient.invalidateQueries({ queryKey: ['moves', eventCaseId] });
+            queryClient.invalidateQueries({ queryKey: ['kanban', eventCaseId] });
+            queryClient.invalidateQueries({ queryKey: ['attention', eventCaseId] });
+            queryClient.invalidateQueries({ queryKey: ['timeline', eventCaseId] });
           }
           break;
         case 'kanban_updated':
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['kanban', msg.case_id] });
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['kanban', eventCaseId] });
           break;
         case 'attention_updated':
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['attention', msg.case_id] });
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['attention', eventCaseId] });
           break;
+        case 'decision_created':
         case 'decision_updated':
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['decisions', msg.case_id] });
+        case 'decision_resolved':
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['decisions', eventCaseId] });
           break;
+        case 'evidence_attached':
+        case 'evidence_invalidated':
         case 'evidence_updated':
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['evidence', msg.case_id] });
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['evidence', eventCaseId] });
           break;
         case 'timeline_updated':
-          if (msg.case_id) queryClient.invalidateQueries({ queryKey: ['timeline', msg.case_id] });
+          if (eventCaseId) queryClient.invalidateQueries({ queryKey: ['timeline', eventCaseId] });
+          break;
+        case 'attempt_started':
+        case 'attempt_succeeded':
+        case 'attempt_failed':
+        case 'attempt_steered':
+          if (eventCaseId) {
+            queryClient.invalidateQueries({ queryKey: ['moves', eventCaseId] });
+            queryClient.invalidateQueries({ queryKey: ['kanban', eventCaseId] });
+          }
           break;
         default:
-          if (msg.case_id) {
-            queryClient.invalidateQueries({ queryKey: ['case', msg.case_id] });
+          // Catch-all: invalidate case and timeline for any unrecognized event
+          if (eventCaseId) {
+            queryClient.invalidateQueries({ queryKey: ['case', eventCaseId] });
+            queryClient.invalidateQueries({ queryKey: ['timeline', eventCaseId] });
           }
           break;
       }
