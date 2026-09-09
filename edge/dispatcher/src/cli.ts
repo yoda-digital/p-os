@@ -69,7 +69,8 @@ export async function launchBackgroundSession(
     maxTokens?: number;
   },
 ): Promise<LaunchResult> {
-  const args = ['--bg', '--name', moveId, '-p', promptText];
+  // The prompt is the positional argument (not -p which means --print)
+  const args = ['--bg', '--name', moveId, promptText];
 
   if (options?.model) {
     args.push('--model', options.model);
