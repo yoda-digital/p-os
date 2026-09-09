@@ -33,16 +33,14 @@ export function executionRoutes(sql: Sql) {
 
     const caseId = move.case_id as string;
 
-    // Check that the move is in an executable state
+    // Check that the move hasn't already finished
     const execution = move.execution as string;
-    if (execution === 'running') {
-      return c.json({ error: 'Move is already executing' }, 409);
-    }
     if (execution === 'finished') {
       return c.json({ error: 'Move has already finished' }, 409);
     }
 
-    // 2. Check for an active attempt
+    // 2. Check for an active attempt (the real guard — execution state can be
+    //    'running' from Activate without an attempt, so we check the attempts table)
     const [activeAttempt] = await sql`
       SELECT id FROM attempts WHERE move_id = ${moveId} AND state IN ('running', 'starting', 'queued')
       LIMIT 1
