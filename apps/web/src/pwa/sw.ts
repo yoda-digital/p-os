@@ -21,11 +21,11 @@ const APP_SHELL = [
 ];
 
 // API patterns to cache (GET only, stale-while-revalidate)
+// NOTE: Do NOT cache endpoints that must reflect mutations immediately
+// (kanban, moves, attention) — stale-while-revalidate defeats React Query
+// invalidation by returning the cached response before the network fetch.
 const API_CACHE_PATTERNS = [
   /^\/api\/v1\/cases$/,
-  /^\/api\/v1\/attention/,
-  /^\/api\/v1\/decisions/,
-  /^\/api\/v1\/kanban\//,
   /^\/api\/v1\/packs$/,
 ];
 
