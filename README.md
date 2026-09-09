@@ -14,6 +14,7 @@
 
 <p align="center">
   <a href="#quick-start">Quick start</a> •
+  <a href="#claude-code-integration">Claude Code</a> •
   <a href="#what-this-is">What this is</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#features">Features</a> •
@@ -66,6 +67,159 @@ SUPERADMIN_EMAIL=you@company.com npx tsx dev.ts
 
 # Option 2: CLI
 npx tsx apps/api/src/cli/create-superadmin.ts you@company.com yourpassword
+```
+
+---
+
+## Claude Code Integration
+
+Process OS ships a Claude Code plugin that gives Claude direct access to Cases, Moves, Evidence, steering, and the WHY engine. Here's how to set it up.
+
+### Install the plugin
+
+```bash
+# From the repository root
+claude plugin add ./plugin/claude-code
+```
+
+This registers the plugin with Claude Code and makes its skills, agents, hooks, and MCP tools available in all sessions started from this workspace.
+
+> **Not using the repo locally?** Publish the plugin to npm and install globally:
+> ```bash
+> cd plugin/claude-code && npm publish
+> claude plugin add @pos/plugin-claude-code
+> ```
+
+### Configure the control plane URL
+
+By default the plugin talks to `http://localhost:4000` (local dev). For a hosted instance:
+
+```bash
+claude plugin config universal-process-os control_plane_url https://pos.yoda.digital
+```
+
+Other config options:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `control_plane_url` | `http://localhost:4000` | Process OS API endpoint |
+| `organization_hint` | — | Organization slug for auto-discovery |
+| `deployment_mode` | `local` | `local`, `self-hosted`, or `cloud` |
+
+### Pair your device
+
+Every Claude Code installation needs a one-time pairing to link it to your Process OS account:
+
+```
+> /process:connect
+```
+
+This triggers the pairing flow:
+
+1. A **6-character code** and a pairing URL are displayed
+2. Open the URL in your browser (where you're signed in to Process OS)
+3. Enter the code and confirm
+4. The plugin stores a device JWT locally — you won't need to pair again for 30 days
+
+After pairing, the `process.*` MCP tools are live:
+
+```
+> Use process.case.get to show the current case
+> Use process.move.propose to suggest a new move
+> Use process.evidence.register to register evidence
+```
+
+### What you get after installation
+
+**12 MCP Tools** — available as `process.*` in any Claude session:
+
+| Tool | What it does |
+|------|-------------|
+| `case.get` | Get the current Case (or a specific one by ID) |
+| `case.search` | Search Cases by title, status, or pack |
+| `move.list` | List Moves in a Case |
+| `move.get` | Get a specific Move with its full state vector |
+| `move.propose` | Propose a new Move with intent and constraints |
+| `move.bind-task` | Bind the current Claude task to a Move |
+| `evidence.register` | Register evidence (test results, code, documents) |
+| `assertion.propose` | Propose an assertion with confidence level |
+| `decision.request` | Request a human decision with options and recommendation |
+| `context.get` | Get the 11-section Context Capsule |
+| `steering.ack` | Acknowledge a steering instruction |
+| `why.explain` | Ask WHY with 10 causal query types |
+
+**7 Hook Handlers** — fire automatically:
+
+| Hook | When | What it does |
+|------|------|-------------|
+| `SessionStart` | Session opens | Injects Context Capsule, checks pairing, loads pending steering |
+| `TaskCreated` | Task begins | Binds task to Move if context matches |
+| `TaskCompleted` | Task finishes | Validates completion contracts, blocks close if evidence missing |
+| `PreToolUse` | Before any tool | Policy enforcement (forbidden tools, mandatory evidence) |
+| `PostToolUse` | After any tool | Captures tool outputs as evidence candidates |
+| `Stop` | Session pausing | Checkpoints context, flushes outbox |
+| `SessionEnd` | Session closes | Persists session summary, closes edge connection |
+
+**5 Skills:**
+
+| Skill | Trigger | What it does |
+|-------|---------|-------------|
+| `/process:connect` | First-time setup | Device pairing flow |
+| `/process` | Any process question | Route to the right MCP tool for the task |
+| `/why` | "Why did X happen?" | 10 causal query types with deterministic paths |
+| `/steer` | "Change direction" | Compose and deliver a steering instruction |
+| `/context` | "What's the situation?" | Generate a fresh Context Capsule |
+
+**3 Agents:**
+
+| Agent | When to use |
+|-------|------------|
+| Process Architect | Analyze stalled work, propose structural optimizations |
+| Process Guardian | Monitor invariants, alert on drift or contract violations |
+| Evidence Verifier | Verify evidence freshness and causal chain integrity |
+
+### Manual setup (without `claude plugin add`)
+
+If you prefer manual configuration:
+
+**1. Register the MCP server** in `~/.claude/settings.json` or `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "process-os": {
+      "command": "node",
+      "args": ["--import", "tsx/esm", "<path-to-repo>/plugin/claude-code/src/mcp/server.ts"],
+      "env": {
+        "PLUGIN_DATA": "<path-for-sqlite-storage>",
+        "CONTROL_PLANE_URL": "https://pos.yoda.digital"
+      }
+    }
+  }
+}
+```
+
+**2. Register hooks** in the same settings file:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/session-start.js", "timeout": 5000 }],
+    "PreToolUse": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/pre-tool-use.js", "timeout": 1000 }],
+    "PostToolUse": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/post-tool-use.js", "timeout": 1000 }],
+    "Stop": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/stop.js", "timeout": 2000 }],
+    "TaskCreated": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/task-created.js", "timeout": 2000 }],
+    "TaskCompleted": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/task-completed.js", "timeout": 3000 }],
+    "SessionEnd": [{ "command": "node <path-to-repo>/plugin/claude-code/hooks/session-end.js", "timeout": 2000 }]
+  }
+}
+```
+
+**3. Copy skills and agents** to your Claude Code directory:
+
+```bash
+cp -r plugin/claude-code/skills/* .claude/skills/
+cp -r plugin/claude-code/agents/* .claude/agents/
 ```
 
 ---

@@ -16,7 +16,9 @@ const listeners = new Set<(msg: WSMessage) => void>();
 
 function getWsUrl(): string {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${proto}//${location.host}/ws`;
+  const token = localStorage.getItem('pos_token');
+  const params = token ? `?token=${encodeURIComponent(token)}` : '';
+  return `${proto}//${location.host}/ws${params}`;
 }
 
 function connect(): void {
@@ -32,10 +34,6 @@ function connect(): void {
   wsInstance.onopen = () => {
     console.log('[WS] Connected');
     reconnectAttempts = 0;
-    const token = localStorage.getItem('pos_token');
-    if (token) {
-      wsInstance?.send(JSON.stringify({ type: 'auth', token }));
-    }
   };
 
   wsInstance.onmessage = (event) => {

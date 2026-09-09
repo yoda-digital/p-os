@@ -4,7 +4,7 @@
   "displayName": "Universal Process OS",
   "description": "Universal Process OS — semantic control plane for evolving processes with AI-native execution",
   "author": "Universal Process OS",
-  "homepage": "https://ai-kanban.yoda.digital",
+  "homepage": "https://pos.yoda.digital",
   "skills": ["skills/*.md"],
   "agents": ["agents/*.md"],
   "hooks": "hooks/hooks.json",

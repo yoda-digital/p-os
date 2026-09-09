@@ -243,6 +243,25 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@26.5.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)
 
+  executors/api:
+    dependencies:
+      '@pos/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@pos/execution':
+        specifier: workspace:*
+        version: link:../../packages/execution
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.7(@types/node@26.5.0)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.13)
+
   executors/claude-code:
     dependencies:
       '@pos/contracts':
@@ -267,6 +286,9 @@ importers:
       '@pos/execution':
         specifier: workspace:*
         version: link:../../packages/execution
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
@@ -283,6 +305,9 @@ importers:
       '@pos/execution':
         specifier: workspace:*
         version: link:../../packages/execution
+      '@pos/process-sdk':
+        specifier: workspace:*
+        version: link:../../packages/process-sdk
     devDependencies:
       typescript:
         specifier: ^5.8.0
