@@ -453,6 +453,18 @@ export class ExecutionCompiler {
     // Certain move classes are inherently complex
     if (move.class === 'DECIDE' || move.class === 'ESCALATE') score += 1;
 
+    // Objective length and multi-step instructions signal complexity
+    const obj = move.objective ?? '';
+    if (obj.length > 200) score += 1;
+    if (obj.length > 500) score += 1;
+    // Multi-step numbered lists (1. 2. 3.) or bullet points signal planning
+    const steps = (obj.match(/^\s*\d+[.)]/gm) || []).length;
+    if (steps >= 3) score += 2;
+    else if (steps >= 2) score += 1;
+
+    // ACT class with any objective is at minimum medium — implementation is never trivial
+    if (move.class === 'ACT' && obj.length > 50) score = Math.max(score, 2);
+
     if (score >= 4) return 'high';
     if (score >= 2) return 'medium';
     return 'low';

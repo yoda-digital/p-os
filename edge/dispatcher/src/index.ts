@@ -122,16 +122,21 @@ export class ProcessDispatcher {
       let jobId: string;
       let workingDirectory: string | undefined;
 
+      // Use the current working directory as the project root for Claude
+      // The dispatcher should be started from the project directory
+      workingDirectory = process.cwd();
+
       if (this.useMock) {
         const result = await mockCli.launchBackgroundSession(moveId, capsuleText, {
           model: plan.model_hint,
+          cwd: workingDirectory,
         });
         jobId = result.jobId;
-        workingDirectory = process.cwd();
       } else {
         const result = await launchBackgroundSession(moveId, capsuleText, {
           model: plan.model_hint,
           maxTokens: plan.budget?.max_tokens,
+          cwd: workingDirectory,
         });
         jobId = result.jobId;
       }
