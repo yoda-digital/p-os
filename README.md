@@ -104,19 +104,19 @@ claude --plugin-dir /path/to/p-os/plugin/claude-code
 
 ### Configure the control plane URL
 
-By default the plugin talks to `http://localhost:4000` (local dev). For a hosted instance:
+By default the plugin's MCP server talks to `http://localhost:4000` (local dev). For a hosted instance, set the `CONTROL_PLANE_URL` environment variable in the MCP server config via `/plugin` → select the plugin → MCP Servers, or edit `.mcp.json` directly:
 
-```bash
-claude plugin config universal-process-os control_plane_url https://pos.yoda.digital
+```json
+{
+  "mcpServers": {
+    "process-os": {
+      "env": {
+        "CONTROL_PLANE_URL": "https://pos.yoda.digital"
+      }
+    }
+  }
+}
 ```
-
-Other config options:
-
-| Key | Default | Description |
-|-----|---------|-------------|
-| `control_plane_url` | `http://localhost:4000` | Process OS API endpoint |
-| `organization_hint` | — | Organization slug for auto-discovery |
-| `deployment_mode` | `local` | `local`, `self-hosted`, or `cloud` |
 
 ### Pair your device
 
