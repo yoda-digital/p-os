@@ -23,8 +23,12 @@ export function executionRoutes(sql: Sql) {
     const moveId = c.req.param('id');
     const user = getUser(c);
 
-    // 1. Fetch the move
-    const [move] = await sql`SELECT * FROM moves WHERE id = ${moveId}`;
+    // 1. Fetch the move (join with cases for organization_id/tenant_id)
+    const [move] = await sql`
+      SELECT m.*, c.organization_id
+      FROM moves m JOIN cases c ON m.case_id = c.id
+      WHERE m.id = ${moveId}
+    `;
     if (!move) return c.json({ error: 'Move not found' }, 404);
 
     const caseId = move.case_id as string;
