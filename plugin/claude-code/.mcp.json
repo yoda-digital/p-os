@@ -1,10 +1,12 @@
 {
-  "process-os": {
-    "command": "node",
-    "args": ["--import", "tsx/esm", "src/mcp/server.ts"],
-    "env": {
-      "PLUGIN_DATA": "${CLAUDE_PLUGIN_DATA}",
-      "CONTROL_PLANE_URL": "${userConfig.control_plane_url}"
+  "mcpServers": {
+    "process-os": {
+      "command": "node",
+      "args": ["--import", "tsx/esm", "$CLAUDE_PLUGIN_ROOT/src/mcp/server.ts"],
+      "env": {
+        "PLUGIN_DATA": "${CLAUDE_PLUGIN_DATA}",
+        "CONTROL_PLANE_URL": "http://localhost:4000"
+      }
     }
   }
 }

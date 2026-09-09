@@ -1,0 +1,12 @@
+{
+  "name": "universal-process-os",
+  "version": "0.1.0",
+  "description": "Universal Process OS — semantic control plane for evolving processes with AI-native execution. 12 MCP tools, 7 hooks, 5 skills, 3 agents.",
+  "author": {
+    "name": "YODA Digital",
+    "url": "https://yoda.digital"
+  },
+  "homepage": "https://pos.yoda.digital",
+  "repository": "https://github.com/yoda-digital/p-os",
+  "license": "proprietary"
+}
