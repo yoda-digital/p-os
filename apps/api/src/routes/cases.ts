@@ -28,11 +28,12 @@ export function caseRoutes(sql: Sql) {
         ORDER BY c.created_at DESC
       `;
     } else {
+      // Exclude void (deleted) cases from default list
       cases = await sql`
         SELECT c.*, cs.total_moves, cs.active_moves, cs.completed_moves, cs.pending_decisions, cs.last_activity_at
         FROM cases c
         LEFT JOIN projection_case_summary cs ON cs.case_id = c.id
-        WHERE c.organization_id = ${user.organization_id}
+        WHERE c.organization_id = ${user.organization_id} AND c.lifecycle != 'void'
         ORDER BY c.created_at DESC
       `;
     }
@@ -173,6 +174,28 @@ export function caseRoutes(sql: Sql) {
       return c.json({ error: result.reason }, 400);
     }
     return c.json({ status: 'reopened' });
+  });
+
+  // DELETE /:id — delete case (marks as void)
+  app.delete('/:id', async (c) => {
+    const user = getUser(c);
+    const id = c.req.param('id');
+
+    const result = await processor.process({
+      command_id: crypto.randomUUID(),
+      type: 'Case.Void',
+      tenant_id: user.organization_id,
+      case_id: id,
+      actor_id: user.user_id,
+      target_ref: { id, type: 'case' },
+      issued_at: new Date().toISOString(),
+      payload: { id },
+    });
+
+    if (result.status !== 'accepted') {
+      return c.json({ error: result.reason }, 400);
+    }
+    return c.json({ status: 'deleted' }, 200);
   });
 
   return app;

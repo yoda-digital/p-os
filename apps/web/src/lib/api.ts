@@ -102,6 +102,8 @@ export const api = {
     request<Case>(`/v1/cases/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   closeCase: (id: string) =>
     request<void>(`/v1/cases/${id}/close`, { method: 'POST' }),
+  deleteCase: (id: string) =>
+    request<void>(`/v1/cases/${id}`, { method: 'DELETE' }),
   getCaseViews: (id: string) =>
     request<{ views: CompiledView[] }>(`/v1/cases/${id}/views`),
 
